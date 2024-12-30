@@ -126,7 +126,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <path d="M10 20v-6h4v6a2 2 0 0 0 2 2h3a2 2 0 0 0 2-2V12h1.61a1 1 0 0 0 .76-1.64l-10-10a1 1 0 0 0-1.38 0l-10 10A1 1 0 0 0 1.39 12H3v8a2 2 0 0 0 2 2h3a2 2 0 0 0 2-2z" />
               </svg>
 
-                  Home
+                  Inicio
                 </NavLink>
               </li>
               {/* <!-- Menu Item Home --> */}
@@ -4614,7 +4614,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       fill=""
                     />
                   </svg>
-                  Profile
+                  Perfil
                 </NavLink>
               </li>
 
