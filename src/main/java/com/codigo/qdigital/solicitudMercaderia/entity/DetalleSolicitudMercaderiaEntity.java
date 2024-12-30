@@ -50,7 +50,7 @@
         //    @JsonIgnore
         // Producto relacionado (puede ser null)
         @JsonIgnoreProperties("productoExistente")
-        @ManyToOne(fetch = FetchType.LAZY, optional = true) // Relación opcional
+        @ManyToOne(fetch = FetchType.LAZY, optional = tru       e) // Relación opcional
         @JoinColumn(name = "id_producto", nullable = true)  // Se permite nulo
         private ProductoEntity productoExistente;
 

@@ -65,7 +65,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             usuario.setBackgroundUser(generarColorAleatorio());
 
             Set<RolEntity> assginedRoles = new HashSet<>();
-            RolEntity userRol = rolRepository.findByNombreRol(Role.DESARROLLADOR.name()).orElseThrow(() -> new RuntimeException("EL ROL NO EXISTE, REVISA TU BD"));
+            RolEntity userRol = rolRepository.findByNombreRol(Role.USUARIO.name()).orElseThrow(() -> new RuntimeException("EL ROL NO EXISTE, REVISA TU BD"));
           //   Rol userRol2 = rolRepository.findByNombreRol(Role.GESTOR.name()).orElseThrow(() -> new RuntimeException("EL ROL NO EXISTE, REVISA TU BD"));
             assginedRoles.add(userRol);
             // assginedRoles.add(userRol2);
@@ -95,7 +95,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         usuario.setActivo(true);
         usuario.setBackgroundUser(generarColorAleatorio());
         Set<RolEntity> assginedRoles = new HashSet<>();
-        RolEntity userRol = rolRepository.findByNombreRol(Role.GESTOR.name()).orElseThrow(() -> new RuntimeException("EL ROL NO EXISTE, REVISA TU BD"));
+        RolEntity userRol = rolRepository.findByNombreRol(Role.ADMINISTRADOR.name()).orElseThrow(() -> new RuntimeException("EL ROL NO EXISTE, REVISA TU BD"));
         //Rol userRol2 = rolRepository.findByNombreRol(Role.DESARROLLADOR.name()).orElseThrow(() -> new RuntimeException("EL ROL NO EXISTE, REVISA TU BD"));
         assginedRoles.add(userRol);
        // assginedRoles.add(userRol2);
