@@ -64,6 +64,7 @@ public class ProveedorEntity {
     @Column(name = "ch_adj")
     private String chAdj;
 
+
     // Relación bidireccional: un proveedor tiene una lista de productos
     @JsonIgnoreProperties("producto")
     @OneToMany(mappedBy = "proveedor", cascade = CascadeType.ALL)
