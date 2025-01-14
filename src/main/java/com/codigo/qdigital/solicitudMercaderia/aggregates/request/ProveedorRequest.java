@@ -1,11 +1,11 @@
 package com.codigo.qdigital.solicitudMercaderia.aggregates.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -59,6 +59,12 @@ public class    ProveedorRequest {
 
     @Size(max = 255, message = "El archivo adjunto no puede exceder los 255 caracteres.")
     private String chAdj;
+
+    @Email(message = "El correo debe tener un formato válido.")
+    @Size(max = 255, message = "El correo no puede tener más de 255 caracteres.")
+    private String correo;
+
+    private SignUpRequest usuario;
 
     private List<ProductoRequest> productos; // Lista de productos relacionados
 

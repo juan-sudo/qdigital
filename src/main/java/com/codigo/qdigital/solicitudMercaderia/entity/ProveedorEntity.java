@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 
@@ -35,11 +36,11 @@ public class ProveedorEntity {
     private String ciudad;
 
     @Column(name = "atencion")
-    private String atencion;
+        private String atencion;
 
     @Column(name = "celu_venta")
     private String celuVenta;
-
+    
     @Column(name = "ciudad_ven")
     private String ciudadVen;
 
@@ -64,10 +65,27 @@ public class ProveedorEntity {
     @Column(name = "ch_adj")
     private String chAdj;
 
+    private String correo;
+
+    @Column(name = "fecha_registro", nullable = false)
+    private LocalDateTime fechaRegistro;  // Fecha de publicación del producto
+
+    @PrePersist
+    public void prePersist() {
+        if (fechaRegistro == null) {
+            fechaRegistro = LocalDateTime.now();  // Asignar la fecha de publicación si es nula
+        }
+
+    }
+    @JsonIgnoreProperties("usuario")
+    @ManyToOne(fetch = FetchType.LAZY, optional = true) // Relación opcional
+    @JoinColumn(name = "id_usuario", nullable = true)  // Se permite nulo
+    private UsuarioEntity usuario;
+
 
     // Relación bidireccional: un proveedor tiene una lista de productos
     @JsonIgnoreProperties("producto")
-    @OneToMany(mappedBy = "proveedor", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "proveedor", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductoEntity> producto;  // Relación con la entidad Productos
 
 
@@ -205,5 +223,29 @@ public class ProveedorEntity {
 
     public void setProducto(Set<ProductoEntity> producto) {
         this.producto = producto;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public UsuarioEntity getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(UsuarioEntity usuario) {
+        this.usuario = usuario;
+    }
+
+    public LocalDateTime getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
     }
 }

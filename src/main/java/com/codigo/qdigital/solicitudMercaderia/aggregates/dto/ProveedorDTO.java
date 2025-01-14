@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
@@ -15,6 +16,7 @@ import java.util.List;
 public class ProveedorDTO {
     private Long idProveedores;  // ID del proveedor
     private String codigoProveedor; // Código del proveedor
+    private String correo;
     private String nombre;          // Nombre del proveedor
     private String direccion;       // Dirección
     private String fono1;           // Teléfono (ajustado a String)
@@ -30,4 +32,7 @@ public class ProveedorDTO {
     private BigDecimal docto;           // Documento
     private String chAdj;               // Archivo adjunto
     private List<ProductoDTO> productos; // Lista de productos relacionados
+    private UsuarioDTO usuario;
+    private LocalDateTime fechaRegistro;  // Fecha de publicación del producto
+
 }

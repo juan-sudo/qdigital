@@ -13,6 +13,7 @@ import FormLayout from './pages/Form/FormLayout';
 import Profile from './pages/Profile';
 import Mercaderia from './pages/SolicitudMercaderia';
 import StockM from './pages/StockMercaderia';
+import ProveedorP from './pages/Proveedor';
 import Settings from './pages/Settings';
 import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
@@ -71,6 +72,15 @@ function App() {
             <>
               <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <StockM />
+            </>
+          }
+        />
+        <Route
+          path="/proveedor"
+          element={
+            <>
+              <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <ProveedorP />
             </>
           }
         />

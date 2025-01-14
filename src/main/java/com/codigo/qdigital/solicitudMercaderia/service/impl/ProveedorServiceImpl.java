@@ -1,18 +1,26 @@
 package com.codigo.qdigital.solicitudMercaderia.service.impl;
 
 import com.codigo.qdigital.solicitudMercaderia.aggregates.dto.ProveedorDTO;
+import com.codigo.qdigital.solicitudMercaderia.aggregates.dto.SolicitudDTO;
 import com.codigo.qdigital.solicitudMercaderia.aggregates.request.ProveedorRequest;
 import com.codigo.qdigital.solicitudMercaderia.aggregates.response.ResponseBase;
 import com.codigo.qdigital.solicitudMercaderia.entity.ProveedorEntity;
+import com.codigo.qdigital.solicitudMercaderia.entity.SolicitudMercaderiaEntity;
+import com.codigo.qdigital.solicitudMercaderia.entity.UsuarioEntity;
+import com.codigo.qdigital.solicitudMercaderia.mapper.GenericMapper;
 import com.codigo.qdigital.solicitudMercaderia.repository.ProductoRepository;
 import com.codigo.qdigital.solicitudMercaderia.repository.ProveedoresRepository;
 import com.codigo.qdigital.solicitudMercaderia.service.ProveedorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,10 +29,85 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProveedorServiceImpl implements ProveedorService {
 
-
     private final ProveedoresRepository proveedorRepository;
-
+    private final GenericMapper genericMapper;
     private final ProductoRepository productoRepository;
+
+
+    @Override
+    public ResponseBase updateCostos(Long id, ProveedorRequest proveedorRequest) {
+        Optional<ProveedorEntity> proveedorEntity =  proveedorRepository.findByIdWithoutProducto(id);
+
+        if (proveedorEntity.isPresent()) {
+            ProveedorEntity updatedEntity = proveedorEntity.get();
+            updatedEntity.setCodigoProveedor(proveedorRequest.getCodigoProveedor());
+            updatedEntity.setNombre(proveedorRequest.getNombre());
+            updatedEntity.setAdminProveedor(proveedorRequest.getAdminProveedor());
+            updatedEntity.setPerdida(proveedorRequest.getPerdida());
+            updatedEntity.setFlete(proveedorRequest.getFlete());
+            updatedEntity.setCondPago(proveedorRequest.getCondPago());
+            updatedEntity.setnDias(proveedorRequest.getNDias());
+            updatedEntity.setDocto(proveedorRequest.getDocto());
+            updatedEntity.setChAdj(proveedorRequest.getChAdj());
+
+
+            proveedorRepository.save(updatedEntity);
+            // Convertimos la entidad a DTO
+            ProveedorDTO proveedorDTO = genericMapper.mapProveedorEntityToProveedorDTO(updatedEntity);
+
+            return ResponseBase.builder()
+                    .code(200)
+                    .message("Proveedor actualizado exitosamente.")
+                    .data(proveedorDTO)
+                    .build();
+        }
+
+        return ResponseBase.builder()
+                .code(404)
+                .message("Proveedor no encontrado.")
+                .data(null)
+                .build();
+    }
+
+
+    @Override
+    public ResponseBase update(Long id, ProveedorRequest proveedorRequest) {
+        Optional<ProveedorEntity> proveedorEntity =  proveedorRepository.findByIdWithoutProducto(id);
+
+        if (proveedorEntity.isPresent()) {
+            ProveedorEntity updatedEntity = proveedorEntity.get();
+            updatedEntity.setCodigoProveedor(proveedorRequest.getCodigoProveedor());
+            updatedEntity.setNombre(proveedorRequest.getNombre());
+            updatedEntity.setDireccion(proveedorRequest.getDireccion());
+            updatedEntity.setFono1(proveedorRequest.getFono1());
+            updatedEntity.setCiudad(proveedorRequest.getCiudad());
+            updatedEntity.setAtencion(proveedorRequest.getAtencion());
+            updatedEntity.setCeluVenta(proveedorRequest.getCeluVenta());
+            updatedEntity.setCiudadVen(proveedorRequest.getCiudadVen());
+            updatedEntity.setCorreo(proveedorRequest.getCorreo());
+
+            updatedEntity.setCondPago(proveedorRequest.getCondPago());
+            updatedEntity.setDocto(proveedorRequest.getDocto());
+            updatedEntity.setChAdj(proveedorRequest.getChAdj());
+
+            proveedorRepository.save(updatedEntity);
+            // Convertimos la entidad a DTO
+            ProveedorDTO proveedorDTO = genericMapper.mapProveedorEntityToProveedorDTO(updatedEntity);
+
+            return ResponseBase.builder()
+                    .code(200)
+                    .message("Proveedor actualizado exitosamente.")
+                    .data(proveedorDTO)
+                    .build();
+        }
+
+        return ResponseBase.builder()
+                .code(404)
+                .message("Proveedor no encontrado.")
+                .data(null)
+                .build();
+    }
+
 
     @Override
     public ResponseBase save(ProveedorRequest proveedorRequest) {
@@ -32,27 +115,20 @@ public class ProveedorServiceImpl implements ProveedorService {
             ProveedorEntity proveedorEntity = ProveedorEntity.builder()
                     .codigoProveedor(proveedorRequest.getCodigoProveedor())
                     .nombre(proveedorRequest.getNombre())
-                    .direccion(proveedorRequest.getDireccion())
-                    .fono1(proveedorRequest.getFono1())
-                    .ciudad(proveedorRequest.getCiudad())
-                    .atencion(proveedorRequest.getAtencion())
-                    .celuVenta(proveedorRequest.getCeluVenta())
-                    .ciudadVen(proveedorRequest.getCiudadVen())
-                    .adminProveedor(proveedorRequest.getAdminProveedor())
-                    .perdida(proveedorRequest.getPerdida())
-                    .flete(proveedorRequest.getFlete())
-                    .condPago(proveedorRequest.getCondPago())
-                    .nDias(proveedorRequest.getNDias())
-                    .docto(proveedorRequest.getDocto())
-                    .chAdj(proveedorRequest.getChAdj())
+
+
                     .build();
 
             proveedorRepository.save(proveedorEntity);
 
+            // Convertimos la entidad a DTO
+            ProveedorDTO proveedorDTO = genericMapper.mapProveedorEntityToProveedorDTO(proveedorEntity);
+
+
             return ResponseBase.builder()
                     .code(200)
                     .message("Proveedor guardado exitosamente.")
-                    .data(proveedorEntity)
+                    .data(proveedorDTO)
                     .build();
 
         } catch (Exception e) {
@@ -63,6 +139,28 @@ public class ProveedorServiceImpl implements ProveedorService {
                     .build();
         }
     }
+
+
+    @Transactional
+    @Override
+    public Page<ProveedorDTO> findAll(Pageable pageable) {
+        // Validar que pageable no sea nulo
+        if (pageable == null) {
+            throw new IllegalArgumentException("El parámetro 'pageable' no puede ser nulo");
+        }
+
+        // Obtener los datos paginados desde el repositorio
+        Page<ProveedorEntity> pageSolicitudes = proveedorRepository.findAll(pageable);
+
+        // Validar si existen resultados
+        if (pageSolicitudes.isEmpty()) {
+            throw new NoSuchElementException("No se encontraron proveedores");
+        }
+
+        // Mapear las entidades a DTOs
+        return pageSolicitudes.map(this::mapToDTO);
+    }
+
 
     @Override
     public ResponseBase findById(Long id) {
@@ -116,53 +214,14 @@ public class ProveedorServiceImpl implements ProveedorService {
                     .build();
         }
     }
-
-    @Override
-    public ResponseBase update(Long id, ProveedorRequest proveedorRequest) {
-        Optional<ProveedorEntity> proveedorEntity = proveedorRepository.findById(id);
-
-        if (proveedorEntity.isPresent()) {
-            ProveedorEntity updatedEntity = proveedorEntity.get();
-            updatedEntity.setCodigoProveedor(proveedorRequest.getCodigoProveedor());
-            updatedEntity.setNombre(proveedorRequest.getNombre());
-            updatedEntity.setDireccion(proveedorRequest.getDireccion());
-            updatedEntity.setFono1(proveedorRequest.getFono1());
-            updatedEntity.setCiudad(proveedorRequest.getCiudad());
-            updatedEntity.setAtencion(proveedorRequest.getAtencion());
-            updatedEntity.setCeluVenta(proveedorRequest.getCeluVenta());
-            updatedEntity.setCiudadVen(proveedorRequest.getCiudadVen());
-            updatedEntity.setAdminProveedor(proveedorRequest.getAdminProveedor());
-            updatedEntity.setPerdida(proveedorRequest.getPerdida());
-            updatedEntity.setFlete(proveedorRequest.getFlete());
-            updatedEntity.setCondPago(proveedorRequest.getCondPago());
-            updatedEntity.setnDias(proveedorRequest.getNDias());
-            updatedEntity.setDocto(proveedorRequest.getDocto());
-            updatedEntity.setChAdj(proveedorRequest.getChAdj());
-
-            proveedorRepository.save(updatedEntity);
-
-            return ResponseBase.builder()
-                    .code(200)
-                    .message("Proveedor actualizado exitosamente.")
-                    .data(updatedEntity)
-                    .build();
-        }
-
-        return ResponseBase.builder()
-                .code(404)
-                .message("Proveedor no encontrado.")
-                .data(null)
-                .build();
-    }
-
     @Override
     public ResponseBase deleteById(Long id) {
         try {
             Optional<ProveedorEntity> proveedorEntity = proveedorRepository.findById(id);
 
             if (proveedorEntity.isPresent()) {
-                // Eliminar los productos asociados antes de eliminar el proveedor
-               // productoRepository.deleteByProveedorId(id);
+                // Eliminar los productos relacionados
+                productoRepository.deleteByProveedorId(id);
 
                 // Ahora eliminar el proveedor
                 proveedorRepository.deleteById(id);
@@ -207,6 +266,9 @@ public class ProveedorServiceImpl implements ProveedorService {
                 .nDias(proveedorEntity.getnDias())
                 .docto(proveedorEntity.getDocto())
                 .chAdj(proveedorEntity.getChAdj())
+                .correo(proveedorEntity.getCorreo())
+                .fechaRegistro(proveedorEntity.getFechaRegistro())
+
 
                 .build();
     }

@@ -12,7 +12,10 @@ export interface Proveedor {
   adminProveedor: number;
   perdida: number;
   flete: number;
+  ndias:number;
   condPago: number;
   docto: number;
   chAdj: string;
+  correo:string;
+  fechaRegistro:string;
 }

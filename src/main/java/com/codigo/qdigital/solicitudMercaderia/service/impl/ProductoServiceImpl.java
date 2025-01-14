@@ -77,7 +77,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public ResponseBase findAll() {
         // Obtén todas las entidades del repositorio
-        List<ProductoEntity> listaEntidades = productoRepository.findAll();
+       List<ProductoEntity> listaEntidades = productoRepository.findAll();
 
         // Crea una lista para almacenar los DTOs mapeados
         Set<ProductoDTO> listaDto = new HashSet<>();
