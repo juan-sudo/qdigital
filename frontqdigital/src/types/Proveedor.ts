@@ -5,7 +5,9 @@ export interface Proveedor {
   nombre: string;
   direccion: string;
   fono1: string;
-  ciudad: string;
+  //ciudad: string;
+  region:string;
+  comuna:string;
   atencion: string;
   celuVenta: string;
   ciudadVen: string;

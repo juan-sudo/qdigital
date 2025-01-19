@@ -33,6 +33,33 @@ public class ProveedorServiceImpl implements ProveedorService {
     private final GenericMapper genericMapper;
     private final ProductoRepository productoRepository;
 
+    @Override
+    public ResponseBase updatedetalle(Long id, ProveedorRequest proveedorRequest) {
+        Optional<ProveedorEntity> proveedorEntity =  proveedorRepository.findByIdWithoutProducto(id);
+
+        if (proveedorEntity.isPresent()) {
+            ProveedorEntity updatedEntity = proveedorEntity.get();
+            updatedEntity.setCodigoProveedor(proveedorRequest.getCodigoProveedor());
+            updatedEntity.setNombre(proveedorRequest.getNombre());
+
+            proveedorRepository.save(updatedEntity);
+            // Convertimos la entidad a DTO
+            ProveedorDTO proveedorDTO = genericMapper.mapProveedorEntityToProveedorDTO(updatedEntity);
+
+            return ResponseBase.builder()
+                    .code(200)
+                    .message("Proveedor actualizado exitosamente.")
+                    .data(proveedorDTO)
+                    .build();
+        }
+
+        return ResponseBase.builder()
+                .code(404)
+                .message("Proveedor no encontrado.")
+                .data(null)
+                .build();
+    }
+
 
     @Override
     public ResponseBase updateCostos(Long id, ProveedorRequest proveedorRequest) {
@@ -76,11 +103,11 @@ public class ProveedorServiceImpl implements ProveedorService {
 
         if (proveedorEntity.isPresent()) {
             ProveedorEntity updatedEntity = proveedorEntity.get();
-            updatedEntity.setCodigoProveedor(proveedorRequest.getCodigoProveedor());
-            updatedEntity.setNombre(proveedorRequest.getNombre());
             updatedEntity.setDireccion(proveedorRequest.getDireccion());
             updatedEntity.setFono1(proveedorRequest.getFono1());
-            updatedEntity.setCiudad(proveedorRequest.getCiudad());
+           // updatedEntity.setCiudad(proveedorRequest.getCiudad());
+            updatedEntity.setRegion(proveedorRequest.getRegion());
+            updatedEntity.setComuna(proveedorRequest.getComuna());
             updatedEntity.setAtencion(proveedorRequest.getAtencion());
             updatedEntity.setCeluVenta(proveedorRequest.getCeluVenta());
             updatedEntity.setCiudadVen(proveedorRequest.getCiudadVen());
@@ -160,6 +187,69 @@ public class ProveedorServiceImpl implements ProveedorService {
         // Mapear las entidades a DTOs
         return pageSolicitudes.map(this::mapToDTO);
     }
+
+    @Transactional
+    @Override
+    public ResponseBase findAllLikeNombre(String nombre) {
+        // Obtener los datos desde el repositorio
+        List<ProveedorEntity> proveedores = proveedorRepository.findByNombreLike(nombre);
+
+        // Validar si existen resultados
+        if (proveedores.isEmpty()) {
+            // Si no se encuentran proveedores, retornamos un error en la respuesta
+            return ResponseBase.builder()
+                    .code(404) // Código de error 404 (No encontrado)
+                    .message("No se encontraron proveedores con el código proporcionado")
+                    .data(null) // No hay datos si no se encuentran proveedores
+                    .build();
+        }
+
+        // Mapear las entidades a DTOs
+        List<ProveedorDTO> proveedoresDTO = proveedores.stream()
+                .map(this::mapToDTO) // Convertir cada entidad en un DTO
+                .collect(Collectors.toList());
+
+        // Retornar una respuesta exitosa con los datos de los proveedores
+        return ResponseBase.builder()
+                .code(200) // Código de éxito 200
+                .message("Proveedores encontrados con éxito")
+                .data(proveedoresDTO) // Los datos serán los DTOs de proveedores
+                .build();
+    }
+
+
+
+
+    @Transactional
+    @Override
+    public ResponseBase findAllLikeCodigo(String codigo) {
+        // Obtener los datos desde el repositorio
+        List<ProveedorEntity> proveedores = proveedorRepository.findByCodigoProveedorLike(codigo);
+
+        // Validar si existen resultados
+        if (proveedores.isEmpty()) {
+            // Si no se encuentran proveedores, retornamos un error en la respuesta
+            return ResponseBase.builder()
+                    .code(404) // Código de error 404 (No encontrado)
+                    .message("No se encontraron proveedores con el código proporcionado")
+                    .data(null) // No hay datos si no se encuentran proveedores
+                    .build();
+        }
+
+        // Mapear las entidades a DTOs
+        List<ProveedorDTO> proveedoresDTO = proveedores.stream()
+                .map(this::mapToDTO) // Convertir cada entidad en un DTO
+                .collect(Collectors.toList());
+
+        // Retornar una respuesta exitosa con los datos de los proveedores
+        return ResponseBase.builder()
+                .code(200) // Código de éxito 200
+                .message("Proveedores encontrados con éxito")
+                .data(proveedoresDTO) // Los datos serán los DTOs de proveedores
+                .build();
+    }
+
+
 
 
     @Override
@@ -255,7 +345,9 @@ public class ProveedorServiceImpl implements ProveedorService {
                 .nombre(proveedorEntity.getNombre())
                 .direccion(proveedorEntity.getDireccion())
                 .fono1(proveedorEntity.getFono1())
-                .ciudad(proveedorEntity.getCiudad())
+                .region(proveedorEntity.getRegion())
+                .comuna(proveedorEntity.getComuna())
+                //.ciudad(proveedorEntity.getCiudad())
                 .atencion(proveedorEntity.getAtencion())
                 .celuVenta(proveedorEntity.getCeluVenta())
                 .ciudadVen(proveedorEntity.getCiudadVen())

@@ -20,7 +20,7 @@ public class ProveedorEntity {
     @Column(name = "id_proveedores")
     private Long idProveedores;
 
-    @Column(name = "codigo_proveedor", unique = true, nullable = false)
+        @Column(name = "codigo_proveedor", unique = true, nullable = false)
     private String codigoProveedor;
 
     @Column(name = "nombre", nullable = false)
@@ -32,8 +32,12 @@ public class ProveedorEntity {
     @Column(name = "fono_1")
     private String fono1; // Cambiado de Double a String
 
-    @Column(name = "ciudad")
-    private String ciudad;
+    private String region;
+
+    private String comuna;
+
+    //@Column(name = "ciudad")
+    //private String ciudad;
 
     @Column(name = "atencion")
         private String atencion;
@@ -129,12 +133,20 @@ public class ProveedorEntity {
         this.fono1 = fono1;
     }
 
-    public String getCiudad() {
-        return ciudad;
+    public String getRegion() {
+        return region;
     }
 
-    public void setCiudad(String ciudad) {
-        this.ciudad = ciudad;
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getComuna() {
+        return comuna;
+    }
+
+    public void setComuna(String comuna) {
+        this.comuna = comuna;
     }
 
     public String getAtencion() {

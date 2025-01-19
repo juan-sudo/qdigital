@@ -19,4 +19,8 @@ public interface ProveedorService {
     ResponseBase deleteById(Long id);
     Page<ProveedorDTO> findAll(Pageable pageable);
     ResponseBase updateCostos(Long id, ProveedorRequest proveedorRequest);
+    ResponseBase updatedetalle(Long id, ProveedorRequest proveedorRequest);
+    ResponseBase findAllLikeCodigo(String codigo);
+
+    ResponseBase findAllLikeNombre(String nombre);
 }

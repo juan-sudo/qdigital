@@ -20,7 +20,9 @@ public class ProveedorDTO {
     private String nombre;          // Nombre del proveedor
     private String direccion;       // Dirección
     private String fono1;           // Teléfono (ajustado a String)
-    private String ciudad;          // Ciudad
+    //private String ciudad;          // Ciudad
+    private String region;
+    private String comuna;
     private String atencion;        // Atención
     private String celuVenta;       // Número de celular
     private String ciudadVen;       // Ciudad de venta

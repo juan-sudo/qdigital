@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/proveedores")
 @AllArgsConstructor
@@ -34,6 +36,13 @@ public class ProveedorController {
         ResponseBase response = proveedorService.update(id, proveedorRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
+    // Actualizar un proveedor existente por su ID
+    @PutMapping("/detalle/{id}")
+    public ResponseEntity<ResponseBase> updateDetalle(@PathVariable Long id, @RequestBody ProveedorRequest proveedorRequest) {
+        ResponseBase response = proveedorService.updatedetalle(id, proveedorRequest);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
 
     // Actualizar un proveedor existente por su ID
     @PutMapping("/costo/{id}")
@@ -55,7 +64,23 @@ public class ProveedorController {
         ResponseBase response = proveedorService.findAll();
         return ResponseEntity.status(response.getCode()).body(response);
     }
+//busqueda por codigo
+// Búsqueda por código
+    @GetMapping("/buscarcodigo")
+public ResponseEntity<ResponseBase> buscarProveedores(@RequestParam String codigo) {
+    String codigoTrimmed = codigo.trim(); // Elimina espacios al principio y final
+    ResponseBase response = proveedorService.findAllLikeCodigo(codigoTrimmed);
+    return ResponseEntity.status(response.getCode()).body(response);
+}
 
+
+//bucar por nombre
+@GetMapping("/buscarnombre")
+public ResponseEntity<ResponseBase> buscarProveedoresNombre(@RequestParam String nombre) {
+    String nombreTrimmed = nombre.trim(); // Elimina espacios al principio y final
+    ResponseBase response = proveedorService.findAllLikeNombre(nombreTrimmed);
+    return ResponseEntity.status(response.getCode()).body(response);
+}
 
 
     // Eliminar un proveedor por su ID

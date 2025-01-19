@@ -27,8 +27,13 @@ public class    ProveedorRequest {
     @Size(max = 20, message = "El número de teléfono no puede exceder los 20 caracteres.")
     private String fono1; // Cambiado a String
 
-    @Size(max = 50, message = "La ciudad no puede exceder los 50 caracteres.")
-    private String ciudad;
+    //@Size(max = 50, message = "La ciudad no puede exceder los 50 caracteres.")
+   // private String ciudad;
+    @Size(max = 150, message = "La region no puede exceder los 150 caracteres.")
+    private String region;
+
+    @Size(max = 150, message = "La comuna no puede exceder los 150 caracteres.")
+    private String comuna;
 
     @Size(max = 100, message = "La atención no puede exceder los 100 caracteres.")
     private String atencion;

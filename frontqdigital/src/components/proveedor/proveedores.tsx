@@ -1,5 +1,5 @@
 
-import { MdArrowBack, MdArrowForward,MdOutlineSettings,MdAutoDelete,MdEdit } from 'react-icons/md';
+import { MdArrowBack, MdArrowForward,MdOutlineSettings,MdAutoDelete,MdEdit,MdCheck,MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
 
 import React, { useState, useEffect ,useRef} from 'react';
 import { MdAdd,MdPersonAddAlt1 } from 'react-icons/md';
@@ -26,22 +26,104 @@ interface Option {
 //option proveedor
 
 
+const RegionesYcomunas = {
 
+  "regiones": [
+      {
+          "NombreRegion": "Arica y Parinacota",
+          "comunas": ["Arica", "Camarones", "Putre", "General Lagos"]
+      },
+      {
+          "NombreRegion": "Tarapacá",
+          "comunas": ["Iquique", "Alto Hospicio", "Pozo Almonte", "Camiña", "Colchane", "Huara", "Pica"]
+  },
+      {
+          "NombreRegion": "Antofagasta",
+          "comunas": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "Ollagüe", "San Pedro de Atacama", "Tocopilla", "María Elena"]
+  },
+      {
+          "NombreRegion": "Atacama",
+          "comunas": ["Copiapó", "Caldera", "Tierra Amarilla", "Chañaral", "Diego de Almagro", "Vallenar", "Alto del Carmen", "Freirina", "Huasco"]
+  },
+      {
+          "NombreRegion": "Coquimbo",
+          "comunas": ["La Serena", "Coquimbo", "Andacollo", "La Higuera", "Paiguano", "Vicuña", "Illapel", "Canela", "Los Vilos", "Salamanca", "Ovalle", "Combarbalá", "Monte Patria", "Punitaqui", "Río Hurtado"]
+  },
+      {
+          "NombreRegion": "Valparaíso",
+          "comunas": ["Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví", "Quintero", "Viña del Mar", "Isla de Pascua", "Los Andes", "Calle Larga", "Rinconada", "San Esteban", "La Ligua", "Cabildo", "Papudo", "Petorca", "Zapallar", "Quillota", "Calera", "Hijuelas", "La Cruz", "Nogales", "San Antonio", "Algarrobo", "Cartagena", "El Quisco", "El Tabo", "Santo Domingo", "San Felipe", "Catemu", "Llaillay", "Panquehue", "Putaendo", "Santa María", "Quilpué", "Limache", "Olmué", "Villa Alemana"]
+  },
+      {
+          "NombreRegion": "Región del Libertador Gral. Bernardo O’Higgins",
+          "comunas": ["Rancagua", "Codegua", "Coinco", "Coltauco", "Doñihue", "Graneros", "Las Cabras", "Machalí", "Malloa", "Mostazal", "Olivar", "Peumo", "Pichidegua", "Quinta de Tilcoco", "Rengo", "Requínoa", "San Vicente", "Pichilemu", "La Estrella", "Litueche", "Marchihue", "Navidad", "Paredones", "San Fernando", "Chépica", "Chimbarongo", "Lolol", "Nancagua", "Palmilla", "Peralillo", "Placilla", "Pumanque", "Santa Cruz"]
+  },
+      {
+          "NombreRegion": "Región del Maule",
+          "comunas": ["Talca", "ConsVtución", "Curepto", "Empedrado", "Maule", "Pelarco", "Pencahue", "Río Claro", "San Clemente", "San Rafael", "Cauquenes", "Chanco", "Pelluhue", "Curicó", "Hualañé", "Licantén", "Molina", "Rauco", "Romeral", "Sagrada Familia", "Teno", "Vichuquén", "Linares", "Colbún", "Longaví", "Parral", "ReVro", "San Javier", "Villa Alegre", "Yerbas Buenas"]
+  },
+      {
+          "NombreRegion": "Región del Biobío",
+          "comunas": ["Concepción", "Coronel", "Chiguayante", "Florida", "Hualqui", "Lota", "Penco", "San Pedro de la Paz", "Santa Juana", "Talcahuano", "Tomé", "Hualpén", "Lebu", "Arauco", "Cañete", "Contulmo", "Curanilahue", "Los Álamos", "Tirúa", "Los Ángeles", "Antuco", "Cabrero", "Laja", "Mulchén", "Nacimiento", "Negrete", "Quilaco", "Quilleco", "San Rosendo", "Santa Bárbara", "Tucapel", "Yumbel", "Alto Biobío", "Chillán", "Bulnes", "Cobquecura", "Coelemu", "Coihueco", "Chillán Viejo", "El Carmen", "Ninhue", "Ñiquén", "Pemuco", "Pinto", "Portezuelo", "Quillón", "Quirihue", "Ránquil", "San Carlos", "San Fabián", "San Ignacio", "San Nicolás", "Treguaco", "Yungay"]
+  },
+      {
+          "NombreRegion": "Región de la Araucanía",
+          "comunas": ["Temuco", "Carahue", "Cunco", "Curarrehue", "Freire", "Galvarino", "Gorbea", "Lautaro", "Loncoche", "Melipeuco", "Nueva Imperial", "Padre las Casas", "Perquenco", "Pitrufquén", "Pucón", "Saavedra", "Teodoro Schmidt", "Toltén", "Vilcún", "Villarrica", "Cholchol", "Angol", "Collipulli", "Curacautín", "Ercilla", "Lonquimay", "Los Sauces", "Lumaco", "Purén", "Renaico", "Traiguén", "Victoria", ]
+  },
+      {
+          "NombreRegion": "Región de Los Ríos",
+          "comunas": ["Valdivia", "Corral", "Lanco", "Los Lagos", "Máfil", "Mariquina", "Paillaco", "Panguipulli", "La Unión", "Futrono", "Lago Ranco", "Río Bueno"]
+  },
+      {
+          "NombreRegion": "Región de Los Lagos",
+          "comunas": ["Puerto Montt", "Calbuco", "Cochamó", "Fresia", "FruVllar", "Los Muermos", "Llanquihue", "Maullín", "Puerto Varas", "Castro", "Ancud", "Chonchi", "Curaco de Vélez", "Dalcahue", "Puqueldón", "Queilén", "Quellón", "Quemchi", "Quinchao", "Osorno", "Puerto Octay", "Purranque", "Puyehue", "Río Negro", "San Juan de la Costa", "San Pablo", "Chaitén", "Futaleufú", "Hualaihué", "Palena"]
+  },
+      {
+          "NombreRegion": "Región Aisén del Gral. Carlos Ibáñez del Campo",
+          "comunas": ["Coihaique", "Lago Verde", "Aisén", "Cisnes", "Guaitecas", "Cochrane", "O’Higgins", "Tortel", "Chile Chico", "Río Ibáñez"]
+  },
+      {
+          "NombreRegion": "Región de Magallanes y de la Antartica Chilena",
+          "comunas": ["Punta Arenas", "Laguna Blanca", "Río Verde", "San Gregorio", "Cabo de Hornos (Ex Navarino)", "AntárVca", "Porvenir", "Primavera", "Timaukel", "Natales", "Torres del Paine"]
+  },
+      {
+          "NombreRegion": "Región Metropolitana",
+          "comunas": ["Santiago centro","Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura", "Puente Alto", "Pirque", "San José de Maipo", "Colina", "Lampa", "TilVl", "San Bernardo", "Buin", "Calera de Tango", "Paine", "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro", "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"]
+  }]
+  }
 
 
 
 
 const Proveedores = () => {
 
+  //estados de input
+  const [selectedOptionEstados, setSelectedOptionEstados] = useState("codigo"); 
+  //select de por que quiere buscar
+  const [selectedOption, setSelectedOption] = useState<string>('');
+  const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false);
+
+  const changeTextColor = () => {
+    setIsOptionSelected(true);
+  };
+
+
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchTermNombre, setSearchTermnombre] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
   const [showModalCliente, setShowModalCliente] = useState(false);
   const [showModalCostos, setShowModalCostos] = useState(false);
   const [showModalDeta, setShowModalDeta] = useState(false); // Controla el 
+    //PARA BOTON DETALLLE PROVEEDOR
+    const [isEditingClienteD, setIsEditingClienteD] = useState(false); // Controla si
 
   //PARA BOTON MODIFCAR
   const [isEditingCliente, setIsEditingCliente] = useState(false); // Controla si
+  //PARA BOTN MODIFICAR BOTN COSTO
   const [isEditingCosto, setIsEditingCosto] = useState(false); // Controla si
+
+//PROBAR MDAL ESTA EN GUADADO
+const [isSaving, setIsSaving] = useState(false); // Para controlar si estamos en proceso de guardado
+
  
 //PARA ABRIR CON ENTER
 
@@ -74,6 +156,9 @@ const codigoInputRef = useRef<HTMLInputElement>(null); // Especifica el tipo HTM
 const inputRef = useRef<HTMLInputElement | null>(null);
 
 
+//MANEJAR ESTADO DE MODAL
+const [isModalOpen, setIsModalOpen] = useState(false); // Estado para manejar el moda
+
    // Función para manejar el cambio del valor en el input
    
   
@@ -92,7 +177,8 @@ const [isValidAdministrativo, setIsValidAdmnistrativo] = useState(true);
 const [isValidPerdida, setIsValidPerdida] = useState(true);
 const [isValidNdias, setIsValidNdias] = useState(true);
 const [isValidFlete, setIsValidFlete] = useState(true);
-
+const [isValidRegion, setIsValidRegion] = useState(true);
+const [isValidComuna, setIsValidComuna] = useState(true);
 
 //CLIENTE NUEVo
 const [email, setEmail] = useState('');
@@ -100,6 +186,8 @@ const [ciudad, setCiudad] = useState('');
 const [fonoProveedor, setFonoProveedor] = useState('');
 const [direccion, setDireccion] = useState('');
 const [nombre, setNombre] = useState('');
+const [region, setRegion] = useState('');
+const [comuna, setComuna] = useState('');
 const [codigo, setCodigo] = useState('');
 const [atencion, setAtencion] = useState('');
 const [celular, setCelular] = useState('');
@@ -121,6 +209,36 @@ const [isTouchedAdministrativo, setIsTouchedAdministrativo] = useState(false); /
 const [isTouchedNdias, setIsTouchedNdias] = useState(false); // Para verificar si el campo fue tocado
 const [isTouchedPerdida, setIsTouchedPerdida] = useState(false); // Para verificar si el campo fue tocado
 const [isTouchedFlete, setIsTouchedFlete] = useState(false); // Para verificar si el campo fue tocado
+const [isTouchedRegion, setIsTouchedRegion] = useState(false); // Para verificar si el campo fue tocado
+const [isTouchedComuna, setIsTouchedComuna] = useState(false); // Para verificar si el campo fue tocado
+
+
+//FILTRAR OPCIONES
+const [filteredOptionsR, setFilteredOptionsR] = useState<string[]>([]);
+
+//FILTRAR OPCIONES comuna
+const [filteredOptionsC, setFilteredOptionsC] = useState<string[]>([]);
+
+
+
+const [opcionesC, setOpcionesC] = React.useState<string[]>([]); // Opciones dinámicas de comunas
+
+
+//REGION ACROLL
+
+const listRef = useRef<HTMLUListElement>(null);
+  const optionRefs = useRef<HTMLLIElement[]>([]);
+
+//CSCROLL COMUNA
+const listRefC = useRef<HTMLUListElement>(null);
+  const optionRefsC = useRef<HTMLLIElement[]>([]);
+
+
+ // Estado para el índice de la opción seleccionada en la lista
+ const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+
+  // Estado para el índice de la opción COMUNA
+  const [selectedIndexC, setSelectedIndexC] = useState<number>(-1);
 
 //FORMATEAR LA FECHA
 
@@ -143,7 +261,7 @@ useEffect(() => {
 }, [selectedDetalleItem]);
 
 
-//EDITA COSTOS
+//EDITA COSTOS F5
 
 
 const handleEditClickCosto = () => {
@@ -158,12 +276,19 @@ const handleEditClickCosto = () => {
 };
 
 
-    //  F5 PARA MODFICAR CLIENTE
+    //  F5 PARA MODFICAR COST0
     useEffect(() => {
       const handleKeyDown = (event) => {
         if (event.key === "F5") {
           event.preventDefault(); // Evita la acción predeterminada de recargar la página
-          handleEditClickCosto(); // Activa el modo de edición
+       
+           // Verifica el estado actual y realiza la acción correspondiente
+           if (isEditingCosto) {
+            handleCancelClickCosto(); // Cancela la edición si ya está en modo de edición
+          } else {
+            handleEditClickCosto(); // Activa el modo de edición
+
+          }
         }
       };
 
@@ -175,10 +300,61 @@ const handleEditClickCosto = () => {
       };
     }, [isEditingCliente, selectedClienteItem]);
 
+
+
   const handleCancelClickCosto = () => {
     setIsEditingCosto(false); // Cancela la edición y vuelve al modo visualización
     setIsTouchedFlete(false); // Opcional: Resetea el estado de validación
+    
   };
+
+
+  //EDITAR NOBRE EN DETALLE PROVEEDOR
+
+  const handleEditClickClienteD= () => {
+    if (!isEditingClienteD) {
+      // Verificar si selectedClienteItem no es null
+      setNombre(selectedDetalleItem?.nombre || ""); // Usa optional chaining
+      setCodigo(selectedDetalleItem?.codigoProveedor || ""); // Usa optional chaining
+      
+    }
+    setIsEditingClienteD(true); // Cambia a modo de edición
+  };
+
+
+    //  F5 PARA MODFICAR DETALLE
+    useEffect(() => {
+      const handleKeyDown = (event) => {
+        if (event.key === "F5") {
+          event.preventDefault(); // Evita la acción predeterminada de recargar la página
+          
+          // Verifica el estado actual y realiza la acción correspondiente
+          if (isEditingClienteD) {
+            handleCancelClickClienteD(); // Cancela la edición si ya está en modo de edición
+          } else {
+            handleEditClickClienteD(); // Inicia la edición si no está en modo de edición
+          }
+        }
+      };
+    
+      window.addEventListener("keydown", handleKeyDown);
+    
+      // Cleanup del listener al desmontar el componente
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }, [isEditingClienteD, selectedDetalleItem]); // Dependencias relevantes
+
+
+
+  const handleCancelClickClienteD = () => {
+    setIsEditingClienteD(false); // Cancela la edición y vuelve al modo visualización
+   // setIsTouchedDireccion(false); // Opcional: Resetea el estado de validación
+  };
+
+  
+
+
 
   //EDITARCLIENTE
 
@@ -187,7 +363,9 @@ const handleEditClickCosto = () => {
       // Verificar si selectedClienteItem no es null
       setDireccion(selectedClienteItem?.direccion || ""); // Usa optional chaining
       setFonoProveedor(selectedClienteItem?.fono1 || ""); // Usa optional chaining
-      setCiudad(selectedClienteItem?.ciudad || ""); // Usa optional chaining
+      setRegion(selectedClienteItem?.region || ""); // Usa optional chaining
+      setComuna(selectedClienteItem?.comuna || ""); // Usa optional chaining
+     // setCiudad(selectedClienteItem?.ciudad || ""); // Usa optional chaining
       setEmail(selectedClienteItem?.correo || ""); // Usa optional chaining
       setAtencion(selectedClienteItem?.atencion || ""); // Usa optional chaining
       setCelular(selectedClienteItem?.celuVenta || ""); // Usa optional chaining
@@ -202,7 +380,14 @@ const handleEditClickCosto = () => {
       const handleKeyDown = (event) => {
         if (event.key === "F5") {
           event.preventDefault(); // Evita la acción predeterminada de recargar la página
-          handleEditClickCliente(); // Activa el modo de edición
+         
+          // Verifica el estado actual y realiza la acción correspondiente
+          if (isEditingCliente) {
+            handleCancelClickCliente(); // Cancela la edición si ya está en modo de edición
+          } else {
+            handleEditClickCliente(); // Activa el modo de edición
+
+          }
         }
       };
 
@@ -213,6 +398,9 @@ const handleEditClickCosto = () => {
         window.removeEventListener("keydown", handleKeyDown);
       };
     }, [isEditingCliente, selectedClienteItem]);
+
+
+
 
   const handleCancelClickCliente = () => {
     setIsEditingCliente(false); // Cancela la edición y vuelve al modo visualización
@@ -248,6 +436,153 @@ const handleEditClickCosto = () => {
     setIsTouchedCiudad(true); // Marca el campo como tocado al salir del campo
   };
 
+//COMUNA
+  
+  // Manejo de cambio en el input de región
+  const handleComunaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.trim(); // Eliminar espacios al inicio/final
+  
+    // Eliminar caracteres no deseados
+    value = value.replace(/[^A-Za-z\s]/g, "");
+  
+    setComuna(value);
+    setIsValidComuna(value.length > 0);
+  
+    // Filtrar opciones que coincidan con el texto ingresado
+    const filtered = opcionesC.filter((option) =>
+      option.toLowerCase().startsWith(value.toLowerCase())
+    );
+    setFilteredOptionsC(filtered);
+  };
+  
+
+// Manejo de clic en una opción
+const handleOptionClickC = (option: string) => {
+  setComuna(option);
+  setFilteredOptionsC([]);
+ // setSelectedIndexC(-1); // Restablece el índice seleccionado
+};
+
+
+const handleFocusComuna = () => {
+  // Mostrar todas las opciones al enfocar si no hay texto en el input
+  if (comuna.trim() === "") {
+    setFilteredOptionsC(opcionesC);
+  }
+};
+
+React.useEffect(() => {
+  if (selectedIndexC >= 0 && listRefC.current && optionRefsC.current[selectedIndexC]) {
+    // Asegurarse de que el elemento seleccionado esté visible
+    optionRefsC.current[selectedIndexC].scrollIntoView({
+      block: "nearest", // Alinear al contenedor
+      behavior: "smooth", // Desplazamiento suave
+    });
+  }
+}, [selectedIndexC]);
+
+
+
+// Manejo de teclas
+const handleKeyDownComuna = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === "ArrowDown") {
+    setSelectedIndexC((prevIndex) =>
+      Math.min(filteredOptionsC.length - 1, prevIndex + 1)
+    );
+  } else if (e.key === "ArrowUp") {
+    setSelectedIndexC((prevIndex) => Math.max(0, prevIndex - 1));
+  } else if (e.key === "Enter" && selectedIndexC >= 0) {
+    handleOptionClickC(filteredOptionsC[selectedIndexC]);
+  }
+};
+
+
+const handleBlurComuna = () => {
+  setIsTouchedComuna(true);
+  setTimeout(() => {
+    setFilteredOptionsC([]); // Oculta la lista después de perder foco
+  }, 150); // Retraso para permitir clics
+};
+
+
+
+
+
+   //REGION
+  
+  // Manejo de cambio en el input de región
+// Filtrar opciones de regiones
+const handleRegionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value.trim().replace(/[^A-Za-z\s]/g, "");
+  setRegion(value);
+
+  // Filtrar las regiones
+  const filtered = RegionesYcomunas.regiones
+    .map((r) => r.NombreRegion)
+    .filter((regionName) =>
+      regionName.toLowerCase().startsWith(value.toLowerCase())
+    );
+  setFilteredOptionsR(filtered);
+};
+ 
+  
+
+// Manejo de clic en una opción
+
+const handleOptionClick = (regionName: string) => {
+  setRegion(regionName);
+  setFilteredOptionsR([]);
+  setComuna(""); // Reinicia la comuna seleccionada
+
+  // Encuentra las comunas de la región seleccionada
+  const regionData = RegionesYcomunas.regiones.find(
+    (r) => r.NombreRegion === regionName
+  );
+  setOpcionesC(regionData ? regionData.comunas : []); // Actualiza las comunas disponibles
+};
+
+
+// Manejo de teclas
+const handleKeyDownRegion = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === "ArrowDown") {
+    // Mover hacia abajo
+    setSelectedIndex((prevIndex) =>
+      Math.min(filteredOptionsR.length - 1, prevIndex + 1)
+    );
+  } else if (e.key === "ArrowUp") {
+    // Mover hacia arriba
+    setSelectedIndex((prevIndex) => Math.max(0, prevIndex - 1));
+  } else if (e.key === "Enter" && selectedIndex >= 0) {
+    // Seleccionar opción
+    handleOptionClick(filteredOptionsR[selectedIndex]);
+  }
+};
+React.useEffect(() => {
+  if (selectedIndex >= 0 && listRef.current && optionRefs.current[selectedIndex]) {
+    // Asegurarse de que el elemento seleccionado esté visible
+    optionRefs.current[selectedIndex].scrollIntoView({
+      block: "nearest", // Alinear al contenedor
+      behavior: "smooth", // Desplazamiento suave
+    });
+  }
+}, [selectedIndex]);
+
+ 
+
+  const handleBlurRegion = () => {
+    setIsTouchedRegion(true); // Marca el campo como tocado al salir del campo
+    setTimeout(() => {
+      setFilteredOptionsR([]); // Oculta la lista después de perder foco
+    }, 150); // Retraso para permitir clics
+  };
+  
+
+  const handleFocusRegion = () => {
+    // Mostrar todas las opciones al enfocar si no hay texto en el input
+    if (comuna.trim() === "") {
+      setFilteredOptionsR(opciones);
+    }
+  };
 
 
   //FIONO
@@ -410,6 +745,40 @@ const handleEditClickCosto = () => {
   };
 
 
+//NOMBREE DETALLE OROVEEDOR
+
+  //DIRECCION
+
+  const handleNombreDetalleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase(); // Convertir el valor a mayúsculas
+    setNombre(value);
+
+    // Validación: Aceptar solo letras (sin números ni caracteres especiales)
+    const fonoProveedorPattern = /^A-Z0-9_-/;
+    setIsValidNombre(fonoProveedorPattern.test(value));
+  };
+
+  const handleBlurNombreDetalle= () => {
+    setIsTouchedNombre(true); // Marca el campo como tocado al salir del campo
+  };
+
+
+  //CODIGO DETALLE OROVEEDOR
+
+  //DIRECCION
+
+  const handleCodigoDetalleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase(); // Convertir el valor a mayúsculas
+    setCodigo(value);
+
+    // Validación: Aceptar solo letras (sin números ni caracteres especiales)
+    const fonoProveedorPattern = /^A-Z0-9_-/;
+    setIsValidCodigo(fonoProveedorPattern.test(value));
+  };
+
+  const handleBlurCodigoDetalle= () => {
+    setIsTouchedCodigo(true); // Marca el campo como tocado al salir del campo
+  };
 
 
 
@@ -424,6 +793,59 @@ const handleEditClickCosto = () => {
   
   const pageSize = 9 ;  // Puedes cambiar el tamaño de página aquí
   const [totalElementos, setTotalElements] = useState(0);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null); // Referencia para el temporizador
+
+
+  // BUSCAR POR CODIGO
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase(); // Convierte a mayúsculas
+    const regex = /^[A-Z0-9 _-]*$/; // Permite caracteres válidos
+
+    if (regex.test(value)) {
+      setSearchTerm(value); // Actualiza el término de búsqueda
+
+      // Si hay un temporizador activo, cancelarlo
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+
+      // Configurar un nuevo temporizador
+      debounceTimeout.current = setTimeout(() => {
+        if (value.trim() === "") {
+          // Si el campo está vacío, mostrar todos los proveedores
+          fetchProveedor(currentPage, 7); // Por ejemplo, 10 resultados por página
+        } else {
+          // Si hay un término de búsqueda, filtrar proveedores
+          buscarProveedores(value);
+        }
+      }, 500); // Espera 500 ms antes de ejecutar
+    }
+  };
+//INPUT BUSCAR NOMBRE
+  const handleInputChangenombre= (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase(); // Convierte a mayúsculas
+    const regex = /^[A-Z0-9 _-]*$/; // Permite caracteres válidos
+
+    if (regex.test(value)) {
+      setSearchTermnombre(value); // Actualiza el término de búsqueda
+
+      // Si hay un temporizador activo, cancelarlo
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+
+      // Configurar un nuevo temporizador
+      debounceTimeout.current = setTimeout(() => {
+        if (value.trim() === "") {
+          // Si el campo está vacío, mostrar todos los proveedores
+          fetchProveedor(currentPage, 7); // Por ejemplo, 10 resultados por página
+        } else {
+          // Si hay un término de búsqueda, filtrar proveedores
+          buscarcodigoProveedores(value);
+        }
+      }, 500); // Espera 500 ms antes de ejecutar
+    }
+  };
 
     // Función para obtener los datos desde el API
     const fetchProveedor = async (page: number, size: number) => {
@@ -441,7 +863,9 @@ const handleEditClickCosto = () => {
             nombre: item.nombre,
             direccion: item.direccion, // string
             fono1: item.fono1,         // string
-            ciudad: item.ciudad,       // string
+            //ciudad: item.ciudad,
+            region:item.region,       // string
+            comuna:item.comuna,
             atencion: item.atencion,   // string
             celuVenta: item.celuVenta, // string
             ciudadVen: item.ciudadVen, // string
@@ -453,7 +877,8 @@ const handleEditClickCosto = () => {
             docto: item.docto,                   // number
             chAdj: item.chAdj,
             correo: item.correo ,
-            fechaRegistro: item.fechaRegistro  
+            fechaRegistro: item.fechaRegistro ,
+
           
           }));
     
@@ -470,6 +895,77 @@ const handleEditClickCosto = () => {
         console.error("Error al obtener los datos de mercadería:", error);
       }
     };
+
+     //BUSCAR NONBRE PROVEEDOR
+     const buscarcodigoProveedores = async (nombre: string) => {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/proveedores/buscarnombre?nombre=${nombre}`);
+        if (response.status === 200 && response.data) {
+          const mappedData: Proveedor[] = response.data.data.map((item: any) => ({
+            idProveedores: item.idProveedores,
+            codigoProveedor: item.codigoProveedor,
+            nombre: item.nombre,
+            direccion: item.direccion,
+            fono1: item.fono1,
+            region: item.region,
+            comuna: item.comuna,
+            atencion: item.atencion,
+            celuVenta: item.celuVenta,
+            ciudadVen: item.ciudadVen,
+            adminProveedor: item.adminProveedor,
+            perdida: item.perdida,
+            flete: item.flete,
+            ndias: item.ndias,
+            condPago: item.condPago,
+            docto: item.docto,
+            chAdj: item.chAdj,
+            correo: item.correo,
+            fechaRegistro: item.fechaRegistro,
+          }));
+    
+          // Sobrescribe los datos actuales con los resultados de búsqueda
+          setProveedorData(mappedData);
+        }
+      } catch (error) {
+        console.error("Error al buscar proveedores:", error);
+      }
+    };
+
+    //BUSCAR CODIGO PROVEEDOR
+    const buscarProveedores = async (codigo: string) => {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/proveedores/buscarcodigo?codigo=${codigo}`);
+        if (response.status === 200 && response.data) {
+          const mappedData: Proveedor[] = response.data.data.map((item: any) => ({
+            idProveedores: item.idProveedores,
+            codigoProveedor: item.codigoProveedor,
+            nombre: item.nombre,
+            direccion: item.direccion,
+            fono1: item.fono1,
+            region: item.region,
+            comuna: item.comuna,
+            atencion: item.atencion,
+            celuVenta: item.celuVenta,
+            ciudadVen: item.ciudadVen,
+            adminProveedor: item.adminProveedor,
+            perdida: item.perdida,
+            flete: item.flete,
+            ndias: item.ndias,
+            condPago: item.condPago,
+            docto: item.docto,
+            chAdj: item.chAdj,
+            correo: item.correo,
+            fechaRegistro: item.fechaRegistro,
+          }));
+    
+          // Sobrescribe los datos actuales con los resultados de búsqueda
+          setProveedorData(mappedData);
+        }
+      } catch (error) {
+        console.error("Error al buscar proveedores:", error);
+      }
+    };
+    
     
       // Efecto para llamar a la API al montar el componente
       useEffect(() => {
@@ -517,91 +1013,114 @@ const handleEditClickCosto = () => {
   };
 
 
-    // Crear un nuevo objeto de solicitud
-    const guardarProveedor = () => { 
+const guardarProveedor = () => { 
+  // Si hay un guardado en proceso, no permitir ninguna acción
+  if (isSaving) return;
+  setIsSaving(true); // Establecer en true al comenzar el guardado
 
-      if (!nombre.trim() || !codigo.trim()) {
-        Swal.fire({
-          title: "Campos vacíos",
-          text: "Por favor, completa todos los campos antes de guardar.",
-          icon: "warning",
-          confirmButtonText: "OK",
-        });
-        return; // Detiene la ejecución si los campos están vacíos
-      }
-  
-      // Mostrar confirmación antes de guardar
-      Swal.fire({
-        title: "¿Deseas guardar la solicitud?",
-        text: "Se guardará la solicitud de mercadería con los detalles actuales.",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Sí, guardar",
-        cancelButtonText: "Cancelar",
-      }).then((result) => {
 
-        if (result.isConfirmed) {
-          // Crear un nuevo objeto de solicitud
-            // Mapear los valores numéricos seleccionados a los códigos correspondientes
-          
-            
-          // Crear la nueva solicitud
-          const nuevoProveedor = {
-            codigoProveedor: codigo, // Asignar dinámicamente
-            nombre: nombre// Asignar dinámicamente
-            
-          
-          };
-    
-          // Agregar la nueva solicitud al arreglo de mercadería
-        //  mercaderiaData.push(nuevaSolicitud);
-    
-          console.log("Proveedor guardada:", nuevoProveedor);
 
-          
-    
-          // Mostrar mensaje de éxito
-          axios.post('http://localhost:8080/api/proveedores', nuevoProveedor)
-          .then((response) => {
-            console.log('Respuesta del servidor:', response.data);
-            Swal.fire({
-              title: "¡Guardado!",
-              text: "La solicitud de proveedor se guardó correctamente.",
-              icon: "success",
-              confirmButtonText: "OK",
-            });
-    
-            setCodigo("")
-            setNombre("")
+  // Verificar si alguno de los campos está vacío
+  if (!nombre.trim() || !codigo.trim()) {
+    Swal.fire({
+      title: "Campos vacíos",
+      text: "Por favor, completa todos los campos antes de guardar.",
+      icon: "warning",
+      confirmButtonText: "OK",
+    }).then(() => {
+      inputRef.current?.focus();
+    });
+    setIsSaving(false); // Reestablecer isSaving
+    return; // Detener la ejecución si los campos están vacíos
+  }
 
-            
-          
+  // Mostrar confirmación antes de guardar
+  Swal.fire({
+    title: "¿Deseas guardar la solicitud?",
+    text: "Se guardará la solicitud de mercadería con los detalles actuales.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, guardar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const nuevoProveedor = {
+        codigoProveedor: codigo,
+        nombre: nombre
+      };
 
-            fetchProveedor(currentPage, 7); // Llama a la función con la página actual y
-            closeModal();
+      console.log("Proveedor guardado:", nuevoProveedor);
 
-          })  
-          .catch((error) => {
-            console.error("Error al guardar la solicitud:", error);
-            Swal.fire({
-              title: "¡Error!",
-              text: "Hubo un problema al guardar la solicitud.",
-              icon: "error",
-              confirmButtonText: "OK",
-            });
-          });
-        }
-        
-        else {
+      // Realizar la solicitud al servidor
+      axios.post('http://localhost:8080/api/proveedores', nuevoProveedor)
+        .then((response) => {
+          console.log('Respuesta del servidor:', response.data);
           Swal.fire({
-            title: "Cancelado",
-            text: "No se guardó la solicitud de mercadería.",
-            icon: "info",
+            title: "¡Guardado!",
+            text: "El proveedor se guardó correctamente.",
+            icon: "success",
             confirmButtonText: "OK",
+          }).then(() => {
+            setIsSaving(false); // Reestablecer isSaving
           });
-        }
+
+          setCodigo("");
+          setNombre("");
+
+          fetchProveedor(currentPage, 7); // Recargar la lista
+          closeModal();
+
+        })
+        .catch((error) => {
+          console.error("Error al guardar el proveedor", error);
+          Swal.fire({
+            title: "¡Error!",
+            text: "Hubo un problema al guardar el proveedor.",
+            icon: "error",
+            confirmButtonText: "OK",
+          }).then(() => {
+            setIsSaving(false); // Reestablecer isSaving
+          });
+        });
+
+    } else {
+      Swal.fire({
+        title: "Cancelado",
+        text: "No se guardó el proveedor.",
+        icon: "info",
+        confirmButtonText: "OK",
+      }).then(() => {
+        setIsSaving(false); // Reestablecer isSaving
       });
-    };
+    }
+
+    inputRef.current?.focus();
+  });
+};
+
+//GUADAR MODAL CON TECKAD F4
+
+
+useEffect(() => {
+  const handleKeyDown = (event) => {
+    if (event.key === "F4") {
+      event.preventDefault();
+
+      if (!isModalOpen) {
+        guardarProveedor(); // Llama a la función guardarProveedor cuando el modal está abierto
+      } else {
+    
+      }
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, [isModalOpen, nombre, codigo, isSaving]); // Dependencias actualizadas
+
 
 
 
@@ -670,6 +1189,8 @@ const handleEditClickCosto = () => {
       }, 300);
     };
 
+
+
     //END CANCELAR
 
 
@@ -686,7 +1207,9 @@ const handleEditClickCosto = () => {
     setIsTouchedCelular(false);
     setIsTouchedFono(false);
     setIsTouchedDireccion(false);
-    setIsTouchedCiudad(false);
+    setIsTouchedRegion(false);
+    setIsTouchedComuna(false);
+    
 
     //PORNE A NULL VALORES
     setDireccion( ""); // Usa optional chaining
@@ -695,6 +1218,8 @@ const handleEditClickCosto = () => {
     setEmail( ""); // Usa optional chaining
     setAtencion(""); // Usa optional chaining
     setCelular(""); // Usa optional chaining
+    setRegion("");
+    setComuna("");
 
     // Restablece el estado de edición del cliente
     setIsEditingCliente(false); // Aquí se asegura que vuelva al modo "Editar"
@@ -717,7 +1242,7 @@ const handleEditClickCosto = () => {
           if (showModalCliente) {
             closeModalCliente();
           } else if (showModal) {
-            closeModal();
+            closeModal();  
           }
          else if (showModalCostos) {
           closeModalCostos();
@@ -753,6 +1278,9 @@ const handleEditClickCosto = () => {
   }, []);
 
   const handleKeyDownDetalle = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (showModalCliente || showModal || showModalCostos || showModalDeta || isSaving) return; // Si hay algún modal abierto o estamos guardando, no hacer nada
+
+
     console.log("manajndo con taclado")
     if (e.key === "ArrowDown") {
       setActiveRow((prev) => (prev + 1) % filteredFacturaVen.length); // Navegar hacia abajo
@@ -760,16 +1288,36 @@ const handleEditClickCosto = () => {
       setActiveRow((prev) =>
         prev === 0 ? filteredFacturaVen.length - 1 : prev - 1
       ); // Navegar hacia arriba
-    } else if (e.key === "Enter") {
+    } else if (e.key === "F9") {
+      e.preventDefault(); 
       openModalDetallleProveedor(filteredFacturaVen[activeRow]); // Abrir modal
+
+    } else if (e.key === "F10") {
+      e.preventDefault(); // Evitar comportamiento predeterminado del navegador para F10
+      openModalCliente(filteredFacturaVen[activeRow]); // Abrir modal de cliente
     }
+    else if (e.key === "F11") {
+    e.preventDefault(); // Evitar comportamiento predeterminado del navegador para F10
+    openModalCostos(filteredFacturaVen[activeRow]); // Abrir modal de cliente
+   }
+   else if (e.key === "F6") {
+    e.preventDefault(); // Evitar comportamiento predeterminado de la tecla
+    deleteProveedor(filteredFacturaVen[activeRow]); // Llama a la función para eliminar proveedor
+  }
+
   };
 
 const closeModalDetalle = () => {
+     // Restablece el estado de edición del cliente
+
     
+   //  isEditingClienteD
   setShowModalDeta(false); // Cierra el modal
   inputRef.current?.focus(); // Mueve el foco al input de búsqueda
- 
+ setNombre("");
+ setCodigo("");
+
+ setIsEditingClienteD(false); // Aquí se asegura que vuelva al modo "Editar"
 
 };
 
@@ -786,21 +1334,7 @@ const closeModalDetalle = () => {
     
   };
 
-   // TECLADO ABRI MODAL CLIENTE TCLADO
-useEffect(() => {
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'F10') {
-      openModalCliente();
-    }
-  };
-
-  window.addEventListener('keydown', handleKeyDown);
-
-  // Limpia el listener al desmontar el componente
-  return () => {
-    window.removeEventListener('keydown', handleKeyDown);
-  };
-}, []); // Solo se ejecuta una vez al montar
+ 
 
  
   const closeModalCostos = () => {
@@ -830,7 +1364,7 @@ useEffect(() => {
 
   };
   
-
+//LIMINAR PROVEEEDOR
 
   const deleteProveedor = async (proveedor: Proveedor) => {
 console.log("delete id "+proveedor.idProveedores)
@@ -877,10 +1411,15 @@ console.log("delete id "+proveedor.idProveedores)
           );
         }
       }
+       // Enfocar el campo de búsqueda después de confirmar o cancelar
+    inputRef.current?.focus();
     });
   };
-  
 
+
+  
+  
+//modal costos
   const openModalCostos = (proveedor:Proveedor) => {
 
 
@@ -926,6 +1465,12 @@ useEffect(() => {
 
 
 
+// Filtrar datos según los términos de búsqueda
+const filteredFacturaVen = proveedorData.filter((factura) => {
+  const matchesCodigo = searchTerm === "" || factura.codigoProveedor.toString().includes(searchTerm);
+  const matchesNombre = searchTermNombre === "" || factura.nombre.toLowerCase().includes(searchTermNombre.toLowerCase());
+  return matchesCodigo && matchesNombre;
+});
 
 
 
@@ -933,10 +1478,10 @@ useEffect(() => {
 
 
   // Filtrar datos según el término de búsqueda
-  const filteredFacturaVen = proveedorData.filter((factura) =>
+  //const filteredFacturaVen = proveedorData.filter((factura) =>
 
-    factura.codigoProveedor.toString().includes(searchTerm)
-  );
+ //   factura.codigoProveedor.toString().includes(searchTerm)
+ // );
 
 
   
@@ -994,7 +1539,7 @@ useEffect(() => {
   // TECLADO ABRI MODAL GUARDAR
 useEffect(() => {
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'F4') {
+    if (event.key === 'F8') {
       openModal();
     }
   };
@@ -1040,124 +1585,9 @@ useEffect(() => {
   }
 }, [showModalCostos,selectedCostosItem]);
 
-//ACTUALIZAR CLEINTE
 const guardarCostoProveedor = () => { 
- 
- 
-  // Verificar si los campos están vacíos
- // Verificar si alguno de los campos está vacío
- if (
-   !administrativo.trim() ||
-   !perdida.trim() ||
-   !flete.trim() ||
-   !ndias.trim() 
-   
- ) {
- Swal.fire({
-   title: "Campos vacíos",
-   text: "Por favor, completa todos los campos antes de guardar.",
-   icon: "warning",
-   confirmButtonText: "OK",
- });
- return; // Detener la ejecución si los campos están vacíos
-}
-
- // Mostrar confirmación antes de guardar
- Swal.fire({
-   title: "¿Deseas guardar la solicitud?",
-   text: "Se guardará la solicitud de mercadería con los detalles actuales.",
-   icon: "question",
-   showCancelButton: true,
-   confirmButtonText: "Sí, guardar",
-   cancelButtonText: "Cancelar",
- }).then((result) => {
-
-   if (result.isConfirmed) {
-     // Crear un nuevo objeto de solicitud
-       // Mapear los valores numéricos seleccionados a los códigos correspondientes
-      
-       
-     // Crear la nueva solicitud
-     const nuevoClienteProveedor = {
-       codigoProveedor: selectedCostosItem?.codigoProveedor, // Asignar dinámicamente
-       nombre: selectedCostosItem?.nombre,// Asignar dinámicamente
-       adminProveedor:administrativo,
-       perdida:perdida,
-       flete:flete,
-       ndias:ndias
-       
-     
-     };
-
-     // Agregar la nueva solicitud al arreglo de mercadería
-   //  mercaderiaData.push(nuevaSolicitud);
-
-     console.log("Proveedor guardada:", nuevoClienteProveedor);
-
-     
-
-     // Mostrar mensaje de éxito
-     axios.put(`http://localhost:8080/api/proveedores/costo/${selectedCostosItem?.idProveedores}`, nuevoClienteProveedor)
-     .then((response) => {
-       console.log('Respuesta del servidor:', response.data);
-       Swal.fire({
-         title: "¡Guardado!",
-         text: "El proveedor se guardó correctamente.",
-         icon: "success",
-         confirmButtonText: "OK",
-       });
-
-       setAdministrativo("")
-       setPerdida("")
-       setFlete("")
-       setNdias("")
-      
-
-       
-     
-
-       fetchProveedor(currentPage, 7); // Llama a la función con la página actual y
-       closeModalCostos();
-
-     })  
-     .catch((error) => {
-       console.error("Error al guardar la solicitud:", error);
-       Swal.fire({
-         title: "¡Error!",
-         text: "Hubo un problema al guardar la solicitud.",
-         icon: "error",
-         confirmButtonText: "OK",
-       });
-     });
-   }
-   
-   else {
-     Swal.fire({
-       title: "Cancelado",
-       text: "No se guardó la solicitud de mercadería.",
-       icon: "info",
-       confirmButtonText: "OK",
-     });
-   }
- });
-};
-
-
-
-//ACTUALIZAR CLEINTE
-const guardarClienteProveedor = () => { 
- 
- 
-     // Verificar si los campos están vacíos
-    // Verificar si alguno de los campos está vacío
-    if (
-      !direccion.trim() ||
-      !email.trim() ||
-      !fonoProveedor.trim() ||
-      !ciudad.trim() ||
-      !atencion.trim() ||
-      !celular.trim()
-    ) {
+  // Verificar si alguno de los campos está vacío
+  if (!administrativo.trim() || !perdida.trim() || !flete.trim() || !ndias.trim()) {
     Swal.fire({
       title: "Campos vacíos",
       text: "Por favor, completa todos los campos antes de guardar.",
@@ -1166,11 +1596,206 @@ const guardarClienteProveedor = () => {
     });
     return; // Detener la ejecución si los campos están vacíos
   }
+
+  // Mostrar confirmación antes de guardar
+  Swal.fire({
+    title: "¿Deseas guardar el proveedor?",
+    text: "Se actualizará proveedor.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, guardar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const nuevoClienteProveedor = {
+        codigoProveedor: selectedCostosItem?.codigoProveedor,
+        nombre: selectedCostosItem?.nombre,
+        adminProveedor: administrativo,
+        perdida: perdida,
+        flete: flete,
+        ndias: ndias,
+      };
+
+      console.log("Proveedor guardado:", nuevoClienteProveedor);
+
+      axios
+        .put(`http://localhost:8080/api/proveedores/costo/${selectedCostosItem?.idProveedores}`, nuevoClienteProveedor)
+        .then((response) => {
+          console.log("Respuesta del servidor:", response.data);
+          Swal.fire({
+            title: "¡Guardado!",
+            text: "El proveedor se guardó correctamente.",
+            icon: "success",
+            confirmButtonText: "OK",
+          }).then(() => {
+            // Enfocar el campo de búsqueda después de que el modal de confirmación de éxito haya cerrado
+            inputRef.current?.focus();
+          });
+
+          setAdministrativo("");
+          setPerdida("");
+          setFlete("");
+          setNdias("");
+
+          fetchProveedor(currentPage, 7); // Recargar la lista
+          closeModalCostos();
+        })
+        .catch((error) => {
+          console.error("Error al guardar el proveedor:", error);
+          Swal.fire({
+            title: "¡Error!",
+            text: "Hubo un problema al guardar el proveedor.",
+            icon: "error",
+            confirmButtonText: "OK",
+          }).then(() => {
+            // Enfocar el campo de búsqueda incluso si hubo un error
+            inputRef.current?.focus();
+          });
+        });
+    } else {
+      Swal.fire({
+        title: "Cancelado",
+        text: "No se guardó proveedor.",
+        icon: "info",
+        confirmButtonText: "OK",
+      }).then(() => {
+        // Enfocar el campo de búsqueda si se cancela
+        inputRef.current?.focus();
+      });
+    }
+  });
+};
+
+
+//ACTUALIZAR DETALLE
+const guardarDetalleProveedor = () => { 
+
+  // Verificar si los campos están vacíos
+  if (!nombre.trim() || !codigo.trim()) {
+    Swal.fire({
+      title: "Campos vacíos",
+      text: "Por favor, completa todos los campos antes de guardar.",
+      icon: "warning",
+      confirmButtonText: "OK",
+    }).then(() => {
+      // Enfocar el campo después de mostrar el mensaje de advertencia
+      inputRef.current?.focus();
+    });
+    return; // Detener la ejecución si los campos están vacíos
+  }
+
+  // Mostrar confirmación antes de guardar
+  Swal.fire({
+    title: "¿Deseas actualizar el proveedor?",
+    text: "Se guardará el proveedor.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sí, guardar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+
+    if (result.isConfirmed) {
+      // Crear un nuevo objeto de solicitud
+      const nuevoClienteProveedor = {
+        codigoProveedor: codigo, // Asignar dinámicamente
+        nombre: nombre, // Asignar dinámicamente
+      };
+
+      console.log("Proveedor guardado:", nuevoClienteProveedor);
+
+      // Realizar la solicitud al servidor
+      axios.put(`http://localhost:8080/api/proveedores/detalle/${selectedDetalleItem?.idProveedores}`, nuevoClienteProveedor)
+        .then((response) => {
+          console.log('Respuesta del servidor:', response.data);
+          Swal.fire({
+            title: "¡Guardado!",
+            text: "El proveedor se guardó correctamente.",
+            icon: "success",
+            confirmButtonText: "OK",
+          }).then(() => {
+            // Enfocar el campo después de que el mensaje de éxito se cierre
+            inputRef.current?.focus();
+          });
+
+          setNombre("");
+          setCodigo("");
+
+          fetchProveedor(currentPage, 7); // Recargar la lista
+          closeModalDetalle();
+
+        })  
+        .catch((error) => {
+          console.error("Error al guardar el proveedor:", error);
+          Swal.fire({
+            title: "¡Error!",
+            text: "Hubo un problema al guardar el proveedor.",
+            icon: "error",
+            confirmButtonText: "OK",
+          }).then(() => {
+            // Enfocar el campo después de que el mensaje de error se cierre
+            inputRef.current?.focus();
+          });
+        });
+
+    } else {
+      Swal.fire({
+        title: "Cancelado",
+        text: "No se guardó el proveedor.",
+        icon: "info",
+        confirmButtonText: "OK",
+      }).then(() => {
+        // Enfocar el campo después de que el mensaje de cancelación se cierre
+        inputRef.current?.focus();
+      });
+    }
+  });
+};
+
+
+//ACTUALIZAR CLEINTE
+const guardarClienteProveedor = () => { 
+ 
+ 
+  const mensajes = [];
+
+  if (!direccion.trim()) {
+    mensajes.push("El campo 'Dirección' está vacío.");
+  }
+  if (!email.trim()) {
+    mensajes.push("El campo 'Email' está vacío.");
+  }
+  if (!fonoProveedor.trim()) {
+    mensajes.push("El campo 'Teléfono del proveedor' está vacío.");
+  }
+  if (!atencion.trim()) {
+    mensajes.push("El campo 'Atención' está vacío.");
+  }
+  if (!celular.trim()) {
+    mensajes.push("El campo 'Celular' está vacío.");
+  }
+  if (!region.trim()) {
+    mensajes.push("El campo 'Región' está vacío.");
+  }
+  if (!comuna.trim()) {
+    mensajes.push("El campo 'Comuna' está vacío.");
+  }
+
+  // Si hay mensajes, significa que hay campos vacíos
+  if (mensajes.length > 0) {
+    Swal.fire({
+      title: "Campos vacíos",
+      html: `<ul>${mensajes.map((mensaje) => `<li>${mensaje}</li>`).join("")}</ul>`,
+      icon: "warning",
+      confirmButtonText: "OK",
+    });
+    return; // Detener la ejecución si los campos están vacíos
+  }
+
  
     // Mostrar confirmación antes de guardar
     Swal.fire({
-      title: "¿Deseas guardar la solicitud?",
-      text: "Se guardará la solicitud de mercadería con los detalles actuales.",
+      title: "¿Deseas Actulizar el proveedor?",
+      text: "Se guardará el proveedor.",
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Sí, guardar",
@@ -1191,7 +1816,9 @@ const guardarClienteProveedor = () => {
           ciudad:ciudad,
           atencion:atencion,
           correo:email,
-          celuVenta:celular
+          celuVenta:celular,
+          region:region,
+          comuna:comuna
           
         
         };
@@ -1220,6 +1847,8 @@ const guardarClienteProveedor = () => {
           setAtencion("")
           setEmail("")
           setCelular("")
+          setRegion("")
+          setComuna("")
 
           
         
@@ -1229,10 +1858,10 @@ const guardarClienteProveedor = () => {
 
         })  
         .catch((error) => {
-          console.error("Error al guardar la solicitud:", error);
+          console.error("Error al guardar el proveedor:", error);
           Swal.fire({
             title: "¡Error!",
-            text: "Hubo un problema al guardar la solicitud.",
+            text: "Hubo un problema al guardar el proveedor.",
             icon: "error",
             confirmButtonText: "OK",
           });
@@ -1242,7 +1871,7 @@ const guardarClienteProveedor = () => {
       else {
         Swal.fire({
           title: "Cancelado",
-          text: "No se guardó la solicitud de mercadería.",
+          text: "No se guardó el proveedor.",
           icon: "info",
           confirmButtonText: "OK",
         });
@@ -1251,6 +1880,8 @@ const guardarClienteProveedor = () => {
   };
 
 
+
+  
   
   
   return (
@@ -1263,126 +1894,197 @@ const guardarClienteProveedor = () => {
      
      >
          <div className="py-6 px-4 md:px-0 xl:px-0">
+
         {/* Contenedor flex para alinearlos horizontalmente con espacio entre */}
         <div className="flex justify-between items-center gap-4 ">
           {/* Buscador */}
+
+          <div className="flex justify-start items-center gap-4 " >
           
-        
-          <div className="relative">
-              <button className="absolute left-0 top-1/2 -translate-y-1/2">
-                <svg
-                  className="fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M9.16666 3.33332C5.945 3.33332 3.33332 5.945 3.33332 9.16666C3.33332 12.3883 5.945 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.945 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
-                    fill=""
-                  />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
-                    fill=""
-                  />
-                </svg>
-              </button>
-
-             <input
-              type="text"
-              placeholder="Escribe número"
-              className="w-full bg-transparent pl-9 pr-4 text-black focus:outline-none dark:text-white xl:w-125"
-              value={searchTerm}
-              ref={inputRef} // Asigna la referencia al input
-              onChange={(e) => {
-                const value = e.target.value.toUpperCase(); // Convierte a mayúsculas
-                const regex = /^[A-Z0-9 _-]*$/; // Permite letras mayúsculas, números, espacios, guiones (-) y guiones bajos (_)
-                if (regex.test(value)) {
-                  setSearchTerm(value); // Actualiza el estado si cumple con el regex
-                }
-              }}
-            />
-
-            </div>
-         
-          
-
-
-         {/* Botón Nueva Venta */}
-         <button
-          onClick={openModal}
-          className="flex items-center px-4 py-2 bg-blue-800 text-white rounded hover:bg-blue-700 hover:text-white 
-                    sm:w-auto w-full text-center"
-        >
-          <MdAdd className="h-5 w-5 mr-2" />
-          Nuevo
-        </button>
-        
-       
-
-        </div>
-      </div>
-
-
-     {/*<div className="max-w-full overflow-x-auto"> aqui*/} 
-
-      <div
+          <div className=" w-32">
       
-    >
-        <table className="w-full table-auto">
 
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4" >
-              <th className="min-w-[150px] py-2 px-4 font-medium text-black dark:text-white xl:pl-11 ">
-                Código
-              </th>
-             
-              <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
-                Proveedor
-              </th>
+      <div className="relative z-20 bg-transparent dark:bg-form-input">
+        <select
+          value={selectedOptionEstados}
+          onChange={(e) => {
+            setSelectedOptionEstados(e.target.value);
+            changeTextColor();
+          }}
+
+
+          className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-2 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
+            isOptionSelected ? 'text-black dark:text-white' : ''
+          }`}
+        >
+          
+          <option value="codigo" className="text-body dark:text-bodydark">
+            Código
+          </option>
+          <option value="nombre" className="text-body dark:text-bodydark">
+            Nombre
+          </option>
+         
+        </select>
+
+        <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
+          <svg
+            className="fill-current"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g opacity="0.8">
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+                fill=""
+              ></path>
+            </g>
+          </svg>
+        </span>
+      </div>
+           </div>
+        
+           <div className="relative">
+           {selectedOptionEstados === "nombre" && (
+  <input
+    type="text"
+    placeholder="Escribe proveedor"
+    className="w-full bg-transparent px-2 pr-4 py-2 text-black border border-gray-300 focus:border-primary focus:outline-none dark:text-white dark:border-gray-600 dark:focus:border-primary xl:w-125 rounded-xl"
+    value={searchTermNombre}
+    ref={inputRef} // Asigna la referencia al input
+    onChange={handleInputChangenombre} // Maneja cambios en el input
+  />
+)}
+
+
+
+{selectedOptionEstados === "codigo" && (
+  <input
+    type="text"
+    placeholder="Escribe código"
+    className="w-full bg-transparent px-2 pr-4 py-2 text-black border border-gray-300 focus:border-primary focus:outline-none dark:text-white dark:border-gray-600 dark:focus:border-primary xl:w-125 rounded-xl"
+    value={searchTerm}
+    ref={inputRef} // Asigna la referencia al input
+    onChange={handleInputChange} // Maneja cambios en el input
+  />
+)}
+
+  <svg
+    className="absolute right-0 top-1/2 -translate-y-1/2 fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary  mr-3"
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M9.16666 3.33332C5.945 3.33332 3.33332 5.945 3.33332 9.16666C3.33332 12.3883 5.945 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.945 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
+    />
+  </svg>
+
+
+          </div>
+          </div>
               
+          
+            
+
+
+          {/* Botón Nueva Venta */}
+          <button
+            onClick={openModal}
+            className="flex items-center px-4 py-2 bg-blue-800 text-white rounded hover:bg-blue-700 hover:text-white 
+                      sm:w-auto w-full text-center"
+          >
+            <MdAdd className="h-5 w-5 mr-2" />
+            Nuevo
+          </button>
+          
+        
+
+          </div>
+        </div>
+
+
+      {/*<div className="max-w-full overflow-x-auto"> aqui*/} 
+
+        <div
+        
+      >
+          <table className="w-full table-auto">
+
+            <thead>
+              <tr className="bg-gray-2 text-left dark:bg-meta-4" >
+                <th className="min-w-[150px] py-2 px-4 font-medium text-black dark:text-white xl:pl-11 ">
+                  Código
+                </th>
               
-              <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
-                Atención
-              </th>
-              <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
-                Dias
-              </th>
-              
-              
-              <th className="py-2 px-4 font-medium text-black dark:text-white">
-                Acción
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-          {filteredFacturaVen.map((proveedorDataItem, key) => (
-                <tr
-                key={key}
-                className={`${
-                  activeRow === key
-                    ? "bg-blue-200 dark:bg-blue-600" // Fila activa
-                    : "hover:bg-gray-100 dark:hover:bg-gray-600"
-                }`}
-              
-              >
-                <td className="border-b border-[#eee] py-2 px-4 pl-9 dark:border-strokedark xl:pl-11"
+                <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
+                  Proveedor
+                </th>
                 
-                onClick={() => {
-                  setActiveRow(key); // Activar fila al hacer clic
-                  openModalDetallleProveedor(proveedorDataItem); // Abrir modal
-                }}
+                
+                <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
+                  Atención
+                </th>
+                <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
+                  Dias
+                </th>
+                
+                
+                <th className="py-2 px-4 font-medium text-black dark:text-white">
+                  Acción
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+            {filteredFacturaVen.map((proveedorDataItem, key) => (
+                  <tr
+                  key={key}
+                  className={`${
+                    activeRow === key
+                      ? "bg-blue-200 dark:bg-blue-600" // Fila activa
+                      : "hover:bg-gray-100 dark:hover:bg-gray-600"
+                  }`}
+                
                 >
+                  <td className="border-b border-[#eee] py-2 px-4 pl-9 dark:border-strokedark xl:pl-11"
+                  
+                  onClick={() => {
+                    setActiveRow(key); // Activar fila al hacer clic
+                    openModalDetallleProveedor(proveedorDataItem); // Abrir modal
+                  }}
+                  >
+                    <span className="font-medium text-black dark:text-white">
+                      {proveedorDataItem.codigoProveedor}
+                    </span>
+                  
+                  </td>
+                  <td className="border-b border-[#eee] py-2  px-4 dark:border-strokedark"
+                  
+                  onClick={() => {
+                    setActiveRow(key); // Activar fila al hacer clic
+                    openModalDetallleProveedor(proveedorDataItem); // Abrir modal
+                  }}
+                  >
                   <span className="font-medium text-black dark:text-white">
-                    {proveedorDataItem.codigoProveedor}
-                  </span>
+                      {proveedorDataItem.nombre}
+                    </span>
+                  </td>
                 
-                </td>
+                
                 <td className="border-b border-[#eee] py-2  px-4 dark:border-strokedark"
                 
                 onClick={() => {
@@ -1390,38 +2092,25 @@ const guardarClienteProveedor = () => {
                   openModalDetallleProveedor(proveedorDataItem); // Abrir modal
                 }}
                 >
-                <span className="font-medium text-black dark:text-white">
-                    {proveedorDataItem.nombre}
-                  </span>
-                </td>
-               
-              
-              <td className="border-b border-[#eee] py-2  px-4 dark:border-strokedark"
-              
-              onClick={() => {
-                setActiveRow(key); // Activar fila al hacer clic
-                openModalDetallleProveedor(proveedorDataItem); // Abrir modal
-              }}
-              >
-                <span className="font-medium text-black dark:text-white">
-                    {proveedorDataItem.atencion}
-                  </span>
-                </td>
-                 
-              <td className="border-b border-[#eee] py-2  px-4 dark:border-strokedark"
-              
-              onClick={() => {
-                setActiveRow(key); // Activar fila al hacer clic
-                openModalDetallleProveedor(proveedorDataItem); // Abrir modal
-              }}
-              >
-                <span className="font-medium text-black dark:text-white">
-                    {proveedorDataItem.ndias}
-                  </span>
-                </td>
-               
-              
-          
+                  <span className="font-medium text-black dark:text-white">
+                      {proveedorDataItem.atencion}
+                    </span>
+                  </td>
+                  
+                <td className="border-b border-[#eee] py-2  px-4 dark:border-strokedark"
+                
+                onClick={() => {
+                  setActiveRow(key); // Activar fila al hacer clic
+                  openModalDetallleProveedor(proveedorDataItem); // Abrir modal
+                }}
+                >
+                  <span className="font-medium text-black dark:text-white">
+                      {proveedorDataItem.ndias}
+                    </span>
+                  </td>
+                
+                
+            
 
 
                
@@ -1459,34 +2148,31 @@ const guardarClienteProveedor = () => {
           </tbody>
         </table>
         {/* Paginación */}
-        <div className="flex items-center justify-between mt-1 border-gray-200 text-left dark:border-strokedark px-4 py-3 sm:px-6">
+        <div className="flex items-start justify-between mt-1 border-gray-200 text-left dark:border-strokedark ">
   <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
     
-      <p className="text-sm text-gray-700 dark:text-white">
-        {" "}
-        <span className="font-medium">{currentPage * pageSize + 1}</span> al{" "}
-        <span className="font-medium">
-          {Math.min((currentPage + 1) * pageSize, proveedorData.length)}
-        </span>{" "}
-        de <span className="font-medium">{totalElementos}</span> 
-      </p>
-   
-
     <div className="flex justify-start   ">
    
-    <p className="px-0 py-2 w-full sm:w-40 text-start text-md sm:text-md font-bold   ">
-      F4 = Incorporar
+    <p className="px-0 py-2 w-full sm:w-30 text-start text-sm sm:text-sm font-bold   ">
+      F8 Incorporar
     </p>
-    <p className="px-0 py-2 w-full sm:w-40 text-start text-md sm:text-md font-bold ">
-      F10 = Datos
+    <p className="px-0 py-2 w-full sm:w-30 text-start text-sm sm:text-sm font-bold   ">
+      F9 Modificar
     </p>
-    <p className="px-0 py-2 w-full sm:w-40 text-start text-md sm:text-md font-bold ">
-      F11 = Costos
+    <p className="px-0 py-2 w-full sm:w-30 text-start text-sm sm:text-sm font-bold   ">
+      F6 Eliminar
     </p>
-    <p className="px-0 py-2 w-full sm:w-40 text-start text-md sm:text-md font-bold ">
-      F3 = Enfocar
+    <p className="px-0 py-2 w-full sm:w-30 text-start text-sm sm:text-sm font-bold ">
+      F10 Datos
+    </p>
+    <p className="px-0 py-2 w-full sm:w-30 text-start text-sm sm:text-sm font-bold ">
+      F11 Costos
+    </p>
+    <p className="px-0 py-2 w-full sm:w-30 text-start text-sm sm:text-sm font-bold ">
+      F3 Enfocar
     </p>
   </div>
+
     <div>
       <nav aria-label="Pagination" className="inline-flex -space-x-px rounded-md shadow-sm">
         {/* Botón Previous */}
@@ -1534,7 +2220,21 @@ const guardarClienteProveedor = () => {
       </nav>
     </div>
   </div>
+
+ 
 </div>
+
+<div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+    
+    <p className="text-sm text-gray-700 dark:text-white">
+      {" "}
+      <span className="font-medium">{currentPage * pageSize + 1}</span> al{" "}
+      <span className="font-medium">
+        {Math.min((currentPage + 1) * pageSize, proveedorData.length)}
+      </span>{" "}
+      de <span className="font-medium">{totalElementos}</span> 
+    </p>
+    </div>
 
 
         
@@ -1646,7 +2346,12 @@ const guardarClienteProveedor = () => {
   <div className="flex flex-col sm:flex-row justify-end gap-2 w-full">
     <button
       className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
-      onClick={guardarProveedor}
+      onClick={(e) => {
+        e.preventDefault(); // Evitar el comportamiento predeterminado
+        e.stopPropagation(); // Detener propagación del evento
+        guardarProveedor(); // Lógica del botón
+      }}
+     
     >
       Guardar
     </button>
@@ -2072,7 +2777,13 @@ const guardarClienteProveedor = () => {
   {selectedCostosItem.flete ? (
     <button
       className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
-      onClick={guardarCostoProveedor}
+      
+
+      onClick={(e) => {
+        e.preventDefault(); // Evitar el comportamiento predeterminado
+        e.stopPropagation(); // Detener propagación del evento
+        guardarCostoProveedor(); // Lógica del botón
+      }}
     >
       Actualizar
     </button>
@@ -2081,7 +2792,13 @@ const guardarClienteProveedor = () => {
 
 <button
       className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
-      onClick={guardarCostoProveedor}
+     
+    
+      onClick={(e) => {
+        e.preventDefault(); // Evitar el comportamiento predeterminado
+        e.stopPropagation(); // Detener propagación del evento
+        guardarCostoProveedor(); // Lógica del botón
+      }}
     >
       Guardar
     </button>
@@ -2165,7 +2882,7 @@ const guardarClienteProveedor = () => {
             onClick={handleCancelClickCliente} // Cancela la edición
           >
             <MdEdit className="text-sm" />
-            <span className='pl-2'>Cancelar</span>
+            <span className='pl-2'>No modificar</span>
           </button>
         )}
 
@@ -2184,9 +2901,12 @@ const guardarClienteProveedor = () => {
          {/* DATOS CLIENTE NUEVO */}
          
          {!selectedClienteItem.direccion ? (
+
+<div className="mb-4 flex flex-col  w-full">
+
     <div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
   {/* Código */}
-  <div className="flex flex-col w-full sm:w-1/4 relative">
+  <div className="flex flex-col w-full sm:w-1/3 relative">
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       Dirección
     </label>
@@ -2216,7 +2936,7 @@ const guardarClienteProveedor = () => {
   </div>
 
   {/* Fono  */}
-  <div className="flex flex-col w-full sm:w-1/4 relative">
+  <div className="flex flex-col w-full sm:w-1/3 relative">
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       Fono
     </label>
@@ -2247,37 +2967,7 @@ const guardarClienteProveedor = () => {
   </div>
 
 
-
-  {/* Nombre */}
-  <div className="flex flex-col w-full sm:w-1/4 relative">
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-      Ciudad
-    </label>
-    <input
-      type="text"
-      placeholder="ANTOFAGAST"
-      className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-        ${
-          isTouchedCiudad && (!ciudad )
-            ? "border-red-500 focus:ring-red-500"
-            : isTouchedCiudad && ciudad 
-            ?"border-gray-300 dark:border-gray-600"
-            : "border-gray-300 dark:border-gray-600"
-        }`}
-      value={ciudad}
-      onChange={handleCiudadChange}
-      
-      onBlur={handleBlurCiudad}
-      required
-   />
-    {/* Mostrar el mensaje de error si el campo está vacío o el correo no es válido */}
-    {isTouchedCiudad && !ciudad &&  (
-        <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
-         *La ciudad es obligatorio.
-        </span>
-      )}
-      
-  </div>
+   {/* CORREO */}
   <div className="flex flex-col w-full sm:w-1/3 relative">
   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
     Correo
@@ -2313,23 +3003,154 @@ const guardarClienteProveedor = () => {
     </span>
   )}
 </div>
+</div>
 
 
+<div className=" my-3 flex flex-row space-x-4 w-full"
+>
+  <div className="relative w-full flex justify-center items-center">
+    {/* Línea con texto en el centro */}
+    <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2">
+      <hr className="border-t dark:border-gray-600 border-gray-300" />
+    </div>
+    <p className="px-2 text-1xl font-bold bg-white dark:bg-gray-800 dark:text-white relative z-10">
+     Ubicación
+    </p>
+  </div>
+</div>
 
 
+ {/* NUEBA FILA */}
+
+ <div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+
+
+  {/* REGION */}
+  <div className="flex flex-col w-full sm:w-1/2 relative">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Region
+      </label>
+      <input
+        type="text"
+        placeholder="Escribe para filtrar"
+        className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border ${
+         
+          isTouchedRegion && !region?
+           "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"
+        }`}
+        value={region}
+        onChange={handleRegionChange}
+        //onFocus={handleFocusRegion}
+        onFocus={() =>
+          setFilteredOptionsR(
+            RegionesYcomunas.regiones.map((r) => r.NombreRegion)
+          )
+        }
+       // onBlur={() => setTimeout(() => setFilteredOptionsR([]), 150)}
+        onBlur={handleBlurRegion}
+        onKeyDown={handleKeyDownRegion}
+        required
+      />
+       {isTouchedRegion && !region && (
+    <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
+      *Seleciona una region
+    </span>
+  )}
+
+      {filteredOptionsR.length > 0 && (
+        <ul
+          ref={listRef} // Referencia al contenedor de la lista
+          className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]"
+        >
+          {filteredOptionsR.map((option, index) => (
+            <li
+              ref={(el) => (optionRefs.current[index] = el!)} // Asigna la referencia a cada elemento
+              key={index}
+              className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 ${
+                selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
+              }`}
+              onMouseDown={() => handleOptionClick(option)} // Evitar conflicto con onBlur
+            >
+              <span>{option}</span>
+              {selectedIndex === index && <MdCheck className="text-green-500" />}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+
+  {/* COMUNAS  */}
+  <div className="flex flex-col w-full sm:w-1/2 relative">
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    Comuna
+  </label>
+  <input
+    type="text"
+    placeholder="Escribe para filtrar"
+    className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border ${
+      isTouchedComuna && !comuna
+        ? "border-red-500 focus:ring-red-500"
+        : "border-gray-300 dark:border-gray-600"
+    }`}
+    value={comuna}
+    onChange={handleComunaChange}
+    onBlur={handleBlurComuna}
+    onFocus={handleFocusComuna} // Mostrar lista al enfocar
+    onKeyDown={handleKeyDownComuna}
+    required
+  />
+  {isTouchedComuna && !comuna && (
+    <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
+      *Escribe inicial de comuna y selecciona
+    </span>
+  )}
+
+  {/* Lista de opciones filtradas */}
+  {filteredOptionsC.length > 0 && (
+    <ul
+    ref={listRefC} // Referencia al contenedor de la lista
+      className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]"
+    >
+      {filteredOptionsC.map((option, index) => (
+        <li
+        ref={(el) => (optionRefsC.current[index] = el!)} // Asigna la referencia a cada elemento
+          key={index}
+          className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 ${
+            selectedIndexC === index ? "bg-gray-200 dark:bg-gray-600" : ""
+          }`}
+          onMouseDown={() => handleOptionClickC(option)} // Usar onMouseDown para evitar conflicto con onBlur
+        >
+         
+          <span>{option}</span>
+               
+          {selectedIndexC === index && <MdCheck className="text-green-500" />}
+              
+            
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+
+  
+ 
 
 
 </div>
+
+</div>
+
 
 
 
    
   ) : (
     
-
+<div className="mb-4 flex flex-col  w-full">
    <div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
   {/* CLIENTE MODIFICAR */}
-  <div className="flex flex-col w-full sm:w-1/4 relative">
+  <div className="flex flex-col w-full sm:w-1/3 relative">
    {/* Botón dinámico */}
   
 
@@ -2368,7 +3189,7 @@ const guardarClienteProveedor = () => {
   </div>
 
   {/* Fono */}
-  <div className="flex flex-col w-full sm:w-1/4 relative">
+  <div className="flex flex-col w-full sm:w-1/3 relative">
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       Fono
     </label>
@@ -2406,43 +3227,6 @@ const guardarClienteProveedor = () => {
 
 
 
-  {/* Ciudad */}
-  <div className="flex flex-col w-full sm:w-1/4 relative">
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-      Ciudad
-    </label>
-    {isEditingCliente ? (
-    <input
-      type="text"
-      placeholder="ANTOFAGAST"
-      className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-        ${
-          isTouchedCiudad && (!ciudad )
-            ? "border-red-500 focus:ring-red-500"
-            : isTouchedCiudad && ciudad 
-            ?"border-gray-300 dark:border-gray-600"
-            : "border-gray-300 dark:border-gray-600"
-        }`}
-      value={ciudad}
-      onChange={handleCiudadChange}
-      
-      onBlur={handleBlurCiudad}
-      required
-   />
-  ) : (
-    <p className='w-full py-2'>
-          {selectedClienteItem.ciudad}
-        </p>
-    )}
-
-    {/* Mostrar el mensaje de error si el campo está vacío o el correo no es válido */}
-    {isTouchedCiudad && !ciudad &&  (
-        <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
-         *La ciudad es obligatorio.
-        </span>
-      )}
-      
-  </div>
 
 
    {/* CORREO */}
@@ -2488,12 +3272,150 @@ const guardarClienteProveedor = () => {
 </div>
 
 
+</div>
 
 
+<div className=" my-3 flex flex-row space-x-4 w-full"
+>
+  <div className="relative w-full flex justify-center items-center">
+    {/* Línea con texto en el centro */}
+    <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2">
+      <hr className="border-t dark:border-gray-600 border-gray-300" />
+    </div>
+    <p className="px-2 text-1xl font-bold bg-white dark:bg-gray-800 dark:text-white relative z-10">
+     Ubicación
+    </p>
+  </div>
+</div>
+<div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+
+
+  {/* REGION */}
+  <div className="flex flex-col w-full sm:w-1/2 relative">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Region
+      </label>
+      {isEditingCliente ? (
+      <input
+        type="text"
+        placeholder="Escribe para filtrar"
+        className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border ${
+         
+          isTouchedRegion && !region?
+           "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"
+        }`}
+        value={region}
+        onChange={handleRegionChange}
+        //onFocus={handleFocusRegion}
+        onFocus={() =>
+          setFilteredOptionsR(
+            RegionesYcomunas.regiones.map((r) => r.NombreRegion)
+          )
+        }
+       // onBlur={() => setTimeout(() => setFilteredOptionsR([]), 150)}
+        onBlur={handleBlurRegion}
+        onKeyDown={handleKeyDownRegion}
+        required
+      />
+    ) : (
+      <p className='w-full py-2'>
+            {selectedClienteItem.region}
+          </p>
+      )}
+       {isTouchedRegion && !region && (
+    <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
+      *Seleciona una region
+    </span>
+  )}
+
+      {filteredOptionsR.length > 0 && (
+        <ul
+          ref={listRef} // Referencia al contenedor de la lista
+          className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]"
+        >
+          {filteredOptionsR.map((option, index) => (
+            <li
+              ref={(el) => (optionRefs.current[index] = el!)} // Asigna la referencia a cada elemento
+              key={index}
+              className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 ${
+                selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
+              }`}
+              onMouseDown={() => handleOptionClick(option)} // Evitar conflicto con onBlur
+            >
+              <span>{option}</span>
+              {selectedIndex === index && <MdCheck className="text-green-500" />}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+
+  {/* COMUNAS  */}
+  <div className="flex flex-col w-full sm:w-1/2 relative">
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    Comuna
+  </label>
+  {isEditingCliente ? (
+  <input
+    type="text"
+    placeholder="Escribe para filtrar"
+    className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border ${
+      isTouchedComuna && !comuna
+        ? "border-red-500 focus:ring-red-500"
+        : "border-gray-300 dark:border-gray-600"
+    }`}
+    value={comuna}
+    onChange={handleComunaChange}
+    onBlur={handleBlurComuna}
+    onFocus={handleFocusComuna} // Mostrar lista al enfocar
+    onKeyDown={handleKeyDownComuna}
+    required
+  />
+) : (
+  <p className='w-full py-2'>
+        {selectedClienteItem.comuna}
+      </p>
+  )}
+  {isTouchedComuna && !comuna && (
+    <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
+      *Escribe inicial de comuna y selecciona
+    </span>
+  )}
+
+  {/* Lista de opciones filtradas */}
+  {filteredOptionsC.length > 0 && (
+    <ul
+    ref={listRefC} // Referencia al contenedor de la lista
+      className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]"
+    >
+      {filteredOptionsC.map((option, index) => (
+        <li
+        ref={(el) => (optionRefsC.current[index] = el!)} // Asigna la referencia a cada elemento
+          key={index}
+          className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 ${
+            selectedIndexC === index ? "bg-gray-200 dark:bg-gray-600" : ""
+          }`}
+          onMouseDown={() => handleOptionClickC(option)} // Usar onMouseDown para evitar conflicto con onBlur
+        >
+         
+          <span>{option}</span>
+               
+          {selectedIndexC === index && <MdCheck className="text-green-500" />}
+              
+            
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+
+  
+ 
 
 
 </div>
-
+</div>
 )}
  
 
@@ -2502,14 +3424,15 @@ const guardarClienteProveedor = () => {
 
 
            {/* Separador */}
-<div className="mb-4 flex flex-row space-x-4 w-full">
+<div className="mb-4 flex flex-row space-x-4 w-full"
+>
   <div className="relative w-full flex justify-center items-center">
     {/* Línea con texto en el centro */}
     <div className="absolute left-0 right-0 top-1/2 transform -translate-y-1/2">
       <hr className="border-t dark:border-gray-600 border-gray-300" />
     </div>
     <p className="px-2 text-1xl font-bold bg-white dark:bg-gray-800 dark:text-white relative z-10">
-      Antecedentes del vendedor
+      Contacto del vendedor
     </p>
   </div>
 </div>
@@ -2708,10 +3631,17 @@ const guardarClienteProveedor = () => {
   <div className="flex flex-col sm:flex-row justify-end gap-2 w-full">
     
   {selectedClienteItem.direccion ? (
+    
     <button
       className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
-      onClick={guardarClienteProveedor}
-    >
+     
+   
+      onClick={(e) => {
+        e.preventDefault(); // Evitar el comportamiento predeterminado
+         e.stopPropagation(); // Detener propagación del evento
+        guardarClienteProveedor();
+      }}
+   >
       Actualizar
     </button>
 
@@ -2719,7 +3649,12 @@ const guardarClienteProveedor = () => {
 
 <button
       className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
-      onClick={guardarClienteProveedor}
+      onClick={(e) => {
+        e.preventDefault(); // Evitar el comportamiento predeterminado
+         e.stopPropagation(); // Detener propagación del evento
+        guardarClienteProveedor();
+      }}
+      
     >
       Guardar
     </button>
@@ -2763,21 +3698,66 @@ const guardarClienteProveedor = () => {
 </button>
 
 
-
-
-
-
-
-           
+         
  {/* Separador */}
 <hr className="border-t dark:border-gray-600 border-gray-300 my-4 mx-auto"/>
 
   
 
 <div className="mb-1 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-2 w-full">
-<div className="flex flex-row w-full sm:w-full relative items-start justify-start space-x-2">
+  
+<div className="flex flex-row w-full sm:w-full relative items-center justify-between">
+  {/* Div de Nombre con 80% */}
+  <div className="flex flex-row  w-full items-center space-x-2 flex-[8]">
   <p className="font-bold">Nombre :</p>
-  <p>{selectedDetalleItem.nombre}</p>
+  {isEditingClienteD ? (
+    <input
+      type="text"
+     
+      className={`w-80 px-3 py-0 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
+        ${
+          isTouchedNombre && (!nombre )
+            ? "border-red-500 focus:ring-red-500"
+            : isTouchedNombre && nombre
+            ?"border-gray-300 dark:border-gray-600"
+            : "border-gray-300 dark:border-gray-600"
+        }`}
+    value={nombre}
+    onChange={handleNombreDetalleChange}
+
+      onBlur={handleBlurNombreDetalle}
+      required
+   />
+      ) : (
+        <>
+       
+        <p>{selectedDetalleItem.nombre}</p>
+        </>
+    )}
+
+  </div>
+
+  {/* Div de botones con 20% */}
+  <div className="w-full flex-[2] flex justify-end">
+    {!isEditingClienteD ? (
+       <button
+       className="flex items-center  "
+       onClick={handleEditClickClienteD} // Activa el modo de edición aquiiii
+     >
+       <MdEdit className="text-sm" />
+        <span>Modificar</span>
+        
+     </button>
+   ) : (
+     <button
+       className="flex items-center py-2 px-4 "
+       onClick={handleCancelClickClienteD} // Cancela la edición
+     >
+       <MdEdit className="text-sm" />
+       <span>No modificar</span>
+     </button>
+    )}
+  </div>
 </div>
 
     
@@ -2785,8 +3765,33 @@ const guardarClienteProveedor = () => {
 </div>
 <div className="mb-1 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-2 w-full">
 <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-4">
-  <p className="font-bold ">Codigo :</p>
-  <p className=''>{selectedDetalleItem.codigoProveedor}</p>
+  <p className="font-bold ">Codigo:</p>
+  
+
+  {isEditingClienteD ? (
+    <input
+      type="text"
+     
+      className={`w-100  px-3 py-0 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
+        ${
+          isTouchedCodigo && (!codigo )
+            ? "border-red-500 focus:ring-red-500"
+            : isTouchedCodigo && codigo
+            ?"border-gray-300 dark:border-gray-600"
+            : "border-gray-300 dark:border-gray-600"
+        }`}
+    value={codigo}
+    onChange={handleCodigoDetalleChange}
+
+      onBlur={handleBlurCodigoDetalle}
+      required
+   />
+      ) : (
+        <>
+       
+       <p className=''>{selectedDetalleItem.codigoProveedor}</p>
+        </>
+    )}
 </div>
 
     <div className="flex flex-row w-full sm:w-1/2 relative items-end justify-end space-x-4">
@@ -2831,19 +3836,6 @@ const guardarClienteProveedor = () => {
 </div>
 
 
-<div className="mb-1 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
-
-    <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
-  <p className="font-bold">Ciudad :</p>
-  <p>{selectedDetalleItem.ciudad ? selectedDetalleItem.ciudad : "No registrado"}</p>
-</div>
-
-<div className="flex flex-col w-full sm:w-1/2 relative">
-    
-    </div>
-
-      
-</div>
 
 <div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
 
@@ -2952,7 +3944,11 @@ const guardarClienteProveedor = () => {
   
    
     <p className="px-0 py-2 w-full text-start text-md sm:text-md font-bold">
-      F3 = Anterior
+      F3 Anterior
+    </p>
+
+    <p className="px-0 py-2 w-full text-start text-md sm:text-md font-bold">
+      F5 Modificar
     </p>
     
 
@@ -2964,6 +3960,13 @@ const guardarClienteProveedor = () => {
 
   {/* Segundo div: Botones Guardar y Anterior */}
   <div className="flex flex-col sm:flex-row justify-end gap-2 w-full">
+  <button
+      className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
+      onClick={guardarDetalleProveedor}
+    >
+      Actualizar
+    </button>
+
    
     <button
   onClick={closeModalDetalle}
