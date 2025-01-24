@@ -3,6 +3,7 @@ import com.codigo.qdigital.solicitudMercaderia.aggregates.request.ProductoReques
 import com.codigo.qdigital.solicitudMercaderia.aggregates.response.ResponseBase;
 import com.codigo.qdigital.solicitudMercaderia.service.ProductoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -40,6 +41,13 @@ public class ProductoController {
     public ResponseBase deleteProducto(@PathVariable Long id) {
         // Llamada al servicio para eliminar el producto
         return productoService.delete(id);
+    }
+
+
+    @GetMapping("/buscaridproveedor/{idProveedor}")
+    public ResponseEntity<ResponseBase> buscarPorProveedores(@PathVariable Long idProveedor) {
+        ResponseBase response = productoService.findProductoByIdProveedor(idProveedor);
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
 

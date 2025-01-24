@@ -1,12 +1,9 @@
 import { Mercaderia } from '../../types/SolicitudMercaderia';
-import { MdArrowBack, MdArrowForward } from 'react-icons/md';
-
+import { MdArrowBack, MdArrowForward,MdArrowDropDown } from 'react-icons/md';
 import React, { useState, useEffect ,useRef} from 'react';
-import { MdAdd,MdCleaningServices } from 'react-icons/md';
+import { MdAdd} from 'react-icons/md';
 import { Producto } from '../../types/Producto';
-
 import {  DetalleSolicitudMercaderia } from '../../types/DetalleSolicitudMercaderia';
-import { Cliente } from '../../types/Cliente';
 import Swal from 'sweetalert2';
 import axios from "axios";
 import { Proveedor } from '../../types/Proveedor';
@@ -37,14 +34,7 @@ interface OptionProveedor {
 
 }
 
-// Nueva interfaz para los atributos que mencionas
-interface ProductoPrueba {
-  codigo: string;
-  producto: string;
-  scs: string; // Si es un número, usa "number". Si es texto, usa "string".
-  reposicion: string; // Si representa un valor verdadero/falso.
-}
-//end proveedoir
+
 
 
 interface ProductoSeleccionado {
@@ -56,22 +46,50 @@ interface ProductoSeleccionado {
 
 }
 
-interface ProveedorSeleccionado {
-  value: number,
-  text: string,
-  codigo:string,
-  selected: boolean,
-  direccion:string,
 
 
+// Define el tipo de las opciones
+interface ProveedorOption {
+  label: JSX.Element | string; // Código subrayado
+  value: number; // ID único del proveedor
 }
-//END SELECT
 
+interface ProveedorOptionNombre {
+  label: JSX.Element | string; // Nombre subrayado
+  value: number; // ID único del proveedor
+}
 
 
 const StockMercaderia = () => {
 
-  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const [filteredOptionsProveedorCodigo, setFilteredOptionsProveedorCodigo] = useState<ProveedorOption[]>([]); // Ahora el estado 
+  const [filteredOptionsProveedorNombre, setFilteredOptionsProveedorNombre] = useState<ProveedorOptionNombre[]>([]);
+
+
+  const [selectedProveedor, setSelectedProveedor] = useState<ProveedorOption | null>(null); // Objeto del proveedor seleccionado
+
+ // const [selectedProveedor, setSelectedProveedor] = useState<ProveedorSeleccionado[]>([]); // Productos s
+//PROVEEDORRS
+
+  
+const listRef = useRef<HTMLUListElement>(null);
+const optionRefs = useRef<HTMLLIElement[]>([]);
+
+//datos proveedor
+const [proveedorNombre, setProveedorNombre] = useState<string>("");
+const [proveedorCodigo, setProveedorCodigo] = useState<string>("");
+
+
+ // Estado para el índice de la opción seleccionada en la lista
+ const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+
+
+    const [selectedOptionEstadosProveedor, setSelectedOptionEstadosProveedor] = useState("codigo"); 
+
+    const [selectedOptionEstadosProducto, setSelectedOptionEstadosProducto] = useState("codigo"); 
+
+    const [searchTerm, setSearchTerm] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
   const [showModalVer, setShowModalver] = useState(false);
  
@@ -86,132 +104,49 @@ const StockMercaderia = () => {
  const [transitioning, setTransitioning] = useState(false); // Para controlar el estado de la transición
  const [selectedItem, setSelectedItem] = useState<Mercaderia | null>(null); // Aquí se asegura que `selectedItem` sea de tipo `Mercaderia`
  
-  const [proveedorNuevo, setProveedorNuevo] = useState(""); // Estado para manejar el valor del input
-  const [productoNuevo, setProductoNuevo] = useState(""); // Estado para manejar el valor del input
-  const [clienteNuevo, setClienteNuevo] = useState(""); // Estado para manejar el valor del input
-const [inputMostrarProveedor, setInputMostrarProveedor] = useState(""); // Texto de búsqueda
+
+//inputs
+ // const [searchTerm, setSearchTerm] = useState<string>("");
+ const debounceTimeout = useRef<NodeJS.Timeout | null>(null); // Referencia para el temporizador
+
+  const [searchTermNombreProducto, setSearchTermnombreProducto] = useState<string>("");
+  const [searchTermCodigoProducto, setSearchTermCodigoProducto] = useState<string>("");
+
+  // const [searchTermNombre, setSearchTermnombre] = useState<string>("");
 
 
-//PRUEBA
+  //select de input proveedor
+  const selectRef = useRef<HTMLSelectElement | null>(null);
 
-  // Estado con los valores iniciales
-  const [productoPrueba, setProductoPrueba] = useState<ProductoPrueba[]>(
-    [
+  const handleClick = () => {
+    // Dar foco al select cuando se hace clic en el icono o en el select
+    selectRef.current?.focus();
+  };
 
-      {
-        codigo: "5215001",
-        producto: "ESPIRAL 06 mm        24 HJS.",
-        scs: "24",
-        reposicion: "Descontinuado",
-      },
-      {
-        codigo: "5215002",
-        producto: "ESPIRAL 10 mm        45 HJS.",
-        scs: "14",
-        reposicion: "Descontinuado",
-      }
-      ,
-      {
-        codigo: "5215003",
-        producto: "ESPIRAL 12 mm        60 HJS.",
-        scs: "12",
-        reposicion: "Descontinuado",
-      }
-      ,
-      {
-        codigo: "5215004",
-        producto: "ESPIRAL 14 mm        80 HJS.",
-        scs: "8",
-        reposicion: "Automático",
-      }
-      ,
-      {
-        codigo: "5215005",
-        producto: "ESPIRAL 18 mm        125 HJS.",
-        scs: "30",
-        reposicion: "Descontinuado",
-      }
-      ,
-      {
-        codigo: "5215006",
-        producto: "ESPIRAL 23 mm        155 HJS.",
-        scs: "7",
-        reposicion: "Descontinuado",
-      }
-      ,
-      {
-        codigo: "7890003",
-        producto: "ESFERA PLUMA VIT  2,5 cms",
-        scs: "9",
-        reposicion: "Automático",
-      }
-      ,
-      {
-        codigo: "7890004",
-        producto: "ESFERA PLUMA VIT  3,5 cms",
-        scs: "48",
-        reposicion: "Automático",
-      },
-      {
-        codigo: "7890005",
-        producto: "ESFERA PLUMA VIT  5,0 cms",
-        scs: "7",
-        reposicion: "Descontinuado",
-      },
-      {
-        codigo: "7890006",
-        producto: "ESFERA PLUMA VIT  7,0 cms",
-        scs: "4",
-        reposicion: "Descontinuado",
-      },
-      {
-        codigo: "78900037",
-        producto: "ESFERA PLUMA VIT 10,0 cms",
-        scs: "2",
-        reposicion: "Automático",
-      },
 
-      
-    ]
-    
-);
+//LIMPIA CUANDO CAMBIA EL SELECT PARA BUSCAR
+const handleSelectChangeProducto = (e) => {
+  setSelectedOptionEstadosProducto(e.target.value);
 
+  // Limpia los valores de los inputs al cambiar la opción
+  if (e.target.value === "codigo") {
+    setSearchTermnombreProducto(""); // Limpia el valor de nombre
+  //  fetchProveedor(currentPage, 7); 
+  
+   
+  } else if (e.target.value === "nombre") {
+    setSearchTermCodigoProducto(""); // Limpia el valor de código
+  //  fetchProveedor(currentPage, 7);  
+  }
+};
+
+
+ 
   //transicion de modal
    const inputRef = useRef<HTMLInputElement>(null); // Referencia al input con el tipo correcto
 
-   const handleResetInputs = () => {
-    setProductoNuevo(""); // Reinicia el valor del input de producto
-    setProveedorNuevo(""); // Reinicia el valor del input de proveedor
-    setCantidadInicial(1); // Reinicia la cantidad a 1
-    setClienteNombreCompleto(""); // Reinicia el valor del input del cliente
-    setObservacion(""); // Reinicia el valor del input de observación
-    setSearch(""); // Reinicia el valor del input de búsqueda del producto
-    setSearchproveedor(""); // Reinicia el valor del input de búsqueda del proveedor
-  };
-  
- const items = [
-  { id: 1, title: 'Back End Developer', department: 'Engineering', type: 'Full-time', location: 'Remote' },
-  { id: 2, title: 'Front End Developer', department: 'Engineering', type: 'Full-time', location: 'Remote' },
-  { id: 3, title: 'User Interface Designer', department: 'Design', type: 'Full-time', location: 'Remote' },
-]
 
-const mostrarColumnasParaCliente = () => {
-  return (
-    tipoSolicitudSeleccionado === 1 && tipoOperacionSeleccionado === 3 // Mercaderia especial
- 
-  );
-};
 
-const mostrarColumnasParaTradicional = () => {
-  return (
-    tipoSolicitudSeleccionado === 1 && tipoOperacionSeleccionado === 2 // Mercaderia especial
-  );
-};
-const mostrarColumnasParaProductoNuevo = () => {
-  return (
-    tipoSolicitudSeleccionado === 1 && tipoOperacionSeleccionado === 1 // Mercaderia especial
-  );
-};
 
 useEffect(() => {
   if (
@@ -231,139 +166,20 @@ useEffect(() => {
  const pageSize = 9 ;  // Puedes cambiar el tamaño de página aquí
  const [totalElementos, setTotalElements] = useState(0);
 
-  // Función para obtener los datos desde el API
-  const fetchMercaderia = async (page: number, size: number) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/solicitud/solicitudes?page=${page}&size=${size}`
-      );
-      console.log("Solicitud mercaderia de hoy:", response);  // Muestra toda la respuesta
-  
-      if (response.status === 200 && response.data) {
-        // Mapeamos los datos obtenidos de la API para ajustarlos a las interfaces
-        const mappedData: Mercaderia[] = response.data.data.content.map((item: any) => ({
-          nSolicitud: item.nSolicitud,
-          tSolicitud: item.tSolicitud,
-          tOperacion: item.tOperacion,
-          estado: item.estado,
-          fecha: item.fecha,
-          guia: item.guia,
-          responsable: item.responsable,
-          detalleMercaderia: item.detalles.map((detalle: any) => ({
-            id: detalle.id,
-            productoNuevo: detalle.producto || "",
-            nombreNuevo: detalle.nombre,
-            cantidad: detalle.cantidad,
-            marca: detalle.marca || "",
-            cliente: detalle.cliente || "",
-            observ: detalle.observ || "",
-            fComprom: detalle.fComprom || "",
-            proveedorNuevo: detalle.proveedor || "",
-            nCompra: detalle.nCompra || "",
-            productoExistente: detalle.productoExistente || null,
-          })),
-        }));
-  
-        // Actualizamos el estado con los datos mapeados
-        setMercaderiaData(mappedData);
-        // Guardamos la información de paginación
-        //setTotalElements(response.data.totalElements);
-        setTotalElements(response.data.data.totalElements); // Aquí puede estar el error
-
-        setTotalPages(response.data.data.totalPages);
-        setCurrentPage(response.data.data.currentPage);
-      }
-    } catch (error) {
-      console.error("Error al obtener los datos de mercadería:", error);
-    }
-  };
-  
+ 
  // useEffect(()=>{
    // console.log("valor de elementos"+totalElementos)
 
-  //}),([totalElementos]) 
-
-  // Efecto para llamar a la API al montar el componente
-    // Efecto para llamar a la API al montar el componente
-    useEffect(() => {
-      // Llamar a fetchMercaderia con los parámetros adecuados
-      fetchMercaderia(currentPage, 7); // Asegúrate de pasar el page y size correctos
-    }, [currentPage]); // El useEffect se ejecuta cuando `currentPage` cambia
 
  // Estado para almacenar los productos obtenidos
  const [productos, setProductos] = useState<Producto[]>([]);
 
    // Función para cargar productos desde la API
 
-   // Función para cargar productos desde la API
-const loadProductos = async () => {
-  try {
-    console.log("Realizando solicitud a la API...");
-    const response = await axios.get("http://localhost:8080/api/productos");
-    console.log("Respuesta completa de la API:", response); // Muestra toda la respuesta para depuración
+  
+  
+  
 
-    // Si la respuesta tiene los productos dentro de response.data.data
-    setProductos(response.data.data || []); // Actualiza el estado con los productos
-  } catch (error) {
-    console.error("Error al obtener productos:", error);
-  }
-};
-
-  useEffect(() => {
-    loadProductos();
-   
-  }, []);
-
-  // useEffect para imprimir los productos cuando se actualizan
-useEffect(() => {
-  console.log("Productos actualizados:", productos);
-}, [productos]);
-  
-  
-  
-     // Función para manejar el cambio del valor en el input
-     //OBSERVACION
-     const handleInputChangeObservacion = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setObservacion(e.target.value); // Actualiza el estado con el valor actual
-      
-    };
-    //PRODUCTO
-    const handleInputChangeProductoNuevo = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setProductoNuevo(e.target.value); // Actualiza el estado con el valor actual
-  
-    }
-    //PROVEEDOR
-    const handleInputChangeProveedorNuevo = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setProveedorNuevo(e.target.value); // Actualiza el estado con el valor actual
-  
-    }
-//CLIENTE
-    const handleInputChangeClienteNuevo = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setClienteNuevo(e.target.value); // Actualiza el estado con el valor actual
-  
-    }
-    
-      
-    const handleInputChangeCliente = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const valor = e.target.value;
-      setClienteNombreCompleto(valor); // Actualiza el estado del nombre completo del cliente
-    
-      // Actualiza el cliente en el estado `selectedCliente`
-      setSelectCliente((prevCliente) => {
-        if (prevCliente.length === 0) {
-          return [{ id: null, nombreCompleto: valor }]; // Si no hay cliente, inicializa con un cliente sin ID
-        }
-    
-        // Si hay cliente seleccionado, actualiza solo el nombre
-        return prevCliente.map((cliente) => {
-          return { ...cliente, nombreCompleto: valor }; // Solo se actualiza el nombre
-        });
-      });
-    
-      console.log("Valor actual del input:", valor); // Verifica si el valor del input se actualiza correctamente
-    };
-    
-    
     
 
   // Cargar productos cuando el componente se monta
@@ -371,140 +187,9 @@ useEffect(() => {
   const [selectedMercaderia, setSelectedMercaderia] = useState<Mercaderia | null>(mercaderiaData[0] || null);
   
   //SELECT PRODUCTO
- // Aquí evitamos que `productos` cause problemas antes de ser asignado
- const initialData = {
-  options: productos.length > 0
-    ? productos.map((producto) => ({
-        value: producto.producto, // Asignamos el código del producto como valor
-        text: producto.nombre, // El nombre del producto como texto
-        selected: false // Puedes cambiar esta lógica según sea necesario
-      }))
-    : []
-};
 
 
-  // Crear un nuevo objeto de solicitud
-  const guardarMercaderia = () => { 
-    if(productoNuevo.length>0 || proveedorNuevo.length>0){
-      return;
-    }
-    if (!tipoSolicitudSeleccionado || !tipoOperacionSeleccionado) {
-      Swal.fire({
-        title: "Error",
-        text: "Por favor selecciona el tipo de solicitud y operación.",
-        icon: "error",
-        confirmButtonText: "Entendido",
-      });
-      return;
-    }
-  
-
-    if (!detalleMercaderiaFront || detalleMercaderiaFront.length === 0) {
-      Swal.fire({
-        title: "Error",
-        text: "No hay detalles de mercadería para guardar.",
-        icon: "error",
-        confirmButtonText: "Entendido",
-      });
-      return;
-    }
-   
-  
-    // Mostrar confirmación antes de guardar
-    Swal.fire({
-      title: "¿Deseas guardar la solicitud?",
-      text: "Se guardará la solicitud de mercadería con los detalles actuales.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Sí, guardar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-
-      if (result.isConfirmed) {
-        // Crear un nuevo objeto de solicitud
-          // Mapear los valores numéricos seleccionados a los códigos correspondientes
-          const tipoSolicitudMap: { [key: number]: string } = {
-            1: "C", // Compra de mercadería
-            2: "R", // Reposición desde bodega
-          };
-          
-          const tipoOperacionMap: { [key: number]: string } = {
-            1: "P", // Producto nuevo
-            2: "T", // Tradicional
-            3: "E", // Especial
-          };
-          
-        // Crear la nueva solicitud
-        const nuevaSolicitud = {
-          tSolicitud: tipoSolicitudMap[tipoSolicitudSeleccionado], // Asignar dinámicamente
-          tOperacion: tipoOperacionMap[tipoOperacionSeleccionado], // Asignar dinámicamente
-          estado: "A", // Estado por defecto
-          detalles: detalleMercaderiaFront.map((item) => ({
-            cantidad: item.cantidad,
-            marca: item.marca || " ", // Asignar "Sin marca" si está vacío
-            cliente: item.cliente || " ", // Asignar "Sin cliente" si está vacío
-            observ: item.observ || " ", // Asignar "Sin observaciones" si está vacío
-            fComprom: item.fComprom || null, // Si no hay fecha, dejar como null
-            proveedor: item.proveedorNuevo || " ", // Verificar que proveedorNuevo esté presente
-            nCompra: item.nCompra || " ", // Si no hay número de compra, asignar valor por defecto
-            idproductoExistente: item.productoExistente?.id  || null, // Asignar productoExistente si tiene id
-            producto: item.productoNuevo || null, // Asignar productoNuevo si existe
-          })),  
-        };
-  
-        // Agregar la nueva solicitud al arreglo de mercadería
-      //  mercaderiaData.push(nuevaSolicitud);
-  
-        console.log("Mercadería guardada:", nuevaSolicitud);
-
-        
-  
-        // Mostrar mensaje de éxito
-        axios.post('http://localhost:8080/api/solicitud', nuevaSolicitud)
-        .then((response) => {
-          console.log('Respuesta del servidor:', response.data);
-          Swal.fire({
-            title: "¡Guardado!",
-            text: "La solicitud de mercadería se guardó correctamente.",
-            icon: "success",
-            confirmButtonText: "OK",
-          });
-  
-          // Limpiar el estado de detalleMercaderia
-          setDetalleMercaderiaFront([]);
-          setTipoSolicitudSeleccionado(0);
-          setTipoOperacionSeleccionado(0);
-          setCantidadInicial(0);
-          setClienteNuevo("");
-          setProductoNuevo("");
-          setProveedorNuevo("");
-        
-
-          fetchMercaderia(currentPage, 7); // Llama a la función con la página actual y
-
-        })  
-        .catch((error) => {
-          console.error("Error al guardar la solicitud:", error);
-          Swal.fire({
-            title: "¡Error!",
-            text: "Hubo un problema al guardar la solicitud.",
-            icon: "error",
-            confirmButtonText: "OK",
-          });
-        });
-      }
-      
-      else {
-        Swal.fire({
-          title: "Cancelado",
-          text: "No se guardó la solicitud de mercadería.",
-          icon: "info",
-          confirmButtonText: "OK",
-        });
-      }
-    });
-  };
-
+ 
   const getPageNumbers = (totalPages: number, currentPage: number): (number | string)[] => {
     const maxMiddlePages = 4; // Número de páginas en el medio
     const firstPage = 1;
@@ -599,38 +284,10 @@ useEffect(() => {
        window.removeEventListener("keydown", handleKeyDown);
      };
    }, [showModal]);
+
 //ABRIR EL MODAL
 
- const showAlert = () => {
-  Swal.fire({
-    title: '¡Hola!',
-    text: 'Esta es una alerta de prueba.',
-    icon: 'success',
-    confirmButtonText: 'Aceptar'
-  });
-};
 
-const showSaveAlert = () => {
-  Swal.fire({
-    title: '¿Guardar cambios?',
-    text: '¿Estás seguro de que deseas guardar los cambios?',
-    icon: 'question',
-    showCancelButton: true, // Botón para cancelar
-    confirmButtonColor: '#28a745', // Color para "Guardar"
-    cancelButtonColor: '#d33', // Color para "Cancelar"
-    confirmButtonText: 'Sí, guardar',
-    cancelButtonText: 'Cancelar',
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Lógica cuando el usuario confirma
-      Swal.fire(
-        '¡Guardado!',
-        'Los cambios han sido guardados correctamente.',
-        'success'
-      );
-    }
-  });
-};
 
 const showDeleteAlert = () => {
   Swal.fire({
@@ -665,30 +322,6 @@ useEffect(() => {
 }, [tipoSolicitudSeleccionado, tipoOperacionSeleccionado]);
 
 
- //END PONER EN CERO
-
- const mostrarProveedor = () => {
- 
-  return (
-    (tipoSolicitudSeleccionado === 1 && tipoOperacionSeleccionado === 1) || // Caso 1: Mercaderia nueva
-    (tipoSolicitudSeleccionado === 1 && tipoOperacionSeleccionado === 2)   // Caso 2: Mercaderia tradicional
-    
-  );
-};
-
-
-
-const mostrarCliente = () => {
-  return (
-    tipoSolicitudSeleccionado === 1 && tipoOperacionSeleccionado === 3 // Mercaderia especial
-  );
-};
-
-const mostrarObservaciones = () => {
-  return (
-    tipoSolicitudSeleccionado === 1 && tipoOperacionSeleccionado === 1 // Mercaderia nueva
-  );
-};
 
 
 
@@ -703,14 +336,12 @@ const [selected, setSelected] = useState<number | null>(null); // Índice selecc
 
 const [search, setSearch] = useState(""); // Texto de búsqueda
 const [searchcodigo, setSearchcodigo] = useState(""); // Texto de búsqueda
-const [serchpro, setSearchpro] = useState(""); // Texto de búsqueda
 
 const [searchproveedor, setSearchproveedor] = useState(""); // Texto de búsqueda
 
 const [show, setShow] = useState(false); // Controlar visibilidad del dropdown
 const [selectedProducts, setSelectedProducts] = useState<ProductoSeleccionado[]>([]); // Productos seleccionados
-const [selectedProveedor, setSelectedProveedor] = useState<ProveedorSeleccionado[]>([]); // Productos seleccionados
-const [selectedCliente, setSelectCliente] = useState<Cliente[]>([]); // Arreglo vacío como predeterminado
+//eleccionados
 
 
 const dropdownRef = useRef<HTMLDivElement>(null);
@@ -723,41 +354,11 @@ const [detalleMercaderiaFront, setDetalleMercaderiaFront] = useState<DetalleSoli
 const [dropdownOpen, setDropdownOpen] = useState(false); // Estado para controlar la visibilidad del dropdown
 const [dropdownOpenNombre, setDropdownOpenNombre] = useState(false); // Estado para controlar la visibilidad del dropdown
 
-const [dropdownOpenProveedor, setdropdownOpenProveedor] = useState(false); // Estado para controlar la visibilidad del dropdown
 
   // Usando useState para almacenar la cantidad inicial
   const [cantidadInicial, setCantidadInicial] = useState<number>(1); // El valor inicial es 0
 
-  //VALOR INICIAL DE CANTIDAD
-
-  const [observacion, setObservacion] = useState(""); // Estado para manejar el valor del input
-
-  const [clienteNombreCompleto, setClienteNombreCompleto] = useState(""); // Estado para manejar el valor del input
-
-
-  //LIMPIAR CAM´PO PROVEEDOR
-
-  const handleClearSearchProveedor= () =>{
-    setSearchproveedor("");
-  }
-  //LIMPIAR AMBOS CAMPOS.
-  const handleClearSearch = () => {
-    setSearch('');       // Limpiar el valor de la búsqueda por nombre
-    setSearchcodigo(''); // Limpiar el valor de la búsqueda por código
-  };
-  
-
-  
-  // Función para actualizar la cantidad inicial (por ejemplo, al incrementar o decrementar)
-  const updateCantidadInicial = (operation: "increase" | "decrease") => {
-    setCantidadInicial((prevCantidad) => {
-      if (operation === "increase") {
-        return prevCantidad + 1; // Aumenta la cantidad en 1
-      } else {
-        return Math.max(0, prevCantidad - 1); // Disminuye la cantidad, pero no permite valores negativos
-      }
-    });
-  };
+ 
 
 
    // Función para manejar el cambio del valor en el input
@@ -775,27 +376,7 @@ const [dropdownOpenProveedor, setdropdownOpenProveedor] = useState(false); // Es
       setDropdownOpenNombre(false);
     }
   }, [selectedProducts]); // Asegúrate de no necesitar `setSearch` aquí, ya que lo actualizarás directamente
-  
 
-const handleSelect = (index: number) => {
-  select(index); // Selecciona el producto
-  //setDropdownOpen(false); // Cierra el dropdown después de seleccionar
-  const selectedOption = filteredOptions[index];
-  setSearch(selectedOption.text); // Asigna el nombre
-  setSearchcodigo(selectedOption.value); // Asigna el código
-  setSearchpro(selectedOption.text);
-
-  setDropdownOpen(false); // Cierra el dropdown después de la selección
-  setDropdownOpenNombre(false);
-};
-
-  // Cuando el usuario empieza a escribir, mostramos el dropdown
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-   setDropdownOpen(true); // Muestra el dropdown al escribir
-    setDropdownOpenNombre(true)
-  };
- 
   //CANCELAR
 
   const closeModal = () => {
@@ -828,57 +409,8 @@ const handleSelect = (index: number) => {
   setCantidadInicial(1); // Restablece el valor de cantidadInicial al valor inicial
   };
 
-
-
-const selectByProveedor = (index: number) => {
-  console.log("valor selecioando")
-  const realIndex = optionsProveedor.findIndex(
-    (option) => option.value === filteredOptionsProveedor[index].value
-  );
-  setSelected(realIndex);
-  setShow(false); // Cerrar el dropdown
-
-  const selectedOption = optionsProveedor[realIndex];
-  const newProveedor = {
-    value: selectedOption.value,
-    text: selectedOption.text,
-    selected: false,
-    codigo: selectedOption.codigo,
-    direccion: selectedOption.direccion,
-    
-   
-   
-  };
-
-
-  setSelectedProveedor((prevProveedor) => {
-    const productExists = prevProveedor.some(
-      (proveedor) => proveedor.value === newProveedor.value
-    );
-    return productExists ? prevProveedor : [...prevProveedor, newProveedor];
-  });
-// Actualiza el valor del input con el texto del proveedor seleccionado
-
-setSearchproveedor(
-  `${selectedOption.text} ${selectedOption.codigo} `
-);
-
- 
-  setdropdownOpenProveedor(false);
-};
-
-
-
 //END PROVEEDOR
 
-// Cargar opciones desde el objeto inicial
-// Verifica cómo está estructurada tu data
-useEffect(() => {
-  const dbOptions: Option[] = initialData.options;
-  console.log(dbOptions);  // Verifica los datos que se están cargando
-  setOptions(dbOptions);
-  setFilteredOptions(dbOptions);
-}, []);
 
 
 // Filtrar opciones según el texto de búsqueda
@@ -893,14 +425,6 @@ useEffect(() => {
 
 //BUSCAR OIR CODIGO
 
-// Cargar opciones desde el objeto inicial
-useEffect(() => {
- 
-  const dbOptions: Option[] = initialData.options;
-  
-  setOptions(dbOptions);
-  setFilteredOptionscodigo(dbOptions);
-}, []);
 
 //
 useEffect(() => {
@@ -916,85 +440,11 @@ useEffect(() => {
 }, [searchproveedor, optionsProveedor]);
 
 
-// Función para manejar el cambio en el input de búsqueda por código
-const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-  setSearchcodigo(value);
-  console.log("Nuevo valor de búsqueda:", value);
-};
-
-// Función para manejar el cambio en el input de búsqueda por código
-const handleSearchChangeProvedor = (e: React.ChangeEvent<HTMLInputElement>) => {
- 
-  const value = e.target.value;
-  setSearchproveedor(value);
-  setdropdownOpenProveedor(true)
-};
-
-
-useEffect(() => {
-  const filtered = productos.filter(producto => {
-    console.log("Filtrando producto:", producto);
-    return producto.producto?.toLowerCase().includes(searchcodigo.toLowerCase());
-  }).map(producto => ({
-    value: producto.producto,
-    text: `${producto.producto} - ${producto.nombre}`,
-    selected: false
-  }));
-  console.log("Buscando con productos:", productos);
-
-  console.log("estas filtrado:", filtered);
-  setFilteredOptionscodigo(filtered);
-  setDropdownOpen(filtered.length > 0); // Abrir solo si hay opciones filtradas
-}, [searchcodigo, productos]);
 
 
 
 
-  // Manejar la selección de un producto
-  const handleSelectProduct = (selectedOption: Option) => {
-    const selectedProduct = productos.find(producto => producto.producto === selectedOption.value);
-    
-    if (selectedProduct) {
-      // Asegúrate de que 'proveedor' y 'nombre' existen
-      const proveedorNombre = selectedProduct.proveedor?.nombre || "Proveedor no disponible"; // Valor por defecto
-  
-      // Crea un objeto 'proveedor' completo con valores por defecto para los campos faltantes
-      const proveedor: Proveedor = {
-        idProveedores: selectedProduct.proveedor?.idProveedores ?? 0,
-        codigoProveedor: selectedProduct.proveedor?.codigoProveedor ?? "",
-        nombre: proveedorNombre, // Asigna el nombre del proveedor
-        direccion: selectedProduct.proveedor?.direccion ?? "",
-        fono1: selectedProduct.proveedor?.fono1 ?? "",
-        ciudad: selectedProduct.proveedor?.ciudad ?? "",
-        atencion: selectedProduct.proveedor?.atencion ?? "",
-        celuVenta: selectedProduct.proveedor?.celuVenta ?? "",
-        ciudadVen: selectedProduct.proveedor?.ciudadVen ?? "",
-        adminProveedor: selectedProduct.proveedor?.adminProveedor ?? 0,
-        perdida: selectedProduct.proveedor?.perdida ?? 0,
-        flete: selectedProduct.proveedor?.flete ?? 0,
-        condPago: selectedProduct.proveedor?.condPago ?? 0,
-        docto: selectedProduct.proveedor?.docto ?? 0,
-        chAdj: selectedProduct.proveedor?.chAdj ?? "",
-      };
-  
-      // Actualiza los estados
-      setSelectedProducts([
-        {
 
-          id:selectedProduct.id,
-          code: selectedProduct.producto,
-          name: selectedProduct.nombre,
-          provee: proveedor, // Asigna el objeto completo de 'proveedor'
-        }
-      ]);
-  
-      setSearchcodigo(selectedProduct.producto); // Actualiza el input con el código seleccionado
-      setSearchpro(proveedorNombre); // Establece el nombre del proveedor (si disponible)
-      setDropdownOpen(false); // Cierra el dropdown
-    }
-  };
-  
 
 // Filtrar opciones según el texto de búsqueda
 useEffect(() => {
@@ -1006,131 +456,6 @@ useEffect(() => {
 }, [search, options]);
 
 // end CODIGO
-
-
-  
-const agregarDetalleMercaderia = () => {
-  const productoSeleccionado = selectedProducts[0];
-  // const proveedorSeleccionado = selectedProveedor[0];
- 
-  setDetalleMercaderiaFront((prev) => {
-    const updated = [...prev];
-
-    // Verifica si el código del producto está vacío
-    if (!productoSeleccionado?.code) {
-
-      if(productoNuevo.length>0  ){
- // Si el código es vacío o undefined, agrega un nuevo registro sin hacer la búsqueda
- const newId =
- updated.length > 0
-   ? Math.max(...updated.map((item) => item.id)) + 1 // Genera un nuevo ID
-   : 1;
-
-updated.push({
- id: newId,
- productoNuevo: productoNuevo,
- cantidad: cantidadInicial,
- marca: "",
- cliente: clienteNuevo ?? "Sin cliente", // Convierte null a "Sin cliente"
- observ: observacion,
- fComprom: "2024-12-25", // Ajusta la fecha según tu lógica
- proveedorNuevo: proveedorNuevo, // Ajusta este valor según tu lógica
- nCompra: "",
- productoExistente: {
-   id: 0, // Valor predeterminado
-   codProv: "", // Valor predeterminado
-   stockLib: 0, // Valor predeterminado
-   cantidad: 0, // Valor predeterminado
-   producto: "", // Si el código está vacío, se asigna una cadena vacía
-   nombre: "", // Si el nombre está vacío, se asigna una cadena vacía
-   stDic2023: 0,
-   compras: 0,
-   ventas: 0,
-   stAbr2024: 0,
- },
-});
-
-return updated; // Regresa el estado actualizado si no se hace búsqueda
-      }
-      return prev; 
-     
-    }
-   
-    if(productoSeleccionado.name.length>0){
- // Si el código no está vacío, busca el producto existente
- const existingIndexProducto = updated.findIndex(
-  (d) => d.productoExistente.producto === productoSeleccionado.code
-);
-
-if (existingIndexProducto !== -1) {
-  // Si el producto ya existe, incrementar la cantidad
-  updated[existingIndexProducto] = {
-    ...updated[existingIndexProducto],
-    cantidad: updated[existingIndexProducto].cantidad + cantidadInicial, // Incrementar cantidad
-  };
-} else {
-  // Si no existe, agrega un nuevo registro
-  const newId =
-    updated.length > 0
-      ? Math.max(...updated.map((item) => item.id)) + 1
-      : 1;
-
-  updated.push({
-    id: newId,
-    productoNuevo: productoNuevo,
-    cantidad: cantidadInicial,
-    marca: "",
-    cliente: clienteNuevo ?? "Sin cliente", // Convierte null a "Sin cliente"
-    observ: observacion,
-    fComprom: "2024-12-25",
-    proveedorNuevo: proveedorNuevo,
-    nCompra: "",
-    productoExistente: {
-      id: productoSeleccionado?.id??"",
-      codProv: "",
-      stockLib: 0,
-      cantidad: 0,
-      producto: productoSeleccionado?.code ?? "", // Si 'code' es vacío, asigna ""
-      nombre: productoSeleccionado?.name ?? "", // Si 'name' es vacío, asigna ""
-      stDic2023: 0,
-      compras: 0,
-      ventas: 0,
-      stAbr2024: 0,
-      proveedor: productoSeleccionado?.provee??"",  // Asigna el objeto completo de proveedor
-      
-    },
-  });
-}
-
-return updated;
-
-    }
-    return prev; 
-   
- // Regresa el estado actualizado
-  });
-
-  // Limpiar los valores después de agregar a la tabla
-  setSelectedProducts([]); // Limpia los productos seleccionados
-  setSelectedProveedor([]); // Limpia los proveedores seleccionados
-  setSearchcodigo(""); // Limpiar el input de búsqueda de código
-  setSearchproveedor(""); // Limpiar el input de búsqueda de proveedor
-  setSearch(""); // Limpiar el input de búsqueda general
-  setCantidadInicial(1); // Restablece el valor de cantidadInicial
-  setObservacion(""); // Limpia la observación
-  setSelectCliente([]); // Limpia los clientes seleccionados
-  setProductoNuevo("");
-  setProveedorNuevo("");
-  setClienteNuevo("");
-
-  // Limpiar el input del cliente
-  setClienteNombreCompleto(""); // Limpiar el valor del input del cliente
-
-    // Enfocar el input de observaciones después de agregar
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-};
 
 
 
@@ -1153,63 +478,8 @@ useEffect(() => {
 
 
 
-const select = (index: number) => {
-  const realIndex = options.findIndex(
-    (option) => option.text === filteredOptions[index].text
-  );
-  setSelected(realIndex);
-  setSearch(""); // Limpiar el input de búsqueda
-  setShow(false); // Cerrar el dropdown
-
-  // Agregar el producto seleccionado a la lista
-  const selectedOption = options[realIndex];
-  const newProduct = {
-    code: selectedOption.value,
-    name: selectedOption.text,
-    
-   
-  };
-
-  // Verificar si el producto ya está en la lista de seleccionados
-  setSelectedProducts((prevProducts) => {
-    const productExists = prevProducts.some(
-      (product) => product.code === newProduct.code
-    );
-    if (productExists) {
-      return prevProducts;
-    } else {
-      return [...prevProducts, newProduct];
-    }
-  });
-};
 
 
-
-// Función para aumentar o disminuir la cantidad de un producto
-const updateQuantity = (id: number, operation: "increase" | "decrease") => {
-  console.log("aqui estan");
-  setDetalleMercaderiaFront((detalleMercaderia) => {
-    return detalleMercaderiaFront.map((mercaderia) =>
-      mercaderia.id === id
-        ? {
-            ...mercaderia,
-            cantidad:
-              operation === "increase"
-                ? mercaderia.cantidad + 1
-                : Math.max(1, mercaderia.cantidad - 1), // Asegura que la cantidad no sea menor a 1
-          }
-        : mercaderia
-    );
-  });
-};
-
-
-// Función para eliminar un producto de la lista
-const removeProduct = (id: number) => {
-  setDetalleMercaderiaFront((prevMercaderia) =>
-    prevMercaderia.filter((mercaderia) => mercaderia.id !== id)
-  );
-};
 
 
 // Cerrar el dropdown al hacer clic fuera
@@ -1254,20 +524,10 @@ useEffect(() => {
     factura.nSolicitud.toString().includes(searchTerm)
   );
 
-  const filteredFacturaVenPrueba = productoPrueba.filter((factura) =>
-    factura.codigo.toString().includes(searchTerm)
-  );
  
-  // Definimos el tipo de la propiedad de la solicitud y operación para el estado.
-type MercaderiaSol = {
-  tipoSolicitud: string;
-  tipoOperacion: string;
-};
-
-  const [newMercaderiaSolu, setNewMercaderiaSolu] = useState<MercaderiaSol>({
-    tipoSolicitud: "",
-    tipoOperacion: "",
-  });
+ 
+ 
+ 
 
   
   
@@ -1280,7 +540,7 @@ type MercaderiaSol = {
     const filteredByName = options.filter((option) =>
       option.text.toLowerCase().includes(search.toLowerCase())
     );
-    console.log("filtrando nombre"+filteredByName);
+    console.log("filtrando nombre aqui"+filteredByName);
   
     const filteredByCode = options.filter((option) =>
       option.value.toLowerCase().includes(searchcodigo.toLowerCase())
@@ -1323,396 +583,258 @@ type MercaderiaSol = {
     
   };
 
-  const mostrarColumnas = () => {
- 
-    if (tipoSolicitudSeleccionado && tipoOperacionSeleccionado) {
-   // Si tipoSolicitud es 1
-   return (
-     <>
-      <table className="min-w-full table-auto border-collapse">
-    <thead className="bg-gray-100 dark:bg-gray-700">
-      <tr>
-      {( mostrarColumnasParaTradicional() || mostrarColumnasParaCliente())  && <th className="px-1 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">CodigoTradicional</th>}
-      {( mostrarColumnasParaTradicional() || mostrarColumnasParaCliente()) &&   <th className="px-1 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">ProductoTradicional</th>}
- 
-      { mostrarColumnasParaProductoNuevo()  &&   <th className="px-1 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">ProductoNuevo</th>}
- 
-      { mostrarColumnasParaProductoNuevo()  &&  <th className="px-1 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">ProveedorNuevo</th>}
- 
-        <th className="px-1 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">Cantidad</th>
-       
-     { mostrarColumnasParaTradicional()  &&  <th className="px-1 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">ProveedorTradicional</th>}
-     {mostrarColumnasParaCliente()  && <th className="px-1 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">Cliente</th> }
-        
-       {mostrarObservaciones()  && <th className="px-1 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">Observaciones</th> }
-        <th className=" py-2  text-sm font-medium text-gray-700 dark:text-white w-15">
-  <span className="flex justify-center items-center">
-    Acciones
-  </span>
- </th>
- 
-      </tr>
-    </thead>
-    <tbody>
 
-  {detalleMercaderiaFront.length > 0 ? (
-    detalleMercaderiaFront.map((mercaderia, index) => (
-      <tr key={index} className="hover:bg-gray-100 dark:hover:bg-gray-600">
-            {( mostrarColumnasParaTradicional() || mostrarColumnasParaCliente())  &&  <td className="px-4 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">{mercaderia.productoExistente.producto}</td>}
-            {( mostrarColumnasParaTradicional() || mostrarColumnasParaCliente())  &&  <td className="px-4 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">{mercaderia.productoExistente.nombre}</td>}
-            { mostrarColumnasParaProductoNuevo() && <td className="px-4 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">{mercaderia.productoNuevo}</td>}
-         
-        {mostrarColumnasParaProductoNuevo()&& <td className="px-4 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">{mercaderia.proveedorNuevo}  </td>}
-       
-        <td className="px-4 py-2 text-sm text-gray-700 dark:text-white">
-          <div className="flex items-center">
-            <button
-              onClick={() => updateQuantity(mercaderia.id, "decrease")}
-              className="px-2 py-1 bg-gray-200 text-sm rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-            >
-              -
-            </button>
-            <span className="mx-2 w-6 text-center" >{mercaderia.cantidad}</span>
-            <button
-              onClick={() => updateQuantity(mercaderia.id, "increase")}
-              className="px-2 py-1 bg-gray-200 text-sm rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-            >
-              +
-            </button>
-          </div>
-        </td>
-        
-       
-        { ( mostrarColumnasParaTradicional())&&
-        <td className="px-4 py-2  text-left text-sm font-medium text-gray-700 dark:text-white"> {mercaderia.productoExistente?.proveedor?.nombre} </td>}
-       
-        {mostrarColumnasParaCliente()   &&  <td className="px-4 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">{mercaderia?.cliente}</td>}
-       
-         {/* Mostrar Observaciones solo si la condición es verdadera */}
-         {mostrarColumnasParaProductoNuevo() &&  <td className="px-4 py-2  text-left text-sm font-medium text-gray-700 dark:text-white">{mercaderia.observ}</td>}
-              
- 
-         <td className="py-2 text-sm text-gray-700 dark:text-white">
-   <div className="flex justify-center items-center relative group">
-     <button
-       className="hover:text-[red]"
-       onClick={() => removeProduct(mercaderia.id)}
-     >
-       <svg
-         className="fill-current"
-         width="18"
-         height="18"
-         viewBox="0 0 18 18"
-         fill="none"
-         xmlns="http://www.w3.org/2000/svg"
-       >
-         <path
-           d="M13.7535 2.47502H11.5879V1.9969C11.5879 1.15315 10.9129 0.478149 10.0691 0.478149H7.90352C7.05977 0.478149 6.38477 1.15315 6.38477 1.9969V2.47502H4.21914C3.40352 2.47502 2.72852 3.15002 2.72852 3.96565V4.8094C2.72852 5.42815 3.09414 5.9344 3.62852 6.1594L4.07852 15.4688C4.13477 16.6219 5.09102 17.5219 6.24414 17.5219H11.7004C12.8535 17.5219 13.8098 16.6219 13.866 15.4688L14.3441 6.13127C14.8785 5.90627 15.2441 5.3719 15.2441 4.78127V3.93752C15.2441 3.15002 14.5691 2.47502 13.7535 2.47502ZM7.67852 1.9969C7.67852 1.85627 7.79102 1.74377 7.93164 1.74377H10.0973C10.2379 1.74377 10.3504 1.85627 10.3504 1.9969V2.47502H7.70664V1.9969H7.67852ZM4.02227 3.96565C4.02227 3.85315 4.10664 3.74065 4.24727 3.74065H13.7535C13.866 3.74065 13.9785 3.82502 13.9785 3.96565V4.8094C13.9785 4.9219 13.8941 5.0344 13.7535 5.0344H4.24727C4.13477 5.0344 4.02227 4.95002 4.02227 4.8094V3.96565ZM11.7285 16.2563H6.27227C5.79414 16.2563 5.40039 15.8906 5.37227 15.3844L4.95039 6.2719H13.0785L12.6566 15.3844C12.6004 15.8625 12.2066 16.2563 11.7285 16.2563Z"
-         />
-         <path
-           d="M9.00039 9.11255C8.66289 9.11255 8.35352 9.3938 8.35352 9.75942V13.3313C8.35352 13.6688 8.63477 13.9782 9.00039 13.9782C9.33789 13.9782 9.64727 13.6969 9.64727 13.3313V9.75942C9.64727 9.3938 9.33789 9.11255 9.00039 9.11255Z"
-         />
-         <path
-           d="M11.2502 9.67504C10.8846 9.64692 10.6033 9.90004 10.5752 10.2657L10.4064 12.7407C10.3783 13.0782 10.6314 13.3875 10.9971 13.4157C11.0252 13.4157 11.0252 13.4157 11.0533 13.4157C11.3908 13.4157 11.6721 13.1625 11.6721 12.825L11.8408 10.35C11.8408 9.98442 11.5877 9.70317 11.2502 9.67504Z"
-         />
-         <path
-           d="M6.72245 9.67504C6.38495 9.70317 6.1037 10.0125 6.13182 10.35L6.3287 12.825C6.35683 13.1625 6.63808 13.4157 6.94745 13.4157C6.97558 13.4157 6.97558 13.4157 7.0037 13.4157C7.3412 13.3875 7.62245 13.0782 7.59433 12.7407L7.39745 10.2657C7.39745 9.90004 7.08808 9.64692 6.72245 9.67504Z"
-         />
-       </svg>
-     </button>
- 
-     {/* Tooltip */}
-     <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2">
-       Eliminar
-     </div>
-   </div>
- </td>
- 
- 
-      </tr>
-    ))
-  ) : (
-    <span></span>
-  )}
- 
-  {/* Always show this row at the bottom to add a new product */}
-  <tr >
-  {( mostrarColumnasParaTradicional() || mostrarColumnasParaCliente())  && 
-  <td className=" py-2 text-sm text-gray-700 dark:text-white">
-    <div className="relative w-full">
-        {/* Búsqueda por código */}
-        <input
-          type="text"
-          value={searchcodigo}
-          onChange={handleSearchChange} // Llama a la función cuando el texto cambia
-          placeholder="Código"
-          className="w-full px-3 py-2 border rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white 
-            focus:border-[#acabeb] focus:ring-[rgba(88,_86,_214,.25)] focus:ring-1 focus:outline-none
-            dark:focus:border-[#acabeb] dark:focus:ring-[rgba(88,_86,_214,.25)] dark:focus:ring-1"
-        />
-         {searchcodigo && (
-      <button
-        onClick={handleClearSearch} // Limpiar el valor del input
-        className="absolute right-2 top-2 text-gray-500 dark:text-gray-400 cursor-pointer"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    )}
-        {/* Dropdown para mostrar productos filtrados */}
-        {dropdownOpen && filteredOptionsCodigo.length > 0 && (
-          <div ref={dropdownRef} className="absolute z-10 mt-1 w-full rounded border border-gray-300 bg-white dark:bg-gray-800 shadow-md">
-            <ul className="w-full">
-              {filteredOptionsCodigo.slice(0, 4).map(option => (
-                <li
-                  key={option.value}
-                  onClick={() => handleSelectProduct(option)} // Selecciona el producto
-                  className="cursor-pointer p-2 hover:bg-gray-200 dark:hover:bg-gray-600"
-                >
-                  {option.value}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
- 
-      
-      
-      </td>
-   }
+//FILTAR GENERAL
+const loadProveedorG = async (valor: string, tipo: string) => {
+  try {
+    console.log(`Buscando proveedores por ${tipo}: ${valor}...`);
 
+    const endpoint =
+      tipo === "nombre"
+        ? `http://localhost:8080/api/proveedores/buscarnombre?nombre=${valor}`
+        : `http://localhost:8080/api/proveedores/buscarcodigo?codigo=${valor}`;
 
+    const response = await axios.get(endpoint);
 
+    if (response.status === 200 && response.data && response.data.data) {
+      console.log("Proveedores encontrados:", response.data.data);
 
-    {( mostrarColumnasParaTradicional() || mostrarColumnasParaCliente())  && 
-    <td className="px-4 py-2 text-sm text-gray-700 dark:text-white">
-    <div className="relative w-full"> {/* Contenedor padre para controlar ancho */}
-    <input
-  type="text"
-  value={search}
-  //onChange={(e) => setSearch(e.target.value)} // Actualiza el estado para la búsqueda por nombre
-  onChange={handleInputChange} // Actualiza el estado para la búsqueda por 
-  placeholder="Producto"
-  className="w-full px-3 py-2 border rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white 
-    focus:border-[#acabeb] focus:ring-[rgba(88,_86,_214,.25)] focus:ring-1 focus:outline-none
-    dark:focus:border-[#acabeb] dark:focus:ring-[rgba(88,_86,_214,.25)] dark:focus:ring-1"
- />
- {/* Botón de "x" para limpiar el input, solo se muestra si hay texto */}
- {search && (
-      <button
-        onClick={handleClearSearch} // Limpiar el valor del input
-        className="absolute right-2 top-2 text-gray-500 dark:text-gray-400 cursor-pointer"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    )}
- 
-  {search && dropdownOpenNombre &&(
-    <div
-      ref={dropdownRef}
-      className="absolute z-10 mt-1 w-full rounded border border-gray-300 bg-white dark:bg-gray-800 shadow-md"
-    >
-      <ul className="w-full">
-        {filteredOptions.map((option, index) => (
-          <li
-            key={option.value}
-           // onClick={() => select(index)} // Selects an option
-           onClick={() => handleSelect(index)} // Selecciona una opción
-            className="cursor-pointer p-2 hover:bg-gray-200 dark:hover:bg-gray-600"
-          >
-            {option.text} - {option.value}
-          </li>
-        ))}
-        {filteredOptions.length === 0 && (
-          <li className="p-2 text-sm text-gray-500 dark:text-gray-400">Sin resultados</li>
-        )}
-      </ul>
-    </div>
-  )}
- </div>
- 
- </td>
+      if (tipo === "nombre") {
+        setFilteredOptionsProveedorNombre(
+          response.data.data.map((prov) => ({
+            label: (
+              <span>
+                {prov.codigoProveedor} - <u>{prov.nombre}</u>
+              </span>
+            ),
+            displayText: `${prov.codigoProveedor} - ${prov.nombre}`, // Texto para el input
+            value: prov.idProveedores,
+          }))
+        );
+      } else {
+        setFilteredOptionsProveedorCodigo(
+          response.data.data.map((prov) => ({
+            label: (
+              <span>
+                <u>{prov.codigoProveedor}</u> - {prov.nombre}
+              </span>
+            ),
+            displayText: `${prov.codigoProveedor} - ${prov.nombre}`, // Texto para el input
+            value: prov.idProveedores,
+          }))
+        );
+      }
+    } else {
+      console.warn(`No se encontraron proveedores con el ${tipo} especificado.`);
+      tipo === "nombre"
+        ? setFilteredOptionsProveedorNombre([])
+        : setFilteredOptionsProveedorCodigo([]);
     }
- 
- 
- { mostrarColumnasParaProductoNuevo()  && 
- 
-    <td className="px-1 py-2  text-gray-700 dark:text-white">
-    <div className="relative w-full"> {/* Contenedor padre para controlar ancho */}
-    <input
-  type="text"
-  value={productoNuevo}
-  ref={inputRef} 
-  //onChange={(e) => setSearch(e.target.value)} // Actualiza el estado para la búsqueda por nombre
-  onChange={handleInputChangeProductoNuevo} // Actualiza el estado para la búsqueda por 
-  placeholder="Producto nuevo"
-  className="w-full px-3 py-2  border rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white
-          focus:border-[#acabeb] focus:ring-[rgba(88,_86,_214,.25)] focus:ring-1 focus:outline-none
-          dark:focus:border-[#acabeb] dark:focus:ring-[rgba(88,_86,_214,.25)] dark:focus:ring-1"
- />
- {/* Botón de "x" para limpiar el input, solo se muestra si hay texto */}
- {search && (
-      <button
-        onClick={handleClearSearch} // Limpiar el valor del input
-        className="absolute right-2 top-2 text-gray-500 dark:text-gray-400 cursor-pointer"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    )}
- 
- </div>
- 
- </td>
- 
-   }
- 
- {mostrarColumnasParaProductoNuevo()   && 
- <td className="px-1 py-2 text-center ">
-  <input
-   type="text"
-           value={proveedorNuevo} // Enlaza el input con el estado
-        onChange={handleInputChangeProveedorNuevo} // Llama a la función cada vez que el usuario escribe
- 
-       
-   className="w-full px-3 py-2  border rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white
-          focus:border-[#acabeb] focus:ring-[rgba(88,_86,_214,.25)] focus:ring-1 focus:outline-none
-          dark:focus:border-[#acabeb] dark:focus:ring-[rgba(88,_86,_214,.25)] dark:focus:ring-1"
-    placeholder="proveedor nuevo"
-  />
- </td>}
- 
- <td className=" py-2 text-sm text-gray-700 dark:text-white whitespace-nowrap text-center w-20">
- <div className="inline-flex items-center justify-center gap-1 ">
-   {/* Botón de disminución */}
-   <button
-     onClick={() => updateCantidadInicial("decrease")}
-     className="px-2 py-2 bg-gray-200 text-sm rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-     tabIndex={-1} // Usa -1 como número
-   >
-     -
-   </button>
- 
-   {/* Input de cantidad */}
-   <input
-     value={cantidadInicial} // Vinculamos el input al estado
-     onChange={(e) => setCantidadInicial(Number(e.target.value))} // Permite cambiar la cantidad manualmente
-     size={1}
-     className="w-15 py-2 text-center  border rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white
-          focus:border-[#acabeb] focus:ring-[rgba(88,_86,_214,.25)] focus:ring-1 focus:outline-none
-          dark:focus:border-[#acabeb] dark:focus:ring-[rgba(88,_86,_214,.25)] dark:focus:ring-1 no-arrows"
-     type='number'// Ajusta el ancho del input type
-     min="1" // Establece el valor mínimo permitido en 1
-     onKeyDown={(e) => {
-       if (e.key === "Enter") {
-         agregarDetalleMercaderia();
-       }
-     }}
-   />
- 
-   {/* Botón de incremento */}
-   <button
-     onClick={() => updateCantidadInicial("increase")}
-     className="px-2 py-2 bg-gray-200 text-sm rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-     tabIndex={-1} // Usa -1 como número
-   >
-     +
-   </button>
- </div>
- 
- 
-          </td>
- 
-      
- 
- 
- {(mostrarColumnasParaTradicional())&& <td className="px-1 py-2 text-center">
-  <input
-            value={serchpro}
-  //onChange={(e) => setSearch(e.target.value)} // Actualiza el estado para la búsqueda por nombre
-  //onChange={handleInputChange} // Actualiza el estado para la búsqueda por 
- 
-   className="w-full px-3 py-2  border rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white
-          focus:border-[#acabeb] focus:ring-[rgba(88,_86,_214,.25)] focus:ring-1 focus:outline-none
-          dark:focus:border-[#acabeb] dark:focus:ring-[rgba(88,_86,_214,.25)] dark:focus:ring-1"
-    placeholder="proveedor tradicional"
-    disabled
-  />
- </td>}
-     
-      {mostrarColumnasParaCliente()&& <td className="px-1 py-2 text-center">
-  <input
-           value={clienteNuevo} // Enlaza el input con el estado
-        onChange={handleInputChangeClienteNuevo} // Llama a la función cada vez que el usuario escribe
-   className="w-full px-3 py-2  border rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white
-          focus:border-[#acabeb] focus:ring-[rgba(88,_86,_214,.25)] focus:ring-1 focus:outline-none
-          dark:focus:border-[#acabeb] dark:focus:ring-[rgba(88,_86,_214,.25)] dark:focus:ring-1"
-    placeholder="cliente"
-    onKeyDown={(e) => {
-     if (e.key === "Enter") {
-       agregarDetalleMercaderia();
-     }
-   }}
-  />
- </td>}
-      
- {mostrarColumnasParaProductoNuevo()   && <td className="px-1 py-2 text-center w-40" >
-  <input
-           value={observacion} // Enlaza el input con el estado
-        onChange={handleInputChangeObservacion} // Llama a la función cada vez que el usuario escribe
-        onKeyDown={(e) => {
-         if (e.key === "Enter") {
-           agregarDetalleMercaderia();
-         }
-       }}
-   className="w-full px-3 py-2  border rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white
-          focus:border-[#acabeb] focus:ring-[rgba(88,_86,_214,.25)] focus:ring-1 focus:outline-none
-          dark:focus:border-[#acabeb] dark:focus:ring-[rgba(88,_86,_214,.25)] dark:focus:ring-1"
-    placeholder="Observacion"
-  />
- </td>}
+  } catch (error) {
+    console.error(`Error al obtener proveedores por ${tipo}:`, error.message);
+    tipo === "nombre"
+      ? setFilteredOptionsProveedorNombre([])
+      : setFilteredOptionsProveedorCodigo([]);
+  }
+};
+
+
+const handleInputChangeProveedor = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value.trim();
+  if (selectedOptionEstadosProveedor === "nombre") {
+   
+    setProveedorNombre(value);
+    if (value.length >= 1) {
+      loadProveedorG(value, "nombre");
+    } else {
+      setFilteredOptionsProveedorNombre([]);
+    }
+  } else {
+    setProveedorCodigo(value);
+    if (value.length >= 1) {
+      loadProveedorG(value, "codigo");
+    } else {
+      setFilteredOptionsProveedorCodigo([]);
+    }
+  }
+};
+
+const handleBlurProveedor = () => {
+  setTimeout(() => {
+    setFilteredOptionsProveedorCodigo([]);
+    setFilteredOptionsProveedorNombre([]);
+  }, 150);
+};
+
+
+
+const handleOptionClickProveedor = async (option: any) => {
+  try {
+    if (selectedOptionEstadosProveedor === "nombre") {
+      setProveedorNombre(option.displayText); // Mostrar texto en el input
+      setSelectedProveedor(option);
+      setFilteredOptionsProveedorNombre([]);
+
+      console.log("El ID que está: " + option.value);
+
+      // Realizar la llamada a la API con el ID del proveedor seleccionado
+      const response = await axios.get(
+        `http://localhost:8080/api/productos/buscaridproveedor/${option.value}`
+      );
+      if (response.data.code === 200) {
+        setProductos(response.data.data); // Actualizar el estado con los productos
+      } else {
+        console.warn("No se encontraron productos para este proveedor.");
+      }
+      console.log("productos mieco"+productos)
+    } else {
+      setProveedorCodigo(option.displayText); // Mostrar texto en el input
+      setSelectedProveedor(option);
+      setFilteredOptionsProveedorCodigo([]);
+
+      console.log("El ID que está: " + option.value);
+
+      // Realizar la llamada a la API con el ID del proveedor seleccionado
+      const response = await axios.get(
+        `http://localhost:8080/api/productos/buscaridproveedor/${option.value}`
+      );
+      if (response.data.code === 200) {
+        setProductos(response.data.data); // Actualizar el estado con los productos
+      } else {
+        console.warn("No se encontraron productos para este proveedor.");
+      }
+    }
+  } catch (error) {
+    console.error("Error al obtener los productos:", error);
+  }
+};
+
   
+useEffect(() => {
+  console.log("productos actualizados de ahora -----:", productos);
+}, [productos]);
+
+
+
+const handleKeyDownProveedor = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const isNombre = selectedOptionEstadosProveedor === "nombre";
+  const filteredOptions = isNombre ? filteredOptionsProveedorNombre : filteredOptionsProveedorCodigo;
+
+  if (filteredOptions.length === 0) return; // Si no hay opciones, no hacer nada
+
+  if (e.key === "ArrowDown") {
+    // Mover hacia abajo
+    setSelectedIndex((prevIndex) => {
+      const nextIndex = Math.min(filteredOptions.length - 1, prevIndex + 1);
+      scrollToOption(nextIndex); // Desplazar al nuevo índice
+      return nextIndex;
+    });
+  } else if (e.key === "ArrowUp") {
+    // Mover hacia arriba
+    setSelectedIndex((prevIndex) => {
+      const prevIndexValue = Math.max(0, prevIndex - 1);
+      scrollToOption(prevIndexValue); // Desplazar al nuevo índice
+      return prevIndexValue;
+    });
+  } else if (e.key === "Enter" && selectedIndex >= 0) {
+    // Seleccionar opción con Enter
+    handleOptionClickProveedor(filteredOptions[selectedIndex]);
+  }
+};
+
+const scrollToOption = (index: number) => {
+  if (optionRefs.current[index]) {
+    optionRefs.current[index].scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }
+};
+
+// Reinicia el índice y desplaza al primer elemento al abrir la lista
+useEffect(() => {
+  if (
+    (selectedOptionEstadosProveedor === "nombre" && filteredOptionsProveedorNombre.length > 0) ||
+    (selectedOptionEstadosProveedor !== "nombre" && filteredOptionsProveedorCodigo.length > 0)
+  ) {
+    setSelectedIndex(0); // Reinicia al primer índice
+    scrollToOption(0); // Asegura que la vista comience desde el inicio
+  }
+}, [filteredOptionsProveedorNombre, filteredOptionsProveedorCodigo, selectedOptionEstadosProveedor]);
+
+
+
+    //INPUT BUSCAR NOMBRE NOMBRE--------
+    const handleInputChangenombreProducto= (e: React.ChangeEvent<HTMLInputElement>) => {
+      console.log("aqui")
+      const value = e.target.value.toUpperCase(); // Convierte a mayúsculas
+      const regex = /^[A-Z0-9 _-]*$/; // Permite caracteres válidos
+  
+      if (regex.test(value)) {
+        setSearchTermnombreProducto(value); // Actualiza el término de búsqueda
+  
+        // Si hay un temporizador activo, cancelarlo
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+  
+        // Configurar un nuevo temporizador
+        debounceTimeout.current = setTimeout(() => {
+          if (value.trim() === "") {
+            // Si el campo está vacío, mostrar todos los proveedores
+          //  fetchProveedor(currentPage, 7); // Por ejemplo, 10 resultados por página
+          } else {
+            // Si hay un término de búsqueda, filtrar proveedores
+           // buscarcodigoProveedores(value);
+          }
+        }, 500); // Espera 500 ms antes de ejecutar
+      }
+    };
  
- 
- 
- <td className="py-2 text-sm text-gray-700 dark:text-white">
-   <div className="flex justify-center items-center relative group">
-     <button
-       className="hover:text-green-500 focus:outline-none select-none"
-       onClick={handleResetInputs} // Llama a la función de reinicio al hacer clic
-       tabIndex={-1}
-     >
-       <MdCleaningServices size={20} /> {/* Aquí se usa el ícono de la escoba */}
-     </button>
-     
-     {/* Tooltip */}
-     <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-xs rounded py-1 px-2">
-       Limpiar
-     </div>
-   </div>
- </td>
- 
- 
- 
+
+    //INPUT BUSCAR NOMBRE proveedor
+    const handleInputChangeCodigoProducto= (e: React.ChangeEvent<HTMLInputElement>) => {
+      console.log("aqui")
+      const value = e.target.value.toUpperCase(); // Convierte a mayúsculas
+      const regex = /^[A-Z0-9 _-]*$/; // Permite caracteres válidos
+  
+      if (regex.test(value)) {
+        setSearchTermCodigoProducto(value); // Actualiza el término de búsqueda
+  
+        // Si hay un temporizador activo, cancelarlo
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+  
+        // Configurar un nuevo temporizador
+        debounceTimeout.current = setTimeout(() => {
+          if (value.trim() === "") {
+            // Si el campo está vacío, mostrar todos los proveedores
+          //  fetchProveedor(currentPage, 7); // Por ejemplo, 10 resultados por página
+          } else {
+            // Si hay un término de búsqueda, filtrar proveedores
+           // buscarcodigoProveedores(value);
+          }
+        }, 500); // Espera 500 ms antes de ejecutar
+      }
+    };
+  
     
-  </tr>
- </tbody>
- 
- 
-  </table>
-         </>
-   );
- }
- else{
-   null
- }
- };
- 
+  
+  // Filtrar productos en base al término de búsqueda y el campo seleccionado
+  const filteredProductos = productos.filter((producto) => {
+    if (selectedOptionEstadosProducto === "codigo") {
+      return producto.producto?.toLowerCase().includes(searchTerm.toLowerCase());
+    } else if (selectedOptionEstadosProducto === "nombre") {
+      return producto.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+    return true;
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
   
   
   return (
@@ -1996,21 +1118,159 @@ type MercaderiaSol = {
             >
               ×
             </button>
-  {/* Separador */}
 
-  <div className='mb-2'>
-  <input
-          
+{/* DIV DE BUSCA PROVEEDOR */}
+<div className="px-4 md:px-0 xl:px-0">
+  <div className="flex flex-col md:flex-row items-center w-full"> {/* Cambié flex-row a flex-col en pantallas pequeñas */}
+    {/* Select */}
+    <div className="w-full md:w-1/5 flex flex-row items-center mb-2 md:mb-0"> {/* Aseguramos que en móviles ocupe todo el ancho */}
+      <MdArrowDropDown
+        size={30}
+        className="ml-2 text-gray-600 dark:text-gray-400"
+        onClick={handleClick}
+      />
+  <select
+  id="custom-select"
+  value={selectedOptionEstadosProveedor}
+  onChange={(e) => {
+    const value = e.target.value;
+    setSelectedOptionEstadosProveedor(value);
+
+    // Borra el contenido del input dependiendo de la opción seleccionada
+    if (value === "nombre") {
+      setProveedorCodigo(""); // Limpia el valor de código
+    } else {
+      setProveedorNombre(""); // Limpia el valor de nombre
+    }
+  }}
+  className="w-full appearance-none bg-transparent outline-none transition focus:outline-none dark:bg-form-input"
+>
+  <option value="codigo">Código proveedor</option>
+  <option value="nombre">Nombre proveedor</option>
+</select>
+
+    </div>
+
+    {/* Input */}
+    <div className="flex-grow  w-full relative">
+
+
+    <input
           type="text"
-          placeholder="Escribe código o producto"
-          className="w-full bg-transparent  pr-4 text-black focus:outline-none dark:text-white xl:w-125"
-          value={searchTerm}
-          onChange={handleSearch}
-
-          
-          
+          placeholder={`Escribe el ${
+            selectedOptionEstadosProveedor === "nombre"
+              ? "nombre del proveedor"
+              : "código o nombre del proveedor"
+          }`}
+          className="w-full bg-transparent px-2 pr-10 py-1 text-black border border-gray-300 rounded-r-xl focus:border-primary focus:outline-none dark:text-white dark:border-gray-600 dark:focus:border-primary"
+          value={
+            selectedOptionEstadosProveedor === "nombre"
+              ? proveedorNombre
+              : proveedorCodigo
+          }
+          onChange={handleInputChangeProveedor}
+          onBlur={handleBlurProveedor}
+          onKeyDown={handleKeyDownProveedor}
         />
+
+{/* Lista desplegable */}
+{(selectedOptionEstadosProveedor === "nombre"
+          ? filteredOptionsProveedorNombre.length > 0
+          : filteredOptionsProveedorCodigo.length > 0) && (
+            <ul
+            ref={listRef} // Referencia al contenedor de la lista
+            className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]">
+        
+            {(selectedOptionEstadosProveedor === "nombre"
+              ? filteredOptionsProveedorNombre
+              : filteredOptionsProveedorCodigo
+            ).map((option, index) => (
+                    
+              <li
+                key={index}
+                ref={(el) => (optionRefs.current[index] = el!)}
+                className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 ${
+                  selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
+                }`}
+                onMouseDown={() => handleOptionClickProveedor(option)}
+              >
+                {option.label}
+              </li>
+            ))}
+          </ul>
+          
+        )}
+
+    
+
+           
+      <svg
+        className="absolute right-3 top-1/2 -translate-y-1/2 fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M9.16666 3.33332C5.945 3.33332 3.33332 5.945 3.33332 9.16666C3.33332 12.3883 5.945 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.945 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
+        />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
+        />
+      </svg>
+    </div>
   </div>
+</div>
+
+{/* DIV DE BUSCA PRODUCTO */}
+{/* DIV DE BUSCA PRODUCTO */}
+<div className="py-2 px-4 md:px-0 xl:px-0">
+  <div className="flex flex-col md:flex-row items-center w-full">
+    {/* Select */}
+    <div className="w-full md:w-1/5 flex flex-row items-center mb-4 md:mb-0">
+      <MdArrowDropDown
+        size={30}
+        className="ml-2 text-gray-600 dark:text-gray-400"
+      />
+      <select
+        value={selectedOptionEstadosProducto}
+        onChange={handleSelectChangeProducto}
+        className="w-full appearance-none bg-transparent outline-none transition focus:outline-none dark:bg-form-input"
+      >
+        <option value="codigo" className="text-body dark:text-bodydark">
+          Código producto
+        </option>
+        <option value="nombre" className="text-body dark:text-bodydark">
+          Nombre producto
+        </option>
+      </select>
+    </div>
+
+    {/* Input */}
+          <div className="flex-grow relative w-full">
+            <input
+              type="text"
+              placeholder={
+                selectedOptionEstadosProducto === "codigo"
+                  ? "Escribe código del producto"
+                  : "Escribe nombre del producto"
+              }
+              className="w-full bg-transparent px-2 pr-10 py-1 text-black border border-gray-300 rounded-r-xl focus:border-primary focus:outline-none dark:text-white dark:border-gray-600 dark:focus:border-primary"
+              value={searchTerm}
+              ref={inputRef}
+              onChange={handleInputChange}
+            />
+          </div>
+  </div>
+</div>
+
+
+
 
   <div className="max-w-full overflow-x-auto">
 
@@ -2034,31 +1294,37 @@ type MercaderiaSol = {
     </thead>
 
     <tbody>
-      {filteredFacturaVenPrueba.length > 0 ? (
-        filteredFacturaVenPrueba.map((mercaderiaDataItem, key) => (
-          <tr key={key} className="hover:bg-gray-100 dark:hover:bg-gray-600">
-            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              {mercaderiaDataItem.codigo}
-            </td>
-            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              {mercaderiaDataItem.producto}
-            </td>
-            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              {mercaderiaDataItem.scs}
-            </td>
-            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              {mercaderiaDataItem.reposicion}
-            </td>
-          </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan={4} className="text-center py-2 text-gray-500">
-            No hay registros
-          </td>
-        </tr>
-      )}
-    </tbody>
+    {filteredProductos && filteredProductos.length > 0 ? (
+            filteredProductos.map((producto: any, index: number) => (
+              <tr key={index}>
+                <td className="border-b border-[#eee] py-2 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                  {producto.producto} {/* Código del producto */}
+                </td>
+                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
+                  {producto.nombre} {/* Nombre del producto */}
+                </td>
+                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
+                  {producto.stockLib} {/* Stock disponible */}
+                </td>
+                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
+                  {producto.stock} {/* Stock total */}
+                </td>
+                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark text-right">
+                  <div className="flex justify-end items-center space-x-3.5">
+                    {/* Acciones */}
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={5} className="text-center py-2">
+                No se encontraron productos.
+              </td>
+            </tr>
+          )}
+</tbody>
+
   </table>
 </div>
 
@@ -2299,9 +1565,6 @@ type MercaderiaSol = {
  {/* Tipo de operación, inicial select */}
 <div className="relative my-2">
  
-{mostrarColumnas()}
-
-
 
 </div>
 
@@ -2314,7 +1577,7 @@ type MercaderiaSol = {
 
                         <button
                         
-                          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700" onClick={guardarMercaderia}
+                          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
                         >
                           
                             

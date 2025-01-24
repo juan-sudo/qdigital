@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,38 @@ public class ProductoServiceImpl implements ProductoService {
     private final ProductoRepository productoRepository;
     private final ProveedoresRepository proveedoresRepository;
     private final GenericMapper genericMapper;
+
+
+    @Transactional
+    @Override
+    public ResponseBase findProductoByIdProveedor(Long  idProvedor) {
+        // Obtener los datos desde el repositorio
+        List<ProductoEntity> proveedores = productoRepository.findProductosByProveedorId(idProvedor);
+
+        // Validar si existen resultados
+        if (proveedores.isEmpty()) {
+            // Si no se encuentran proveedores, retornamos un error en la respuesta
+            return ResponseBase.builder()
+                    .code(404) // Código de error 404 (No encontrado)
+                    .message("No se encontraron productos con el código proporcionado")
+                    .data(null) // No hay datos si no se encuentran proveedores
+                    .build();
+        }
+
+        // Mapear las entidades a DTOs
+        List<ProductoDTO> productosDTO = proveedores.stream()
+                .map(this::buildProductoDTO) // Convertir cada entidad en un DTO
+                .collect(Collectors.toList());
+
+        // Retornar una respuesta exitosa con los datos de los proveedores
+        return ResponseBase.builder()
+                .code(200) // Código de éxito 200
+                .message("productos encontrados con éxito")
+                .data(productosDTO) // Los datos serán los DTOs de proveedores
+                .build();
+    }
+
+
 
     // Método para guardar un producto
     @Transactional
@@ -112,14 +146,22 @@ public class ProductoServiceImpl implements ProductoService {
 
     // Método privado para convertir una entidad ProductoEntity en un DTO ProductoDTO
     private ProductoDTO buildProductoDTO(ProductoEntity productoEntity) {
-        ProductoDTO productoDTO = genericMapper.mapProductoEntityToProductoDTO(productoEntity);
 
-        // Si existe el proveedor, se mapea a ProveedorDTO
-        if (productoEntity.getProveedor() != null) {
-            ProveedorDTO proveedorDTO = genericMapper.mapProveedorEntityToProveedorDTO(productoEntity.getProveedor());
-            productoDTO.setProveedor(proveedorDTO);
-        }
+        return ProductoDTO.builder()
+                .producto(productoEntity.getProducto())
+                .nombre(productoEntity.getNombre())
+                .codProv(productoEntity.getCodProv())
+                .stockLib(productoEntity.getStockLib())
+                .fCompra(productoEntity.getfCompra())
+                .cantidad(productoEntity.getCantidad())
+                .stDic2023(productoEntity.getStDic2023())
+                .stAbr2024(productoEntity.getStAbr2024())
+                .compras(productoEntity.getCompras())
+                .ventas(productoEntity.getVentas())
 
-        return productoDTO;
+                .build();
+
+
     }
+
 }

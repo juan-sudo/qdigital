@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Optional;  
 
 public interface ProveedoresRepository extends JpaRepository<ProveedorEntity, Long> {
     Optional<ProveedorEntity> findByIdProveedores(Long codigoProveedor);
@@ -23,5 +23,5 @@ public interface ProveedoresRepository extends JpaRepository<ProveedorEntity, Lo
     // Búsqueda por codigoProveedor con LIKE
     @Query("SELECT p FROM ProveedorEntity p WHERE LOWER(p.nombre) LIKE LOWER(CONCAT(:nombre, '%'))")
     List<ProveedorEntity> findByNombreLike(@Param("nombre") String nombre);
-
+    
 }

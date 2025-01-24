@@ -9,4 +9,5 @@ public interface ProductoService {
     ResponseBase saveProducto(ProductoRequest proveedorRequest); // Añadir @Valid aquí
     ResponseBase delete(Long id);
     ResponseBase buscarProductoPorId(Long id);
+    ResponseBase findProductoByIdProveedor(Long  idProvedor);
 }

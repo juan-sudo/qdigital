@@ -2,7 +2,7 @@
 import { MdArrowBack, MdArrowForward,MdOutlineSettings,MdAutoDelete,MdEdit,MdCheck,MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
 
 import React, { useState, useEffect ,useRef} from 'react';
-import { MdAdd,MdPersonAddAlt1 } from 'react-icons/md';
+import { MdAdd,MdPersonAddAlt1, } from 'react-icons/md';
 import { Producto } from '../../types/Producto';
 
 
@@ -420,20 +420,6 @@ const handleEditClickCosto = () => {
 
   const handleBlur = () => {
     setIsTouchedEmail(true); // Marca el campo como tocado al salir del campo 
-  };
-
-  //CIUDAD
-
-  const handleCiudadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase(); // Convertir el valor a mayúsculas
-    setCiudad(value);
-
-    // Validación: Aceptar solo letras (sin números ni caracteres especiales)
-    const ciudadPattern = /^[A-Z\s]+$/;
-    setIsValidCiudad(ciudadPattern.test(value));
-  };
-  const handleBlurCiudad = () => {
-    setIsTouchedCiudad(true); // Marca el campo como tocado al salir del campo
   };
 
 //COMUNA
@@ -1881,7 +1867,21 @@ const guardarClienteProveedor = () => {
 
 
 
-  
+  //LIMPIA CUANDO CAMBIA EL SELECT PARA BUSCAR
+  const handleSelectChange = (e) => {
+    setSelectedOptionEstados(e.target.value);
+
+    // Limpia los valores de los inputs al cambiar la opción
+    if (e.target.value === "codigo") {
+      setSearchTermnombre(""); // Limpia el valor de nombre
+      fetchProveedor(currentPage, 7); 
+    
+     
+    } else if (e.target.value === "nombre") {
+      setSearchTerm(""); // Limpia el valor de código
+      fetchProveedor(currentPage, 7);  
+    }
+  };
   
   
   return (
@@ -1907,10 +1907,11 @@ const guardarClienteProveedor = () => {
       <div className="relative z-20 bg-transparent dark:bg-form-input">
         <select
           value={selectedOptionEstados}
-          onChange={(e) => {
-            setSelectedOptionEstados(e.target.value);
-            changeTextColor();
-          }}
+          onChange={handleSelectChange}
+        //  onChange={(e) => {
+          //  setSelectedOptionEstados(e.target.value);
+          //  changeTextColor();
+         // }}
 
 
           className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-2 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
@@ -1947,6 +1948,10 @@ const guardarClienteProveedor = () => {
           </svg>
         </span>
       </div>
+
+
+
+
            </div>
         
            <div className="relative">
@@ -1996,6 +2001,8 @@ const guardarClienteProveedor = () => {
 
 
           </div>
+
+
           </div>
               
           
@@ -2049,6 +2056,7 @@ const guardarClienteProveedor = () => {
                 </th>
               </tr>
             </thead>
+            
             <tbody>
             {filteredFacturaVen.map((proveedorDataItem, key) => (
                   <tr
@@ -3040,6 +3048,7 @@ const guardarClienteProveedor = () => {
         }`}
         value={region}
         onChange={handleRegionChange}
+        
         //onFocus={handleFocusRegion}
         onFocus={() =>
           setFilteredOptionsR(

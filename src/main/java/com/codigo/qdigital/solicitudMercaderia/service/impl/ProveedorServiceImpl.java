@@ -347,7 +347,6 @@ public class ProveedorServiceImpl implements ProveedorService {
                 .fono1(proveedorEntity.getFono1())
                 .region(proveedorEntity.getRegion())
                 .comuna(proveedorEntity.getComuna())
-                //.ciudad(proveedorEntity.getCiudad())
                 .atencion(proveedorEntity.getAtencion())
                 .celuVenta(proveedorEntity.getCeluVenta())
                 .ciudadVen(proveedorEntity.getCiudadVen())

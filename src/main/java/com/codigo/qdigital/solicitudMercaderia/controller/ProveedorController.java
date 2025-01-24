@@ -66,7 +66,7 @@ public class ProveedorController {
     }
 //busqueda por codigo
 // Búsqueda por código
-    @GetMapping("/buscarcodigo")
+@GetMapping("/buscarcodigo")
 public ResponseEntity<ResponseBase> buscarProveedores(@RequestParam String codigo) {
     String codigoTrimmed = codigo.trim(); // Elimina espacios al principio y final
     ResponseBase response = proveedorService.findAllLikeCodigo(codigoTrimmed);
