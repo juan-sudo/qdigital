@@ -1450,7 +1450,7 @@ const handleOptionClick = (producto: any) => {
           Producto
         </th>
         <th className="min-w-[150px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
-          S.C.S.
+          Stock
         </th>
         <th className="min-w-[150px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
           Reposición
