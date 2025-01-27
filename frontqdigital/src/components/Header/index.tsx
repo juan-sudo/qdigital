@@ -3,10 +3,9 @@ import DropdownMessage from './DropdownMessage';
 import DropdownNotification from './DropdownNotification';
 import DropdownUser from './DropdownUser';
 import LogoIcon from '../../images/logo/logo-icon.svg';
-import LogoDigital from '../../images/logo/logoDigital.svg';
 
 import DarkModeSwitcher from './DarkModeSwitcher';
-
+  
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
   setSidebarOpen: (arg0: boolean) => void;

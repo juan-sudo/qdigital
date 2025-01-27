@@ -8,7 +8,8 @@ import Swal from 'sweetalert2';
 import axios from "axios";
 import { Proveedor } from '../../types/Proveedor';
 
-
+import { Link } from 'react-router-dom';
+import ClickOutside from '../ClickOutside';
 
 
 
@@ -62,15 +63,30 @@ interface ProveedorOptionNombre {
 
 const StockMercaderia = () => {
 
+  const [dropdownOpenCarrito, setDropdownOpenCarrito] = useState(false);
+  const [notifyingCarrito, setNotifyingCarrito] = useState(true);
+
 
   const [filteredOptionsProveedorCodigo, setFilteredOptionsProveedorCodigo] = useState<ProveedorOption[]>([]); // Ahora el estado 
   const [filteredOptionsProveedorNombre, setFilteredOptionsProveedorNombre] = useState<ProveedorOptionNombre[]>([]);
 
 
+  const tableRef = useRef<HTMLDivElement>(null); // Referencia a la tabla
+
+  useEffect(() => {
+    // Establecer el foco en la tabla al cargar el componente
+    
+    tableRef.current?.focus();
+  }, []);
+
   const [selectedProveedor, setSelectedProveedor] = useState<ProveedorOption | null>(null); // Objeto del proveedor seleccionado
 
  // const [selectedProveedor, setSelectedProveedor] = useState<ProveedorSeleccionado[]>([]); // Productos s
 //PROVEEDORRS
+ 
+//PARA ABRIR CON ENTER
+
+const [activeRow, setActiveRow] = useState<number>(0); // Fila activa inicial
 
   
 const listRef = useRef<HTMLUListElement>(null);
@@ -820,7 +836,39 @@ useEffect(() => {
     };
   
     
+
   
+    
+    const [totalesCompras, setTotalesCompras] = useState({
+      enero: 0,
+      diciembre: 0,
+      noviembre: 0,
+      octubre: 0,
+      setiembre: 0,
+      agosto: 0,
+    });
+
+    const [totalesVentas, setTotalesVentas] = useState({
+      enero: 0,
+      diciembre: 0,
+      noviembre: 0,
+      octubre: 0,
+      setiembre: 0,
+      agosto: 0,
+    });
+  
+
+    const [orden, setOrden] = useState(
+      
+      {
+     
+    }
+  
+  );
+  
+    
+
+
   // Filtrar productos en base al término de búsqueda y el campo seleccionado
   const filteredProductos = productos.filter((producto) => {
     if (selectedOptionEstadosProducto === "codigo") {
@@ -834,8 +882,86 @@ useEffect(() => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
+ 
 
+  // Manejar las teclas arriba, abajo y enter
+  const handleKeyDownProductos = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!filteredProductos || filteredProductos.length === 0) return;
   
+    if (event.key === "ArrowDown") {
+      // Mover hacia abajo
+      setActiveRow((prevIndex) => {
+        const newIndex = prevIndex < filteredProductos.length - 1 ? prevIndex + 1 : 0;
+        actualizarTotales(filteredProductos[newIndex]); // Recalcular totales
+
+
+        actualizarTotalesVentas(filteredProductos[newIndex]); // Recalcular totales
+
+
+        
+        return newIndex;
+      });
+      event.preventDefault(); // Evitar el scroll por defecto
+    } else if (event.key === "ArrowUp") {
+      // Mover hacia arriba
+      setActiveRow((prevIndex) => {
+        const newIndex = prevIndex > 0 ? prevIndex - 1 : filteredProductos.length - 1;
+        actualizarTotales(filteredProductos[newIndex]); // Recalcular totales
+
+        actualizarTotalesVentas(filteredProductos[newIndex]); // Recalcular totales
+        
+        return newIndex;
+      });
+      event.preventDefault(); // Evitar el scroll por defecto
+    } else if (event.key === "Enter" && activeRow >= 0) {
+      // Seleccionar el producto activo
+      handleOptionClick(filteredProductos[activeRow]);
+      event.preventDefault(); // Evitar acciones por defecto
+    }
+  };
+
+
+    // Función para actualizar los totales de compras
+const actualizarTotalesVentas = (producto: any) => {
+  const nuevosTotales = {
+    enero: producto.ventas || 0,
+    diciembre: producto.ventas || 0,
+    noviembre: producto.ventas || 0,
+    octubre: producto.ventas || 0,
+    setiembre: producto.ventas || 0,
+    agosto: producto.ventas || 0,
+  };
+
+  setTotalesVentas(nuevosTotales); // Actualizamos el estado con los nuevos totales
+};
+
+
+  // Función para actualizar los totales de compras
+const actualizarTotales = (producto: any) => {
+  const nuevosTotales = {
+    enero: producto.compras || 0,
+    diciembre: producto.compras || 0,
+    noviembre: producto.compras || 0,
+    octubre: producto.compras || 0,
+    setiembre: producto.compras || 0,
+    agosto: producto.compras || 0,
+  };
+
+  setTotalesCompras(nuevosTotales); // Actualizamos el estado con los nuevos totales
+};
+
+
+
+
+
+
+// Función para manejar la selección del producto (modificar según tu lógica)
+const handleOptionClick = (producto: any) => {
+  console.log("Producto seleccionado:", producto);
+  // Aquí puedes actualizar el estado o realizar cualquier acción
+};
+
+
   
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-0 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -1098,19 +1224,30 @@ useEffect(() => {
   </div>
 </div>
 
-
-        
+ 
             {/* Modal para agregarsolicitud mercaderia */}
            
             {showModal && (
   <div    className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-999
     ${transitioning ? 'opacity-100 scale-100' : 'opacity-0 scale-90'} 
     transition-all duration-300 ease-out`}
+  
+    tabIndex={0} // Permitir que el div reciba eventos de teclado
+    onKeyDown={handleKeyDownProductos}
+   
   >
-<div className="bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[1200px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
 
+        <div className="bg-white dark:bg-gray-800 p-2 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[1300px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
+
+        <div className="flex items-center justify-center mb-4">
       <h2 className=" text-2xl font-bold mb-2 text-center">Agregar Consulta stock</h2> 
-      <button
+        
+      
+    
+
+            </div>
+
+            <button
               type="button"
               className="absolute top-0 right-2 text-4xl  text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-gray-300"
               aria-label="Close"
@@ -1119,16 +1256,28 @@ useEffect(() => {
               ×
             </button>
 
+            <div className="flex flex-row">
+
+               {/* PRIMERA FILA */}
+  <div className="w-[70%]  ">
+    {/* Contenido del primer div */}
+
+         
+
 {/* DIV DE BUSCA PROVEEDOR */}
 <div className="px-4 md:px-0 xl:px-0">
   <div className="flex flex-col md:flex-row items-center w-full"> {/* Cambié flex-row a flex-col en pantallas pequeñas */}
     {/* Select */}
     <div className="w-full md:w-1/5 flex flex-row items-center mb-2 md:mb-0"> {/* Aseguramos que en móviles ocupe todo el ancho */}
+     
+   
       <MdArrowDropDown
         size={30}
         className="ml-2 text-gray-600 dark:text-gray-400"
         onClick={handleClick}
       />
+
+
   <select
   id="custom-select"
   value={selectedOptionEstadosProveedor}
@@ -1152,8 +1301,13 @@ useEffect(() => {
     </div>
 
     {/* Input */}
-    <div className="flex-grow  w-full relative">
 
+
+    <div className="flex-grow  w-full relative">
+    <div className="flex flex-col w-full relative space-y-4">
+  {/* Input y Dropdown */}
+    <div className="flex items-center w-full space-x-2 relative pl-2 ">
+  
 
     <input
           type="text"
@@ -1162,7 +1316,7 @@ useEffect(() => {
               ? "nombre del proveedor"
               : "código o nombre del proveedor"
           }`}
-          className="w-full bg-transparent px-2 pr-10 py-1 text-black border border-gray-300 rounded-r-xl focus:border-primary focus:outline-none dark:text-white dark:border-gray-600 dark:focus:border-primary"
+          className="w-full bg-transparent px-2 pr-10 py-1 text-black border border-gray-300 rounded-xl focus:border-primary focus:outline-none dark:text-white dark:border-gray-600 dark:focus:border-primary"
           value={
             selectedOptionEstadosProveedor === "nombre"
               ? proveedorNombre
@@ -1172,6 +1326,7 @@ useEffect(() => {
           onBlur={handleBlurProveedor}
           onKeyDown={handleKeyDownProveedor}
         />
+
 
 {/* Lista desplegable */}
 {(selectedOptionEstadosProveedor === "nombre"
@@ -1201,29 +1356,34 @@ useEffect(() => {
           
         )}
 
-    
+<svg
+    className="absolute right-3 top-1/2 -translate-y-1/2 fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M9.16666 3.33332C5.945 3.33332 3.33332 5.945 3.33332 9.16666C3.33332 12.3883 5.945 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.945 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
+    />
+  </svg>
 
-           
-      <svg
-        className="absolute right-3 top-1/2 -translate-y-1/2 fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M9.16666 3.33332C5.945 3.33332 3.33332 5.945 3.33332 9.16666C3.33332 12.3883 5.945 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.945 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
-        />
-      </svg>
+  
     </div>
+    </div>
+    </div>
+
+
+
+
   </div>
 </div>
 
@@ -1251,8 +1411,9 @@ useEffect(() => {
       </select>
     </div>
 
+
     {/* Input */}
-          <div className="flex-grow relative w-full">
+       <div className="flex-grow relative w-full  pl-2">
             <input
               type="text"
               placeholder={
@@ -1260,12 +1421,16 @@ useEffect(() => {
                   ? "Escribe código del producto"
                   : "Escribe nombre del producto"
               }
-              className="w-full bg-transparent px-2 pr-10 py-1 text-black border border-gray-300 rounded-r-xl focus:border-primary focus:outline-none dark:text-white dark:border-gray-600 dark:focus:border-primary"
+              className="w-full bg-transparent px-2 pr-10 py-1 text-black border border-gray-300 rounded-xl focus:border-primary focus:outline-none dark:text-white dark:border-gray-600 dark:focus:border-primary"
               value={searchTerm}
               ref={inputRef}
               onChange={handleInputChange}
             />
+            
+   
           </div>
+          
+     
   </div>
 </div>
 
@@ -1275,7 +1440,7 @@ useEffect(() => {
   <div className="max-w-full overflow-x-auto">
 
   <div className="max-h-[200px] overflow-y-auto">
-  <table className="w-full table-auto">
+  <table className="w-full table-auto ">
     <thead className="bg-gray-2 text-left dark:bg-meta-4 sticky top-0 z-10">
       <tr className="bg-gray-2 text-left dark:bg-meta-4">
         <th className="min-w-[150px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
@@ -1296,24 +1461,27 @@ useEffect(() => {
     <tbody>
     {filteredProductos && filteredProductos.length > 0 ? (
             filteredProductos.map((producto: any, index: number) => (
-              <tr key={index}>
-                <td className="border-b border-[#eee] py-2 px-4 pl-9 dark:border-strokedark xl:pl-11">
+              <tr key={index}
+              className={`${
+                activeRow === index
+                  ? "bg-blue-200 dark:bg-blue-600" // Fila activa
+                  : "hover:bg-gray-100 dark:hover:bg-gray-600"
+              }`}
+              >
+                
+                <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   {producto.producto} {/* Código del producto */}
                 </td>
-                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
+                <td className="border-b border-[#eee] py-0 px-4 dark:border-strokedark">
                   {producto.nombre} {/* Nombre del producto */}
                 </td>
-                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
+                <td className="border-b border-[#eee] py-0 px-4 dark:border-strokedark">
                   {producto.stockLib} {/* Stock disponible */}
                 </td>
-                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
+                <td className="border-b border-[#eee] py-0 px-4 dark:border-strokedark">
                   {producto.stock} {/* Stock total */}
                 </td>
-                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark text-right">
-                  <div className="flex justify-end items-center space-x-3.5">
-                    {/* Acciones */}
-                  </div>
-                </td>
+               
               </tr>
             ))
           ) : (
@@ -1345,26 +1513,26 @@ useEffect(() => {
             <th className="min-w-[100px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11 ">
               
             </th>
-            <th className="min-w-[100px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
+            <th className="min-w-[100px]  font-medium text-black dark:text-white xl:pl-11">
               Enero
             </th>
-            <th className="min-w-[100px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
+            <th className="min-w-[100px]  font-medium text-black dark:text-white xl:pl-11">
               Diciembre
             </th>
-            <th className="min-w-[100px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
+            <th className="min-w-[100px]  font-medium text-black dark:text-white xl:pl-11">
               Noviembre
             </th>
-            <th className="min-w-[100px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
+            <th className="min-w-[100px] font-medium text-black dark:text-white xl:pl-11">
               Octubre
             </th>
-            <th className="min-w-[100px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
+            <th className="min-w-[100px]  font-medium text-black dark:text-white xl:pl-11">
               Setiembre
             </th>
             
-            <th className="min-w-[100px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
+            <th className="min-w-[100px] font-medium text-black dark:text-white xl:pl-11">
               Agosto
             </th>
-            <th className="min-w-[100px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
+            <th className="min-w-[100px]  font-medium text-black dark:text-white xl:pl-11">
               Medida
             </th>
             
@@ -1376,10 +1544,10 @@ useEffect(() => {
               Compras
            </td>
            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              0
+           {totalesCompras.enero}
            </td>
            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              9
+           
            </td>
            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
               0
@@ -1405,7 +1573,7 @@ useEffect(() => {
               Ventas
            </td>
            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              0
+           {totalesVentas.diciembre}
            </td>
            <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
               9
@@ -1429,34 +1597,8 @@ useEffect(() => {
 
            </tr>
 
-           <tr className="hover:bg-gray-100 dark:hover:bg-gray-600">
-           <td className="border-b border-[#eee] dark:border-strokedark py-0 px-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
-              Sucursal
-           </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              0
-           </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              9
-           </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              0
-           </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              0
-           </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              9
-           </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              0
-           </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
-              0
-           </td>
-
-
-           </tr>
+          
+           
            <tr className="hover:bg-gray-100 dark:hover:bg-gray-600">
            <td className="border-b border-[#eee] dark:border-strokedark py-0 px-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
               Stock
@@ -1499,47 +1641,47 @@ useEffect(() => {
            
 
            <tr>
-           <td className="border-b border-[#eee] dark:border-strokedark py-0 px-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
+           <td className="border-b border-[#eee] dark:border-strokedark  pl-9 font-medium text-black dark:text-white xl:pl-11">
               VIA
            </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
+           <td className="border-b border-[#eee] pl-9 dark:border-strokedark xl:pl-11">
               0
            </td>
-           <td className="border-b border-[#eee] dark:border-strokedark py-0 px-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
+           <td className="border-b border-[#eee] dark:border-strokedark pl-9 font-medium text-black dark:text-white xl:pl-11">
               MC
            </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
+           <td className="border-b border-[#eee] pl-9 dark:border-strokedark xl:pl-11">
               0
            </td>
-           <td className="border-b border-[#eee] dark:border-strokedark py-0 px-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
+           <td className="border-b border-[#eee] dark:border-strokedark  pl-9 font-medium text-black dark:text-white xl:pl-11">
               OF
            </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
+           <td className="border-b border-[#eee] pl-9 dark:border-strokedark xl:pl-11">
               9
            </td>
-           <td className="border-b border-[#eee] dark:border-strokedark py-0 px-4 pl-9 font-medium text-black dark:text-whitexl:pl-11">
+           <td className="border-b border-[#eee] dark:border-strokedark  pl-9 font-medium text-black dark:text-whitexl:pl-11">
               TR
            </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
+           <td className="border-b border-[#eee] pl-9 dark:border-strokedark xl:pl-11">
               0
            </td>
-           <td className="border-b border-[#eee] dark:border-strokedark py-0 px-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
+           <td className="border-b border-[#eee] dark:border-strokedark  pl-9 font-medium text-black dark:text-white xl:pl-11">
               PROV
            </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
+           <td className="border-b border-[#eee]  pl-9 dark:border-strokedark xl:pl-11">
               U98780
            </td>
-           <td className="border-b border-[#eee] dark:border-strokedark py-0 px-4 pl-9 font-medium text-black dark:text-white xl:pl-11">
+           <td className="border-b border-[#eee] dark:border-strokedark   font-medium text-black dark:text-white xl:pl-11">
               CP
            </td>
-           <td className="border-b border-[#eee] py-0 px-4 pl-9 dark:border-strokedark xl:pl-11">
+           <td className=" border-[#eee] pl-2 pr-2">
   <input
     type="text"
     placeholder="0"
-    className="w-full bg-transparent pr-4 text-black focus:outline-none dark:text-white"
-    
+    className="w-13 bg-transparent  text-black focus:outline-none dark:bg-red-700  dark:border-strokedark border-2"
   />
 </td>
+
 
 
 
@@ -1558,13 +1700,41 @@ useEffect(() => {
 
         
 
-        
-  {/* TABLA PRODUCTOS */}
+  </div>
+  <div className="w-[30%] pl-5 ">
+  <div className="bg-white dark:bg-meta-4 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800">
+  {/* Cabecera de la tarjeta */}{/* Cabecera de la tarjeta */}
+    <div className="mb-4 pb-2 bg-gray-300 dark:bg-gray-600 border border-gray-400 dark:border-gray-500 rounded-md">
+      <h3 className="text-lg text-center font-semibold text-black dark:text-white">Orden de compra agregados (5)</h3>
+    </div>
 
- 
- {/* Tipo de operación, inicial select */}
-<div className="relative my-2">
- 
+    
+    {/* Tabla dentro de la tarjeta */}
+    <table className="w-full table-auto">
+      <thead className="bg-gray-200 text-left dark:bg-meta-4 sticky top-0 z-10">
+        <tr className="bg-gray-200 text-left dark:bg-meta-4">
+          <th className="w-[70%] py-0 font-medium text-black dark:text-white">
+            Producto
+          </th>
+          <th className="w-[30%] py-0 font-medium text-black dark:text-white">
+            Cantidad
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="text-left dark:bg-meta-4">
+          <td className="py-2 text-left">
+            No se encontraron productos.
+          </td>
+          <td className="py-2 text-left">
+            50
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
 </div>
 
@@ -1596,8 +1766,14 @@ useEffect(() => {
                         
 
                       </div>
-                    </div>
+         </div>
+
+
+
                   </div>
+
+
+
                 )}
 
 

@@ -1263,9 +1263,10 @@ useEffect(() => {
     tableRef.current?.focus();
   }, []);
 
+
+
   const handleKeyDownDetalle = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (showModalCliente || showModal || showModalCostos || showModalDeta || isSaving) return; // Si hay algún modal abierto o estamos guardando, no hacer nada
-
 
     console.log("manajndo con taclado")
     if (e.key === "ArrowDown") {
