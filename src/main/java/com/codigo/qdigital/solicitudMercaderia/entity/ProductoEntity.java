@@ -32,7 +32,7 @@ public class ProductoEntity {
     private String codProv;
 
     @Column(name = "stock_lib")
-        private BigDecimal stockLib;
+    private BigDecimal stockLib;
 
     @Column(name = "f_compra")
     private LocalDate fCompra;

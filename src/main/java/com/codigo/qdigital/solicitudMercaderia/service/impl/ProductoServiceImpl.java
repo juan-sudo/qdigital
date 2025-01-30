@@ -148,6 +148,7 @@ public class ProductoServiceImpl implements ProductoService {
     private ProductoDTO buildProductoDTO(ProductoEntity productoEntity) {
 
         return ProductoDTO.builder()
+                .id(productoEntity.getId())
                 .producto(productoEntity.getProducto())
                 .nombre(productoEntity.getNombre())
                 .codProv(productoEntity.getCodProv())

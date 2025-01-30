@@ -10,6 +10,7 @@ import { Proveedor } from '../../types/Proveedor';
 
 import { Link } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
+import { Cotizacion } from '../../types/cotizacion';
 
 
 
@@ -88,6 +89,8 @@ const StockMercaderia = () => {
 
 const [activeRow, setActiveRow] = useState<number>(0); // Fila activa inicial
 
+const [activeRowOrden, setActiveRowOrden] = useState<number>(0); // Fila activa inicial
+
   
 const listRef = useRef<HTMLUListElement>(null);
 const optionRefs = useRef<HTMLLIElement[]>([]);
@@ -118,7 +121,7 @@ const [proveedorCodigo, setProveedorCodigo] = useState<string>("");
 
  //transicion de modal
  const [transitioning, setTransitioning] = useState(false); // Para controlar el estado de la transición
- const [selectedItem, setSelectedItem] = useState<Mercaderia | null>(null); // Aquí se asegura que `selectedItem` sea de tipo `Mercaderia`
+ const [selectedItem, setSelectedItem] = useState<Cotizacion | null>(null); // Aquí se asegura que `selectedItem` sea de tipo `Mercaderia`
  
 
 //inputs
@@ -535,10 +538,31 @@ useEffect(() => {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
+
+  const [cotizacionData, setCotizacionData] = useState<Cotizacion[]>([]);
+
+  // Función para obtener las cotizaciones
+  const fetchCotizaciones = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/cotizacion");
+      setCotizacionData(response.data.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // useEffect para cargar cotizaciones al montar el componente
+  useEffect(() => {
+    fetchCotizaciones();
+  }, []);
+
+  
   // Filtrar datos según el término de búsqueda
-  const filteredFacturaVen = mercaderiaData.filter((factura) =>
-    factura.nSolicitud.toString().includes(searchTerm)
+  const filteredFacturaVen = cotizacionData.filter((factura) =>
+    factura.numero.toString().includes(searchTerm)
   );
+
+
 
  
  
@@ -585,8 +609,7 @@ useEffect(() => {
   
   };
 
-  const openModalVer = (mercaderia:Mercaderia) => {
-
+  const openModalVer = (cotizacion:Cotizacion) => {
 
     setSelectedProducts([]); // Limpia la lista de productos
     setSearchcodigo(''); // Limpia el campo de búsqueda
@@ -595,7 +618,7 @@ useEffect(() => {
     setShowModalver(true); // Abre el modal
     
 
-    setSelectedItem(mercaderia); // Establecer el artículo seleccionado
+    setSelectedItem(cotizacion); // Establecer el artículo seleccionado
     
   };
 
@@ -702,7 +725,7 @@ const handleOptionClickProveedor = async (option: any) => {
       } else {
         console.warn("No se encontraron productos para este proveedor.");
       }
-      console.log("productos mieco"+productos)
+      console.log("productos buscado la respuesta"+productos)
     } else {
       setProveedorCodigo(option.displayText); // Mostrar texto en el input
       setSelectedProveedor(option);
@@ -757,6 +780,8 @@ const handleKeyDownProveedor = (e: React.KeyboardEvent<HTMLInputElement>) => {
     handleOptionClickProveedor(filteredOptions[selectedIndex]);
   }
 };
+
+
 
 const scrollToOption = (index: number) => {
   if (optionRefs.current[index]) {
@@ -848,6 +873,8 @@ useEffect(() => {
       agosto: 0,
     });
 
+
+
     const [totalesVentas, setTotalesVentas] = useState({
       enero: 0,
       diciembre: 0,
@@ -856,21 +883,63 @@ useEffect(() => {
       setiembre: 0,
       agosto: 0,
     });
-  
 
-    const [orden, setOrden] = useState(
-      
-      {
-     
-    }
-  
-  );
-  
-    
+
+interface MercaderiaProducto {
+  id:number;
+  codigo: string;
+  producto: string;
+  cantidad:number;
+  nSolicitud: string;
+  tSolicitud: string;
+  tOperacion: string;
+  estado: string;
+
+
+}
+
+const [mercaderiaStock, setMercaderiaStock] = useState<MercaderiaProducto[]>([]);
+
+
+
+
+
+const agregarProductos = (productos: {id: number; codigo: string; producto: string; cantidad: number }[]) => {
+  setMercaderiaStock((prev) => {
+    // Copiar el estado actual para trabajar con él
+    const updatedStock = [...prev];
+
+    // Iterar sobre los productos a agregar
+    productos.forEach((nuevoProducto) => {
+      const index = updatedStock.findIndex((item) => item.codigo === nuevoProducto.codigo);
+
+      if (index !== -1) {
+        // Si el producto ya existe, sumar la cantidad
+        updatedStock[index] = {
+          ...updatedStock[index],
+          cantidad: updatedStock[index].cantidad + nuevoProducto.cantidad,
+        };
+      } else {
+        // Si el producto no existe, agregarlo al estado
+        updatedStock.push({
+          ...nuevoProducto,
+          nSolicitud: "defaultSolicitud",
+          tSolicitud: "defaultTSolicitud",
+          tOperacion: "defaultTOperacion",
+          estado: "defaultEstado",
+        });
+      }
+    });
+
+    return updatedStock;
+  });
+};
+
 
 
   // Filtrar productos en base al término de búsqueda y el campo seleccionado
   const filteredProductos = productos.filter((producto) => {
+    console.log("esta aqui------------")
     if (selectedOptionEstadosProducto === "codigo") {
       return producto.producto?.toLowerCase().includes(searchTerm.toLowerCase());
     } else if (selectedOptionEstadosProducto === "nombre") {
@@ -918,7 +987,50 @@ useEffect(() => {
       handleOptionClick(filteredProductos[activeRow]);
       event.preventDefault(); // Evitar acciones por defecto
     }
+
   };
+
+  useEffect(() => {
+    console.log("productos de cotizacion -----:", mercaderiaStock);
+  }, [mercaderiaStock]);
+
+  useEffect(() => {
+    console.log("proveedoressssss -----:", filteredOptionsProveedorCodigo);
+  }, [filteredOptionsProveedorCodigo]);
+
+  useEffect(() => {
+    console.log("proveedoressssss -----:", filteredOptionsProveedorNombre);
+  }, [filteredOptionsProveedorNombre]);
+
+
+  
+
+//aumentar o desminuir
+  const handleCantidadChange = (codigo: string, change: number) => {
+    setMercaderiaStock((prev) => 
+      prev.map((item) =>
+        item.codigo === codigo ? { ...item, cantidad: Math.max(0, item.cantidad + change) } : item
+      )
+    );
+  };
+  
+  // Función para manejar la selección del producto cuando presionas "Enter"
+const handleOptionClick = (productoSeleccionado: any) => {
+  const codigo = productoSeleccionado.codigo; // Código del producto
+  const producto = productoSeleccionado.producto; // Nombre del producto
+  const id = productoSeleccionado.id; // Obtener el id del producto
+  const cantidad = parseInt(document.getElementById('cantidad-input')?.value || "0"); // Obtener la cantidad desde el input
+
+  if (cantidad > 0) {
+    agregarProductos([{id, codigo, producto, cantidad }]);
+  }
+  
+};
+
+//elimnar columnas de orden
+const handleEliminar = (codigo: string) => {
+  setMercaderiaStock(prev => prev.filter(item => item.codigo !== codigo));
+};
 
 
     // Función para actualizar los totales de compras
@@ -953,13 +1065,98 @@ const actualizarTotales = (producto: any) => {
 
 
 
+const registrarCotizacion = async () => {
+  const cotizacionData = {
+    proveedorId: selectedProveedor?.value,
+    detalleCotizacionRequests: mercaderiaStock.map((producto) => ({
+      cantidad: producto.cantidad,
+      productoId: producto.id,
+    })),
+  };
 
+  console.log("Para registrar cotización:", JSON.stringify(cotizacionData, null, 2));
 
-// Función para manejar la selección del producto (modificar según tu lógica)
-const handleOptionClick = (producto: any) => {
-  console.log("Producto seleccionado:", producto);
-  // Aquí puedes actualizar el estado o realizar cualquier acción
+  try {
+    const response = await axios.post("http://localhost:8080/api/cotizacion", cotizacionData);
+    
+    // Verificar la estructura de la respuesta
+    console.log("Respuesta de la API:", response);
+
+    // Comprobar si la respuesta es exitosa (code 201)
+    if (response.data.code === 201) {
+      console.log("Cotización registrada con éxito", response.data);
+
+      // Mostrar alerta de éxito con los datos de la respuesta
+      Swal.fire({
+        title: "Éxito",
+        text: `Cotización registrada correctamente. Número: ${response.data.data.numero}`,
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      }).then(() => {
+        
+          // Limpiar los datos después de registrar
+          setSelectedProveedor(null); // Limpiar el proveedor seleccionado
+          setMercaderiaStock([]); // Limpiar el stock de mercadería
+
+          setFilteredOptionsProveedorNombre([]); // Limpiar las opciones filtradas de nombre
+        setFilteredOptionsProveedorCodigo([]); // Limpiar las opciones filtradas de código
+        setSelectedProveedor(null); // Limpiar el proveedor seleccionado
+        setSelectedIndex(-1); // Limpiar el índice seleccionado
+        setProveedorNombre(""); // Limpiar el nombre del proveedor
+        setProveedorCodigo(""); // Limpiar el código del proveedor
+        //datos proveedor
+        // Limpiar searchTerm y los productos filtrados
+         // Limpiar productos después de guardar
+        setProductos([]); // Esto vacía la lista de productos
+        setSearchTerm(""); // Limpiar el término de búsqueda
+
+         // Restablecer los totales a 0 después de guardar
+          setTotalesCompras({
+            enero: 0,
+            diciembre: 0,
+            noviembre: 0,
+            octubre: 0,
+            setiembre: 0,
+            agosto: 0,
+          });
+
+          setTotalesVentas({
+            enero: 0,
+            diciembre: 0,
+            noviembre: 0,
+            octubre: 0,
+            setiembre: 0,
+            agosto: 0,
+          });
+
+        fetchCotizaciones(); // Actualizar la lista después de cerrar la alerta
+        closeModal();
+
+      });
+    } else {
+      console.error("Error al registrar cotización", response.data.message);
+      Swal.fire({
+        title: "Error",
+        text: response.data.message || "Error desconocido",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  } catch (error) {
+    console.error("Error al registrar cotización:", error);
+    Swal.fire({
+      title: "Error",
+      text: "Ocurrió un problema al registrar la cotización.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+    });
+  }
 };
+
+
+
+
+
 
 
   
@@ -1042,66 +1239,43 @@ const handleOptionClick = (producto: any) => {
               <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
                Fecha
               </th>
-              <th className="min-w-[60px] py-2 px-4 font-medium text-black dark:text-white">
-               Estado
-              </th>
+             
               <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
                Responsable
               </th>
               <th className="py-2 px-4 font-medium text-black dark:text-white">
-                Actions
+                Accion
               </th>
             </tr>
           </thead>
           <tbody>
             {filteredFacturaVen.map((mercaderiaDataItem, key) => (
               <tr key={key}
-              onClick={() => handleRowClick(mercaderiaDataItem)} // Manejar clic en la fila
+             // onClick={() => handleRowClick(mercaderiaDataItem)} // Manejar clic en la fila
               >
                 <td className="border-b border-[#eee] py-2 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <span className="font-medium text-black dark:text-white">
-                    {mercaderiaDataItem.nSolicitud}
+                  <span className="font-medium ">
+                    {mercaderiaDataItem.numero}
                   </span>
                 
                 </td>
                 <td className="border-b border-[#eee] py-2  px-4 dark:border-strokedark">
-                  <span className="text-black dark:text-white">
-                     {mercaderiaDataItem.tSolicitud === "C" ? "Compra" :
-                      mercaderiaDataItem.tSolicitud === "R" ? "Reposicion" :
-                     mercaderiaDataItem.tSolicitud}
+                <span className="font-medium ">
+                    {mercaderiaDataItem.proveedor.nombre}
                   </span>
                 </td>
                 <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
-                <span className="text-black dark:text-white">
-                  {
-                    mercaderiaDataItem.tOperacion === "E" ? "Especial" :
-                    mercaderiaDataItem.tOperacion === "T" ? "Tradicional" :
-                    mercaderiaDataItem.tOperacion === "P" ? "Producto nuevo" :
-                    mercaderiaDataItem.tOperacion // Si no coincide con ninguno, muestra el valor original
-                  }
-                </span>
+                <span className="font-medium ">
+                    {mercaderiaDataItem.fechaCotizacion}
+                  </span>
               </td>
               <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
-                <span className="text-black dark:text-white">
-                {mercaderiaDataItem.fecha}
-                </span>
+              <span className="font-medium">
+                    {mercaderiaDataItem.responsable}
+                  </span>
               </td>
-              <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
-              <span className={`text-white text-sm  font-medium py-1 px-2  rounded-md 
-                ${mercaderiaDataItem.estado === "A" ? "bg-green-500" :
-                  
-                  mercaderiaDataItem.estado === "P" ? "bg-yellow-500" : 
-                  "bg-gray-500"}`
-              }>
-                {mercaderiaDataItem.estado}
-              </span>
-            </td>
-            <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
-                <span className="text-black dark:text-white">
-                Eduardo
-                </span>
-              </td>
-
+              
+          
 
                
                 <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark">
@@ -1674,13 +1848,39 @@ const handleOptionClick = (producto: any) => {
            <td className="border-b border-[#eee] dark:border-strokedark   font-medium text-black dark:text-white xl:pl-11">
               CP
            </td>
-           <td className=" border-[#eee] pl-2 pr-2">
+           <td className="border-[#eee] pl-2 pr-2">
   <input
+    id="cantidad-input"
     type="text"
     placeholder="0"
-    className="w-13 bg-transparent  text-black focus:outline-none dark:bg-red-700  dark:border-strokedark border-2"
+    className="w-13 bg-transparent text-black focus:outline-none dark:bg-gray-700 dark:border-strokedark border-2"
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        // Obtener el valor del input
+        const cantidad = e.currentTarget.value.trim();
+
+        // Si la cantidad está vacía o no es un número válido, no hacer nada
+        if (cantidad === "" || isNaN(Number(cantidad))) {
+          e.preventDefault(); // Evitar la acción por defecto
+          return; // No hacer nada
+        }
+
+        // Usamos activeRow para obtener el producto seleccionado
+        const productoSeleccionado = filteredProductos[activeRow];
+        const producto = productoSeleccionado.producto; // Nombre del producto
+        const id = productoSeleccionado.id; // Obtener el id del producto
+        const codigo = productoSeleccionado.nombre; // Código del producto
+        const cantidadNumerica = parseInt(cantidad); // Convertir la cantidad a número
+
+        if (producto.trim() !== "") {
+          agregarProductos([{id, codigo, producto, cantidad: cantidadNumerica }]);
+          e.currentTarget.value = ""; // Limpiar el input después de agregar
+        }
+      }
+    }}
   />
 </td>
+
 
 
 
@@ -1705,33 +1905,81 @@ const handleOptionClick = (producto: any) => {
   <div className="bg-white dark:bg-meta-4 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800">
   {/* Cabecera de la tarjeta */}{/* Cabecera de la tarjeta */}
     <div className="mb-4 pb-2 bg-gray-300 dark:bg-gray-600 border border-gray-400 dark:border-gray-500 rounded-md">
-      <h3 className="text-lg text-center font-semibold text-black dark:text-white">Orden de compra agregados (5)</h3>
+      <h3 className="text-lg text-center font-semibold text-black dark:text-white"> Cotización ({mercaderiaStock.length})</h3>
     </div>
 
     
+    <div className="max-h-[300px] overflow-y-auto ">
     {/* Tabla dentro de la tarjeta */}
     <table className="w-full table-auto">
       <thead className="bg-gray-200 text-left dark:bg-meta-4 sticky top-0 z-10">
-        <tr className="bg-gray-200 text-left dark:bg-meta-4">
+        <tr className="bg-gray-200 text-left dark:bg-gray-700">
           <th className="w-[70%] py-0 font-medium text-black dark:text-white">
             Producto
           </th>
-          <th className="w-[30%] py-0 font-medium text-black dark:text-white">
+          <th className="w-[30%] py-0 font-medium text-black text-center dark:text-white">  
             Cantidad
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr className="text-left dark:bg-meta-4">
-          <td className="py-2 text-left">
+         {/* Renderizar los productos agregados */}
+      {mercaderiaStock.length > 0 ? (
+        mercaderiaStock.map((item, index) => (
+          <tr 
+          
+          key={index}
+          className="hover:bg-gray-100 dark:hover:bg-gray-600" // Solo el efecto hover
+          >
+            <td className=" text-left  text-sm ">{item.producto}-{item.codigo}</td>
+        
+            <td className="text-left flex items-center justify-between space-x-2 text-sm">
+  {/* Contenedor para los botones de cantidad */}
+  <div className="flex items-center space-x-2">
+    {/* Botón para disminuir */}
+    <button
+      onClick={() => handleCantidadChange(item.codigo, -1)}
+      className="px-1 py-1 rounded-sm text-sm"
+    >
+      -
+    </button>
+
+    {/* Mostrar la cantidad */}
+    <span className="text-sm">{item.cantidad}</span>
+
+    {/* Botón para aumentar */}
+    <button
+      onClick={() => handleCantidadChange(item.codigo, 1)}
+      className="px-1 py-1 rounded-sm text-sm"
+    >
+      +
+    </button>
+  </div>
+
+  <button
+  onClick={() => handleEliminar(item.codigo)}
+  className="w-5 h-5 flex items-center justify-center text-white dark:text-black bg-gray-600 hover:bg-red-200 rounded-full text-xs"
+>
+  x
+</button>
+
+
+</td>
+
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td className=" text-left" colSpan={2}>
             No se encontraron productos.
           </td>
-          <td className="py-2 text-left">
-            50
-          </td>
         </tr>
+      )}
       </tbody>
     </table>
+    </div>
+
+
   </div>
 </div>
 
@@ -1748,6 +1996,7 @@ const handleOptionClick = (producto: any) => {
                         <button
                         
                           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                          onClick={registrarCotizacion}
                         >
                           
                             
@@ -1781,7 +2030,7 @@ const handleOptionClick = (producto: any) => {
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-99999">
 <div className="bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[750px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
 
-      <h2 className="text-3xl font-bold mb-4">Solicitud de Mercadería</h2> 
+      <h2 className="text-3xl font-bold mb-4 text-center">Detalle cotización</h2> 
       <button
               type="button"
               className="absolute top-0 right-2 text-4xl  text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-gray-300"
@@ -1801,7 +2050,7 @@ const handleOptionClick = (producto: any) => {
           <div className="mb-4 space-y-2">
           <div className="flex justify-start items-center">
               <p className="text-md  font-bold">Numero de orden: </p>
-              <p className='px-2 text-2xl font-bold '>{selectedItem.nSolicitud}</p>
+              <p className='px-2 text-2xl font-bold '>{selectedItem.numero}</p>
             </div>
            
            
@@ -1813,7 +2062,7 @@ const handleOptionClick = (producto: any) => {
             
             <div className="flex justify-start items-center">
               <p className="text-md  font-bold">Fecha Registro:</p>
-              <p className='px-2 text-sm font-medium'>{selectedItem.fecha}</p>
+              <p className='px-2 text-sm font-medium'>{selectedItem.fechaCotizacion}</p>
             </div>
            
           </div>
@@ -1822,95 +2071,81 @@ const handleOptionClick = (producto: any) => {
         </div>
 
 
-  <div className="">
- 
- {/* Tipo de solicitud */}
- <div className="">
-   <h2 className="block text-1xl font-medium py-1  bg-gray-100 dark:bg-gray-700 ">Detalle solicitud</h2>
-   
- 
- </div>
+        <div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
 
-
-
+<div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 bg-gray-300 dark:bg-gray-700  rounded-md">
+<p className="font-bold text-start text-1xl">Proveedor</p>
 
 </div>
 
+<div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
 
-      {/* Contenedor para los campos */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-4">
-          
-          {/* Tipo de solicitud */}
-          <div className="mb-4 space-y-2">
-          <div className="flex justify-start items-center">
-              <p className="text-md  font-bold">Tipo de Solicitud:</p>
-              <p className='px-2 text-sm font-medium'>
-               
-                <span className="text-gray-600 dark:text-white">
-                     {selectedItem.tSolicitud === "C" ? "Compra mercaderia" :
-                      selectedItem.tSolicitud === "R" ? "Reposicion" :
-                      selectedItem.tSolicitud}
-                  </span>
-                
-                </p>
-            </div>
-          <div className="flex justify-start items-center">
-              <p className="text-md  font-bold">Tipo de Operación:</p>
-              <p className='px-2 text-sm font-medium'>
-              
-                <span className=" text-gray-600 dark:text-white">
-                  {
-                    selectedItem.tOperacion === "E" ? "Especial" :
-                    selectedItem.tOperacion === "T" ? "Tradicional" :
-                    selectedItem.tOperacion === "P" ? "Producto nuevo" :
-                    selectedItem.tOperacion // Si no coincide con ninguno, muestra el valor original
-                  }
-                </span>
-                </p>
-            </div>
-           
-            <div className="flex justify-start items-center">
-              <p className=" text-md  font-bold">Estado:</p>
-              <p className='px-2 text-sm font-medium'>
-              
-                <span className={`text-white text-sm  font-medium py-1 px-2  rounded-md 
-                ${selectedItem.estado === "A" ? "bg-green-500" :
-                  
-                  selectedItem.estado === "P" ? "bg-yellow-500" : 
-                  "bg-gray-500"}`
-              }>
-                {selectedItem.estado}
-              </span>
-                </p>
-            </div>
-            <div className="flex justify-start items-center">
-              <p className=" text-md  font-bold">Guia:</p>
-              <p className='px-2 text-sm font-medium'>sin quia</p>
-            </div>
-           
-           
-          </div>
+</div>
 
-                
-          {/* TABLA PRODUCTOS */}
-          <div className="mb-4 space-y-2">
-           
-            <div className="flex justify-start items-center">
-              <p className="text-md  font-bold">Fecha de compra:</p>
-              <p className='px-2 text-sm font-medium'>12-12-2024</p>
-            </div>
-            <div className="flex justify-start items-center">
-              <p className="text-md  font-bold">Numero de compra:</p>
-              <p className='px-2 text-sm font-medium'>234</p>
-            </div>
-          </div>
+  
+</div>
 
 
-        </div>
+<div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+  <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
+    <div className="flex justify-start items-start">
+      <p className="text-md font-bold text-left">codigo: </p>
+      <p className="px-2 text-left">{selectedItem.proveedor.idProveedores}</p>
+    </div>
+    
+  </div>
 
-      
+  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
+   
+  </div>
+</div>
+
+<div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+  <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
+    <div className="flex justify-start items-start">
+      <p className="text-md font-bold text-left">Nombre: </p>
+      <p className="px-2 text-left">{selectedItem.proveedor.nombre}</p>
+    </div>
+    
+  </div>
+
+  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
+   
+  </div>
+</div>
 
 
+
+
+
+<div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+
+<div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 bg-gray-300 dark:bg-gray-700  rounded-md">
+<p className="font-bold text-start text-1xl">Responsable</p>
+
+</div>
+
+<div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
+
+</div>
+
+  
+</div>
+
+
+<div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+  <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
+    <div className="flex justify-start items-start">
+      <p className="text-md font-bold text-left">Nombre: </p>
+      <p className="px-2 text-left">{selectedItem.responsable}</p>
+    </div>
+    
+  </div>
+
+  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
+   
+  </div>
+</div>
 
 
 
@@ -1919,86 +2154,36 @@ const handleOptionClick = (producto: any) => {
     <thead className="bg-gray-100 dark:bg-gray-700">
       <tr>
      
-       {/* Condicional para mostrar la columna "Código" */}
-       {selectedItem.detalleMercaderia.some(
-          (mercaderia) => mercaderia.productoExistente?.producto
-        ) && (
-          <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">
+       
+          <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">
             Código
           </th>
-        )}
-        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">Producto</th>
-        {!selectedItem.detalleMercaderia.some(
-          (mercaderia) => mercaderia.cliente
-        ) && (
-        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">Proveedor</th>
-      )}
+        
        
-       {selectedItem.tOperacion !== "E" ? (
-        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">
-          Proveedor
+        <th className="px-4 py-1  text-left text-sm font-medium text-gray-700 dark:text-white">
+          producto
         </th>
-      ) : (
-        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">
-          Cliente
+      
+        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">
+          cantidad
         </th>
-      )}
-
-      {selectedItem.tOperacion == "P" && (
-        <th className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">
-          Observacion
-        </th>
-      )}
-        <th className="px-4 py-2 text-center text-sm font-medium text-gray-700 dark:text-white">Cantidad</th>
-
-       
+      
 
       </tr>
     </thead>
     <tbody>
-      {selectedItem.detalleMercaderia.map((mercaderia, index) => (
+      {selectedItem.detalleCotizacionDTO.map((mercaderia, index) => (
         <tr key={index} className="hover:bg-gray-100 dark:hover:bg-gray-600">
     
+        
+    <td className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white justify-center">{mercaderia.producto.producto}</td>
           
-            
-         
-           {/* Mostrar la celda "Código" si hay productos válidos */}
-           {selectedItem.detalleMercaderia.some(
-              (mercaderia) => mercaderia.productoExistente?.producto.length > 0
-            ) && (
-              <td className="px-2 py-2 text-sm text-gray-700 dark:text-white">
-                {mercaderia.productoExistente?.producto || "-"}
-              </td>
-            )}
-             <td className="px-2 py-2 text-sm text-gray-700 dark:text-white">{(mercaderia.productoExistente?.nombre || mercaderia.productoNuevo) || "-"}</td>
-         
-             {selectedItem.tOperacion !== "E" ? (
-          <td className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">
-            {(mercaderia.productoExistente?.proveedor?.nombre || mercaderia.proveedorNuevo)||"np"}
-          </td>
-        ) : (
-          <td className="px-2 py-2 text-sm text-gray-700 dark:text-white">{(mercaderia.cliente ||  "-")}</td>
-        )}
+          <td className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white justify-center">{mercaderia.producto.nombre}</td>
+          <td className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white justify-center">{mercaderia.cantidad}</td>
 
-          {selectedItem.detalleMercaderia.some(
-              (mercaderia) => mercaderia.productoNuevo.length > 0
-            ) && (
-          <td className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">{mercaderia.observ}</td>
-
-        )}
-          <td className="px-4 py-2 text-center text-sm font-medium text-gray-700 dark:text-white justify-center">{mercaderia.cantidad}</td>
         </tr>
       ))}
-      <tr className="hover:bg-gray-100 dark:hover:bg-gray-600">
-        <td className="px-2 py-2 text-sm text-gray-700 dark:text-white"></td>
-        <td className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white"></td>
-        <td className="px-4 py-2 text-left text-2xl font-medium text-gray-700 dark:text-white">Total</td>
-        <td className="px-4 py-2 text-center text-2xl font-medium text-gray-700 dark:text-white justify-center">
-        {
-        selectedItem.detalleMercaderia.reduce((total, mercaderia) => total + mercaderia.cantidad, 0)
-      }
-        </td>
-      </tr>
+     
     </tbody>
   </table>
 </div>
