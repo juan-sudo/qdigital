@@ -5,6 +5,8 @@ import com.codigo.qdigital.solicitudMercaderia.aggregates.dto.DetalleCotizacionD
 import com.codigo.qdigital.solicitudMercaderia.aggregates.dto.ProductoDTO;
 import com.codigo.qdigital.solicitudMercaderia.aggregates.dto.ProveedorDTO;
 import com.codigo.qdigital.solicitudMercaderia.aggregates.request.CotizacionRequest;
+import com.codigo.qdigital.solicitudMercaderia.aggregates.request.DetalleCotizacionProductoRequest;
+import com.codigo.qdigital.solicitudMercaderia.aggregates.request.DetalleCotizacionRequest;
 import com.codigo.qdigital.solicitudMercaderia.aggregates.request.ProductoRequest;
 import com.codigo.qdigital.solicitudMercaderia.aggregates.response.ResponseBase;
 import com.codigo.qdigital.solicitudMercaderia.entity.CotizacionEntity;
@@ -22,10 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +36,55 @@ public class CotizacionServiceImpl implements CotizacionService {
     private final DetalleCotizacionRepository detalleCotizacionRepository;
     private final GenericMapper genericMapper;
 
+    @Transactional
+    @Override
+    public ResponseBase updateCotizacion(Long cotizacionId, List<DetalleCotizacionProductoRequest> nuevosDetalles) {
+        // Buscar la cotización existente
+        CotizacionEntity cotizacion = cotizacionRepository.findById(cotizacionId)
+                .orElseThrow(() -> new RuntimeException("Cotización no encontrada"));
+
+
+        // Obtener los productos existentes en la cotización
+        Set<Long> productosExistentes = cotizacion.getDetalleCotizacion()
+                .stream()
+                .map(detalle -> detalle.getProducto().getId())
+                .collect(Collectors.toSet());
+
+        List<DetalleCotizacionEntity> nuevosDetallesEntities = new ArrayList<>();
+
+        for (DetalleCotizacionProductoRequest detalleRequest : nuevosDetalles) {
+
+            // Buscar el producto usando el ID, o crearlo si no existe
+            ProductoEntity producto = productoRepository.findByProducto(detalleRequest.getProducto())
+                    .orElseGet(() -> {
+                        // Si el producto no existe, crearlo
+                        ProductoEntity nuevoProducto = ProductoEntity.builder()
+                                .producto(detalleRequest.getProducto()) // Usar el ID como código de producto
+                                .nombre(detalleRequest.getNombre()) // Nombre del producto
+                                .proveedor(cotizacion.getProveedor()) // Asignar el proveedor de la cotización
+                                .build();
+                        return productoRepository.save(nuevoProducto);
+                    });
+
+            // Si el producto no está en la cotización, agregarlo
+            if (!productosExistentes.contains(producto.getId())) {
+                DetalleCotizacionEntity nuevoDetalle = DetalleCotizacionEntity.builder()
+                        .cantidad(detalleRequest.getCantidad())
+                        .producto(producto)
+                        .cotizacion(cotizacion)
+                        .build();
+                nuevosDetallesEntities.add(nuevoDetalle);
+            }
+        }
+
+        // Guardar los nuevos detalles en la base de datos si hay nuevos productos
+        if (!nuevosDetallesEntities.isEmpty()) {
+            detalleCotizacionRepository.saveAll(nuevosDetallesEntities);
+            cotizacion.getDetalleCotizacion().addAll(nuevosDetallesEntities);
+        }
+
+        return new ResponseBase(200, "Cotización actualizada con éxito. Se agregaron nuevos productos.", cotizacion);
+    }
 
 
 
@@ -81,6 +129,7 @@ public class CotizacionServiceImpl implements CotizacionService {
         return new ResponseBase(201, "Cotización registrada con éxito.", savedCotizacion);
     }
 
+
     @Override
     public ResponseBase deleteCotizacion(Long id) {
         return null;
@@ -95,6 +144,19 @@ public class CotizacionServiceImpl implements CotizacionService {
                 .collect(Collectors.toList());
 
         return new ResponseBase(200, "Solicitud exitosa", listaDTOs);
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public ResponseBase buscarCotizacionPorId(Long id) {
+        Optional<CotizacionEntity> cotizacionEntity = cotizacionRepository.findById(id);
+        if (cotizacionEntity.isPresent()) {
+            CotizacionDTO cotizacionDTO = buildCotizacionDTO(cotizacionEntity.get());
+            return new ResponseBase(200, "Producto encontrado con éxito", cotizacionDTO);
+        }
+        // Si el producto no existe, se retorna un error
+        return new ResponseBase(404, "Producto no encontrado", null);
     }
 
 

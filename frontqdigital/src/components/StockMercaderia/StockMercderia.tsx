@@ -64,8 +64,70 @@ interface ProveedorOptionNombre {
 
 const StockMercaderia = () => {
 
-  const [dropdownOpenCarrito, setDropdownOpenCarrito] = useState(false);
-  const [notifyingCarrito, setNotifyingCarrito] = useState(true);
+  //DATOS DE INPUT
+
+  const [inputData, setInputData] = useState({
+    producto: "",
+    nombre: "",
+    cantidad: "",
+    proveedorId: "",
+  });
+
+  const handleChange = (e) => {
+    setInputData({ ...inputData, [e.target.name]: e.target.value });
+  };
+
+
+
+  const handleKeyPress = async (e, cotizacionId) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+  
+      if (!cotizacionId) {
+        console.error("Error: cotizacion.id no está definido");
+        return;
+      }
+  
+      try {
+        const response = await axios.put(
+          `http://localhost:8080/api/cotizacion/productonuevo/${cotizacionId}`,
+          [inputData] // Enviar los datos en un array
+        );
+  
+        console.log("Guardado exitoso", response.data);
+  
+        setSelectedItem((prevItem) => {
+          if (!prevItem) return null;
+  
+          const nuevoProducto = response.data || inputData;
+  
+          console.log("Nuevo producto:", nuevoProducto);
+          console.log("Detalle Cotización Actual:", prevItem.detalleCotizacionDTO);
+  
+          return {
+            ...prevItem,
+            detalleCotizacionDTO: [
+              ...(prevItem.detalleCotizacionDTO ?? []), // Evita problemas con null
+              nuevoProducto,
+            ],
+          };
+        });
+        fetchCotizaciones();
+  
+        // Ocultar el input y restablecer los valores del formulario
+        setShowInputRow(false);
+        setInputData({ producto: "", nombre: "", cantidad: "", proveedorId: "" });
+  
+      } catch (error) {
+        console.error("Error al guardar:", error);
+      }
+    }
+  };
+  
+  
+
+  //PARA BOTON PARA QUE APARESCA EL INPUT
+  const [showInputRow, setShowInputRow] = useState(false);
 
 
   const [filteredOptionsProveedorCodigo, setFilteredOptionsProveedorCodigo] = useState<ProveedorOption[]>([]); // Ahora el estado 
@@ -617,7 +679,6 @@ useEffect(() => {
     setSearchproveedor('')
     setShowModalver(true); // Abre el modal
     
-
     setSelectedItem(cotizacion); // Establecer el artículo seleccionado
     
   };
@@ -1626,9 +1687,7 @@ const registrarCotizacion = async () => {
         <th className="min-w-[150px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
           Stock
         </th>
-        <th className="min-w-[150px] py-0 px-4 font-medium text-black dark:text-white xl:pl-11">
-          Reposición
-        </th>
+       
       </tr>
     </thead>
 
@@ -1651,9 +1710,6 @@ const registrarCotizacion = async () => {
                 </td>
                 <td className="border-b border-[#eee] py-0 px-4 dark:border-strokedark">
                   {producto.stockLib} {/* Stock disponible */}
-                </td>
-                <td className="border-b border-[#eee] py-0 px-4 dark:border-strokedark">
-                  {producto.stock} {/* Stock total */}
                 </td>
                
               </tr>
@@ -2043,14 +2099,13 @@ const registrarCotizacion = async () => {
   <hr className="border-t border-gray-300 dark:border-gray-600 mb-4" />
 
   
-      {/* Contenedor para los campos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-4">
+   {/* Contenedor para los campos */}
+   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-4">
           
           {/* Tipo de solicitud */}
-          <div className="mb-4 space-y-2">
+          <div className="space-y-2">
           <div className="flex justify-start items-center">
-              <p className="text-md  font-bold">Numero de orden: </p>
-              <p className='px-2 text-2xl font-bold '>{selectedItem.numero}</p>
+          <p className="text-md  text-gray-800 dark:text-gray-200">C.S.C LIBRERIA</p>
             </div>
            
            
@@ -2058,52 +2113,59 @@ const registrarCotizacion = async () => {
 
                 
           {/* TABLA PRODUCTOS */}
-          <div className="mb-4 space-y-2">
-            
-            <div className="flex justify-start items-center">
-              <p className="text-md  font-bold">Fecha Registro:</p>
-              <p className='px-2 text-sm font-medium'>{selectedItem.fechaCotizacion}</p>
-            </div>
-           
-          </div>
+         {/* TABLA PRODUCTOS */}
+        <div className=" space-y-2 flex justify-end"> 
+        <div className="flex justify-center items-center p-2 w-50 rounded-md border-2 border-gray-300 dark:border-gray-600 ">
+          <p className="text-md font-bold text-gray-800 dark:text-gray-200">N°</p>
+          <p className="px-2 text-xl font-bold text-gray-900 dark:text-white">{selectedItem.numero}</p>
+        </div>
 
 
         </div>
 
 
-        <div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
 
-<div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 bg-gray-300 dark:bg-gray-700  rounded-md">
-<p className="font-bold text-start text-1xl">Proveedor</p>
+        </div>
 
-</div>
 
-<div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
 
-</div>
+      {/* Contenedor para los campos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-4">
+          
+          {/* Tipo de solicitud */}
+          <div className=" space-y-2">
+          <div className="flex justify-start items-center">
+             
+            </div>
+           
+           
+          </div>
 
-  
-</div>
+                
+          {/* TABLA PRODUCTOS */}
+        
+
+
+          <div className=" space-y-2 flex justify-end"> 
+          <div className="flex justify-start items-center p-2 w-50">
+          <p className="px-2 text-sm font-medium text-gray-400 ">
+            {new Date(selectedItem.fechaCotizacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+
+
+        </div>
+
+        </div>
+
+
+
 
 
 <div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
   <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
     <div className="flex justify-start items-start">
-      <p className="text-md font-bold text-left">codigo: </p>
-      <p className="px-2 text-left">{selectedItem.proveedor.idProveedores}</p>
-    </div>
-    
-  </div>
-
-  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
-   
-  </div>
-</div>
-
-<div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
-  <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
-    <div className="flex justify-start items-start">
-      <p className="text-md font-bold text-left">Nombre: </p>
+      <p className="text-md font-bold text-left">Proveedor: </p>
       <p className="px-2 text-left">{selectedItem.proveedor.nombre}</p>
     </div>
     
@@ -2118,75 +2180,90 @@ const registrarCotizacion = async () => {
 
 
 
-<div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
-
-<div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 bg-gray-300 dark:bg-gray-700  rounded-md">
-<p className="font-bold text-start text-1xl">Responsable</p>
-
-</div>
-
-<div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
-
-</div>
-
-  
-</div>
-
 
 <div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
   <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
     <div className="flex justify-start items-start">
-      <p className="text-md font-bold text-left">Nombre: </p>
+      <p className="text-md font-bold text-left">Responsable: </p>
       <p className="px-2 text-left">{selectedItem.responsable}</p>
     </div>
     
   </div>
 
-  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
-   
-  </div>
+  <div className="flex flex-row w-full sm:w-1/2 relative items-end justify-end space-x-2 rounded-md">
+  <button
+          onClick={() => setShowInputRow(!showInputRow)} // Alternar estado
+          className="px-4 py-2 text-gray-600 dark:text-white text-sm font-medium rounded-md border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 hover:border-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+        >
+          {showInputRow ? "Cancelar" : "Nuevo producto"} {/* Cambiar texto dinámicamente */}
+        </button>
+</div>
+
+
 </div>
 
 
 
-        <div className="overflow-x-auto">
+<div className="max-h-[200px] overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md">
   <table className="min-w-full table-auto border-collapse">
-    <thead className="bg-gray-100 dark:bg-gray-700">
+    <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0 z-10">
       <tr>
-     
-       
-          <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">
-            Código
-          </th>
-        
-       
-        <th className="px-4 py-1  text-left text-sm font-medium text-gray-700 dark:text-white">
-          producto
-        </th>
-      
-        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">
-          cantidad
-        </th>
-      
-
+        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Código</th>
+        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Producto</th>
+        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Cantidad</th>
       </tr>
+      {/* Fila con inputs que se muestra al hacer clic en el botón */}
+      {showInputRow && (
+          <tr className="bg-white dark:bg-gray-800">
+            <td className="px-4 py-1">
+              <input
+                type="text"
+                name="producto"
+                value={inputData.producto}
+                onChange={handleChange}
+                className="w-full px-2 py-1 text-sm border rounded-md dark:bg-gray-900 dark:text-white"
+              />
+            </td>
+            <td className="px-4 py-1">
+              <input
+                type="text"
+                name="nombre"
+                value={inputData.nombre}
+                onChange={handleChange}
+                className="w-full px-2 py-1 text-sm border rounded-md dark:bg-gray-900 dark:text-white"
+              />
+            </td>
+            <td className="px-4 py-1">
+              <input
+                type="number"
+                name="cantidad"
+                value={inputData.cantidad}
+                onChange={handleChange}
+                onKeyDown={(e) => handleKeyPress(e, selectedItem.id)}  // Pasando cotizacion.id 
+                className="w-full px-2 py-1 text-sm border rounded-md dark:bg-gray-900 dark:text-white"
+              />
+            </td>
+          </tr>
+        )}
     </thead>
     <tbody>
-      {selectedItem.detalleCotizacionDTO.map((mercaderia, index) => (
+      {selectedItem?.detalleCotizacionDTO?.map((mercaderia, index) => (
         <tr key={index} className="hover:bg-gray-100 dark:hover:bg-gray-600">
-    
-        
-    <td className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white justify-center">{mercaderia.producto.producto}</td>
-          
-          <td className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white justify-center">{mercaderia.producto.nombre}</td>
-          <td className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white justify-center">{mercaderia.cantidad}</td>
-
+          <td className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">
+            {mercaderia?.producto?.producto}
+          </td>
+          <td className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">
+            {mercaderia?.producto?.nombre}
+          </td>
+          <td className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">
+            {mercaderia?.cantidad}
+          </td>
         </tr>
       ))}
-     
     </tbody>
   </table>
 </div>
+
 
 
         
