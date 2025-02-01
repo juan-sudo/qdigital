@@ -6,10 +6,12 @@ import { Producto } from '../../types/Producto';
 import {  DetalleSolicitudMercaderia } from '../../types/DetalleSolicitudMercaderia';
 import Swal from 'sweetalert2';
 import axios from "axios";
+import * as XLSX from 'xlsx';
+import * as ExcelJS from "exceljs";
+
 import { Proveedor } from '../../types/Proveedor';
 
-import { Link } from 'react-router-dom';
-import ClickOutside from '../ClickOutside';
+
 import { Cotizacion } from '../../types/cotizacion';
 
 
@@ -77,53 +79,209 @@ const StockMercaderia = () => {
     setInputData({ ...inputData, [e.target.name]: e.target.value });
   };
 
+  const exportToExcel = async () => {
+    // Datos adicionales que quieres agregar antes de la tabla
+    const additionalData = [
+      ["", "", ""], // Espacio vacío para la fila de encabezado fusionada
+      ["C.S.C LIBRERIA", ""], // Título de la solicitud
+      [" ", " ", "N°" + selectedItem?.numero],
+      [" ", " ", selectedItem?.fechaCotizacion],
+      ["Proveedor", selectedItem?.proveedor?.nombre],
+      ["Responsable", selectedItem?.responsable],
+      ["", ""], // Separador
+    ];
+  
+    // Crear un libro de trabajo
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Cotización");
+  
+    // Establecer los datos adicionales antes de la tabla
+    additionalData.forEach((row, index) => {
+      worksheet.addRow(row);
+    });
+  
+   // Definir los encabezados de la tabla
+const headerRown = worksheet.addRow(["CÓDIGO", "PRODUCTO", "CANTIDAD"]);
+
+// Aplicar estilo de fondo amarillo a los encabezados
+headerRown.eachCell((cell) => {
+  
+  cell.style = {
+    
+    font: { 
+      bold: true, // Negrita para los encabezados
+      color: { argb: "FFFFFF" }, // Color de texto blanco
+    },
+    alignment: { horizontal: "center", vertical: "middle" },  // Centrado
+    fill: {
+      type: "pattern", 
+      pattern: "solid", 
+      fgColor: { argb: "0e0c4d" }, // Color de fondo amarillo
+    },
+  };
+});
+
+ // Hacer el número más grande
+ const row = worksheet.getRow(3); // La fila con "N°" + selectedItem?.numero
+ row.getCell(3).style = {
+   font: {
+     size: 20, // Tamaño de la fuente más grande
+     bold: true,
+   },
+   alignment: { horizontal: "center", vertical: "middle" }, // Centrado
+ };
 
 
-  const handleKeyPress = async (e, cotizacionId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
+
+
+    // Agregar los detalles de la cotización
+   // Agregar los detalles de la cotización
+selectedItem?.detalleCotizacionDTO?.forEach((mercaderia) => {
+  // Agregar la fila de detalles
+  const row = worksheet.addRow([
+    mercaderia?.producto?.producto,
+    mercaderia?.producto?.nombre,
+    mercaderia?.cantidad,
+  ]);
+
+  // Aplicar bordes a las celdas de la fila
+  row.eachCell((cell) => {
+    cell.style.border = {
+      top: { style: 'thin' },    // Borde superior
+      left: { style: 'thin' },   // Borde izquierdo
+      bottom: { style: 'thin' }, // Borde inferior
+      right: { style: 'thin' },  // Borde derecho
+    };
+  });
+});
+
   
-      if (!cotizacionId) {
-        console.error("Error: cotizacion.id no está definido");
-        return;
-      }
+    // Fusionar las celdas en la fila 1 (A1, B1, C1)
+    worksheet.mergeCells("A1:C1");
   
-      try {
-        const response = await axios.put(
-          `http://localhost:8080/api/cotizacion/productonuevo/${cotizacionId}`,
-          [inputData] // Enviar los datos en un array
-        );
+    // Establecer el título en la celda A1
+    const titleCell = worksheet.getCell("A1");
+    titleCell.value = "Detalle de Solicitud de Cotización";
+    titleCell.style = {
+      font: { bold: true, size: 22 },
+      alignment: { horizontal: "center", vertical: "middle" },
+    };
   
-        console.log("Guardado exitoso", response.data);
+    // Establecer color de fondo en la fila de encabezado (CÓDIGO, PRODUCTO, CANTIDAD)
+    const headerRow = worksheet.getRow(2);
+    
+    headerRow.eachCell((cell) => {
+      cell.style = {
+        font: { bold: true },
+        alignment: { horizontal: "center", vertical: "middle" },
+       
+      };
+    });
   
-        setSelectedItem((prevItem) => {
-          if (!prevItem) return null;
+    // Ajustar el ancho de las columnas (A, B, C, etc.)
+    worksheet.columns = [
+      { width: 15 }, // Ancho de la columna A
+      { width: 30 }, // Ancho de la columna B
+      { width: 20 }, // Ancho de la columna C
+    ];
+
+    
   
-          const nuevoProducto = response.data || inputData;
+    // Crear un buffer para el archivo y permitir la descarga
+    const buffer = await workbook.xlsx.writeBuffer();
   
-          console.log("Nuevo producto:", nuevoProducto);
-          console.log("Detalle Cotización Actual:", prevItem.detalleCotizacionDTO);
-  
-          return {
-            ...prevItem,
-            detalleCotizacionDTO: [
-              ...(prevItem.detalleCotizacionDTO ?? []), // Evita problemas con null
-              nuevoProducto,
-            ],
-          };
-        });
-        fetchCotizaciones();
-  
-        // Ocultar el input y restablecer los valores del formulario
-        setShowInputRow(false);
-        setInputData({ producto: "", nombre: "", cantidad: "", proveedorId: "" });
-  
-      } catch (error) {
-        console.error("Error al guardar:", error);
-      }
-    }
+    // Crear un enlace para descargar el archivo
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "cotizacion.xlsx";
+    link.click();
+    window.URL.revokeObjectURL(url);
   };
   
+  
+  
+  
+  
+  //end para funcion excal
+
+const handleKeyPress = async (e, cotizacionId) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    if (!cotizacionId) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "El ID de cotización no está definido.",
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `http://localhost:8080/api/cotizacion/productonuevo/${cotizacionId}`,
+        [inputData]
+      );
+
+      console.log("Guardado exitoso", response.data);
+
+      // Obtener la cotización actualizada desde la API
+      const updatedCotizacion = await axios.get(
+        `http://localhost:8080/api/cotizacion/${cotizacionId}`
+      );
+
+      console.log(
+        "Detalle después de guardar: " +
+          JSON.stringify(updatedCotizacion, null, 2)
+      );
+
+      // Actualizar solo los productos, manteniendo el resto de los datos del modal
+      setSelectedItem((prev) => {
+        if (!prev || !updatedCotizacion.data || !updatedCotizacion.data.data)
+          return prev;
+
+        return {
+          ...prev,
+          detalleCotizacionDTO:
+            updatedCotizacion.data.data.detalleCotizacionDTO || [],
+        };
+      });
+
+      fetchCotizaciones(); // Recargar la lista general de cotizaciones si es necesario
+
+      // Ocultar el input y restablecer los valores del formulario
+      setShowInputRow(false);
+      setInputData({ producto: "", nombre: "", cantidad: "", proveedorId: "" });
+
+    } catch (error: unknown) {
+      console.error("Error capturado:", error);
+    
+      if (axios.isAxiosError(error)) {
+        Swal.fire({
+          icon: "error",
+          title: "Error al guardar",
+          text: error.response?.data?.message || "Error en la solicitud al servidor.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error desconocido",
+          text: "Ocurrió un error inesperado. Inténtalo de nuevo.",
+        });
+      }
+    }
+    
+    
+    
+    
+    
+  }
+};
+
   
 
   //PARA BOTON PARA QUE APARESCA EL INPUT
@@ -462,20 +620,59 @@ const [dropdownOpenNombre, setDropdownOpenNombre] = useState(false); // Estado p
 
   const closeModal = () => {
     // Restablece el estado a su valor inicial al cancelar
-    setSelectedProducts([]); // Limpia la lista de productos
+    setSelectedProducts([]); // Limp
+
+    setProveedorNombre("");
+    setProveedorCodigo("");
+    // ia la lista de productos
     setSearchcodigo(''); // Limpia el campo de búsqueda
-    setSelectedProveedor([]); // Limpia la lista de proveedores
+    setSelectedProveedor(null); // Limpia la lista de proveedores
     setSearchproveedor(''); // Limpia el campo de búsqueda del proveedor
    // setShowModal(false); // Cierra el modal
     setDetalleMercaderia([]);
     setDetalleMercaderiaFront([]);
       // Reinicia cantidadInicial a 1 cuando se cierra el modal
   setCantidadInicial(1); // Restablece el valor de cantidadInicial al valor inicial
+  setProductos([]); // Esto vacía la lista de productos
+  setSearchTerm(""); // Limpiar el término de búsqueda
+
+
+    // Limpiar los datos después de registrar
+    setSelectedProveedor(null); // Limpiar el proveedor seleccionado
+    setMercaderiaStock([]); // Limpiar el stock de mercadería
+
+    setFilteredOptionsProveedorNombre([]); // Limpiar las opciones filtradas de nombre
+  setFilteredOptionsProveedorCodigo([]); // Limpiar las opciones filtradas de código
+  setSelectedProveedor(null); // Limpiar el proveedor seleccionado
+  setSelectedIndex(-1); // Limpiar el índice seleccionado
+
+
+   // Restablecer los totales a 0 después de guardar
+    setTotalesCompras({
+      enero: 0,
+      diciembre: 0,
+      noviembre: 0,
+      octubre: 0,
+      setiembre: 0,
+      agosto: 0,
+    });
+
+    setTotalesVentas({
+      enero: 0,
+      diciembre: 0,
+      noviembre: 0,
+      octubre: 0,
+      setiembre: 0,
+      agosto: 0,
+    });
+
 
   //transicion
   setTransitioning(false); // Inicia la transición de cierre
   setTimeout(() => setShowModal(false), 300); // Oculta el modal después de la animación
   };
+
+
   //END CANCELAR
 
   const closeModalVer = () => {
@@ -627,15 +824,7 @@ useEffect(() => {
 
 
  
- 
- 
- 
 
-  
-  
- 
-
- 
 
   useEffect(() => {
     // Filtrar opciones según el texto de búsqueda por nombre y por código
@@ -1122,7 +1311,6 @@ const actualizarTotales = (producto: any) => {
 
   setTotalesCompras(nuevosTotales); // Actualizamos el estado con los nuevos totales
 };
-
 
 
 
@@ -1692,6 +1880,7 @@ const registrarCotizacion = async () => {
     </thead>
 
     <tbody>
+
     {filteredProductos && filteredProductos.length > 0 ? (
             filteredProductos.map((producto: any, index: number) => (
               <tr key={index}
@@ -2060,9 +2249,11 @@ const registrarCotizacion = async () => {
                         </button>
                         
                         <button
-                        
-                         className="px-4 py-2 bg-gray-600  text-white rounded hover:bg-gray-700 " onClick={closeModalVer}
-                        >
+                         onClick={closeModal} 
+                         className="px-4 py-2 bg-gray-600  text-white rounded hover:bg-gray-700 " 
+                       
+                       
+                       >
                           
                             
                           Cancelar
@@ -2086,7 +2277,7 @@ const registrarCotizacion = async () => {
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-99999">
 <div className="bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[750px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
 
-      <h2 className="text-3xl font-bold mb-4 text-center">Detalle cotización</h2> 
+      <h2 className="text-3xl font-bold mb-4 text-center">Detalle de Solicitud de Cotización</h2> 
       <button
               type="button"
               className="absolute top-0 right-2 text-4xl  text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-gray-300"
@@ -2117,7 +2308,7 @@ const registrarCotizacion = async () => {
         <div className=" space-y-2 flex justify-end"> 
         <div className="flex justify-center items-center p-2 w-50 rounded-md border-2 border-gray-300 dark:border-gray-600 ">
           <p className="text-md font-bold text-gray-800 dark:text-gray-200">N°</p>
-          <p className="px-2 text-xl font-bold text-gray-900 dark:text-white">{selectedItem.numero}</p>
+          <p className="px-2 text-xl font-bold text-gray-900 dark:text-white">{selectedItem?.numero}</p>
         </div>
 
 
@@ -2149,7 +2340,7 @@ const registrarCotizacion = async () => {
           <div className=" space-y-2 flex justify-end"> 
           <div className="flex justify-start items-center p-2 w-50">
           <p className="px-2 text-sm font-medium text-gray-400 ">
-            {new Date(selectedItem.fechaCotizacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
+            {new Date(selectedItem?.fechaCotizacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
           </p>
         </div>
 
@@ -2166,7 +2357,7 @@ const registrarCotizacion = async () => {
   <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
     <div className="flex justify-start items-start">
       <p className="text-md font-bold text-left">Proveedor: </p>
-      <p className="px-2 text-left">{selectedItem.proveedor.nombre}</p>
+      <p className="px-2 text-left">{selectedItem?.proveedor?.nombre}</p>
     </div>
     
   </div>
@@ -2249,13 +2440,13 @@ const registrarCotizacion = async () => {
     <tbody>
       {selectedItem?.detalleCotizacionDTO?.map((mercaderia, index) => (
         <tr key={index} className="hover:bg-gray-100 dark:hover:bg-gray-600">
-          <td className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">
+          <td className="px-4  text-left text-sm font-medium text-gray-700 dark:text-white">
             {mercaderia?.producto?.producto}
           </td>
-          <td className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">
+          <td className="px-4  text-left text-sm font-medium text-gray-700 dark:text-white">
             {mercaderia?.producto?.nombre}
           </td>
-          <td className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">
+          <td className="px-4  text-left text-sm font-medium text-gray-700 dark:text-white">
             {mercaderia?.cantidad}
           </td>
         </tr>
@@ -2279,6 +2470,12 @@ const registrarCotizacion = async () => {
      {/* Tipo de operación termina select */}
                       {/* Botones */}
                       <div className="flex justify-end gap-2">
+                      <button
+                onClick={exportToExcel}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Descargar Excel
+              </button>
                       <button
                       onClick={closeModalVer} 
                       className="px-4 py-2 bg-gray-600  text-white rounded hover:bg-gray-700 "

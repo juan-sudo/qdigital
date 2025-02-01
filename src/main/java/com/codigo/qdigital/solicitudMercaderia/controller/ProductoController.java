@@ -15,10 +15,11 @@ public class ProductoController {
 
     // Endpoint para crear un producto
     @PostMapping
-    public ResponseBase createProducto(@RequestBody ProductoRequest productoRequest) {
+    public ResponseEntity<ResponseBase> createProducto(@RequestBody ProductoRequest productoRequest) {
+        ResponseBase response = productoService.saveProducto(productoRequest);
 
-        // Retornamos la respuesta con el código de estado adecuado
-        return productoService.saveProducto(productoRequest);
+        // Retornar la respuesta con el código HTTP correspondiente
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
     // Endpoint para obtener todos los productos

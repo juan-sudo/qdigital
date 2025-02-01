@@ -59,20 +59,23 @@ public class ProductoServiceImpl implements ProductoService {
 
 
 
-    // Método para guardar un producto
     @Transactional
     @Override
     public ResponseBase saveProducto(ProductoRequest productoRequest) {
         // Validar si el proveedor existe
         Optional<ProveedorEntity> proveedorOpt = proveedoresRepository.findByIdProveedores(productoRequest.getProveedorId());
         if (proveedorOpt.isEmpty()) {
-            // Si el proveedor no existe, se retorna un error
             return new ResponseBase(404, "Proveedor no encontrado con el código: " + productoRequest.getCodProv(), null);
         }
 
-        // Crear la entidad ProductoEntity a partir del request
-        ProductoEntity productoEntity = ProductoEntity.builder()
+        // Verificar si el producto ya existe
+        Optional<ProductoEntity> existingProduct = productoRepository.findByProducto(productoRequest.getProducto());
+        if (existingProduct.isPresent()) {
+            return new ResponseBase(400, "El producto con el código '" + productoRequest.getProducto() + "' ya existe.", null);
+        }
 
+        // Crear la entidad ProductoEntity
+        ProductoEntity productoEntity = ProductoEntity.builder()
                 .producto(productoRequest.getProducto())
                 .nombre(productoRequest.getNombre())
                 .cNeto(productoRequest.getCNeto())
@@ -90,9 +93,9 @@ public class ProductoServiceImpl implements ProductoService {
         // Guardar el producto en la base de datos
         ProductoEntity savedProduct = productoRepository.save(productoEntity);
 
-        // Retornar respuesta con el producto creado
         return new ResponseBase(201, "Producto registrado con éxito.", savedProduct);
     }
+
 
     // Método para obtener un producto por su ID
     @Transactional(readOnly = true)

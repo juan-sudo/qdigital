@@ -43,8 +43,6 @@ public class CotizacionServiceImpl implements CotizacionService {
         CotizacionEntity cotizacion = cotizacionRepository.findById(cotizacionId)
                 .orElseThrow(() -> new RuntimeException("Cotización no encontrada"));
 
-
-        // Obtener los productos existentes en la cotización
         Set<Long> productosExistentes = cotizacion.getDetalleCotizacion()
                 .stream()
                 .map(detalle -> detalle.getProducto().getId())
@@ -53,17 +51,24 @@ public class CotizacionServiceImpl implements CotizacionService {
         List<DetalleCotizacionEntity> nuevosDetallesEntities = new ArrayList<>();
 
         for (DetalleCotizacionProductoRequest detalleRequest : nuevosDetalles) {
-
-            // Buscar el producto usando el ID, o crearlo si no existe
+            // Buscar el producto usando el ID o crearlo si no existe
             ProductoEntity producto = productoRepository.findByProducto(detalleRequest.getProducto())
                     .orElseGet(() -> {
-                        // Si el producto no existe, crearlo
+                        // Crear un nuevo producto
                         ProductoEntity nuevoProducto = ProductoEntity.builder()
-                                .producto(detalleRequest.getProducto()) // Usar el ID como código de producto
-                                .nombre(detalleRequest.getNombre()) // Nombre del producto
-                                .proveedor(cotizacion.getProveedor()) // Asignar el proveedor de la cotización
+                                .producto(detalleRequest.getProducto())
+                                .nombre(detalleRequest.getNombre())
+                                .proveedor(cotizacion.getProveedor())
                                 .build();
-                        return productoRepository.save(nuevoProducto);
+
+                        ProductoEntity savedProducto = productoRepository.save(nuevoProducto);
+
+                        // 🚨 Verificar si realmente se guardó
+                        if (savedProducto.getId() == null) {
+                            throw new RuntimeException("Error al crear el producto: " + detalleRequest.getProducto());
+                        }
+
+                        return savedProducto;
                     });
 
             // Si el producto no está en la cotización, agregarlo
@@ -172,6 +177,7 @@ public class CotizacionServiceImpl implements CotizacionService {
                         .build())
                 .detalleCotizacionDTO(
                         cotizacionEntity.getDetalleCotizacion().stream()
+                                .sorted(Comparator.comparing(detalle -> detalle.getProducto().getId(), Comparator.reverseOrder())) // Orden DESC por id producto
                                 .map(detalle -> DetalleCotizacionDTO.builder()
                                         .id(detalle.getId())
                                         .cantidad(detalle.getCantidad())
@@ -185,6 +191,7 @@ public class CotizacionServiceImpl implements CotizacionService {
                 )
                 .build();
     }
+
     private String generateNextCotizacionNumero(String lastNumero) {
         if (lastNumero == null || lastNumero.isEmpty()) {
             return "COT0001";  // Primer número
