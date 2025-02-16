@@ -69,6 +69,10 @@ public class    ProveedorRequest {
     @Size(max = 255, message = "El correo no puede tener más de 255 caracteres.")
     private String correo;
 
+    @Email(message = "El correo debe tener un formato válido.")
+    @Size(max = 255, message = "El correo no puede tener más de 255 caracteres.")
+    private String correoContacto;
+
     private SignUpRequest usuario;
 
     private List<ProductoRequest> productos; // Lista de productos relacionados

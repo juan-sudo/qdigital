@@ -166,6 +166,7 @@ const [isModalOpen, setIsModalOpen] = useState(false); // Estado para manejar el
 
 //correo
 const [isValidCorreo, setIsValidCorreo] = useState(true);
+const [isValidCorreoContacto, setIsValidCorreoContacto] = useState(true);
 const [isValidCiudad, setIsValidCiudad] = useState(true);
 const [isValidFonoProveedor, setIsValidFonoProveedor] = useState(true);
 const [isValidDireccion, setIsValidDireccion] = useState(true);
@@ -188,6 +189,7 @@ const [direccion, setDireccion] = useState('');
 const [nombre, setNombre] = useState('');
 const [region, setRegion] = useState('');
 const [comuna, setComuna] = useState('');
+const [correoContacto, setCorreoContacto] = useState('');
 const [codigo, setCodigo] = useState('');
 const [atencion, setAtencion] = useState('');
 const [celular, setCelular] = useState('');
@@ -198,7 +200,7 @@ const [flete, setFlete] = useState('');
 
 //TOCHET NUEVO CLIENTE
 const [isTouchedEmail, setIsTouchedEmail] = useState(false); // Para verificar si el campo fue tocado
-const [isTouchedCiudad, setIsTouchedCiudad] = useState(false); // Para verificar si el campo fue tocado
+const [isTouchedCorreoContacto, setIsTouchedisTouchedCorreoContacto] = useState(false); // Para verificar si el campo fue tocado
 const [isTouchedFono, setIsTouchedFono] = useState(false); // Para verificar si el campo fue tocado
 const [isTouchedDireccion, setIsTouchedDireccion] = useState(false); // Para verificar si el campo fue tocado
 const [isTouchedNombre, setIsTouchedNombre] = useState(false); // Para verificar si el campo fue tocado
@@ -369,6 +371,7 @@ const handleEditClickCosto = () => {
       setEmail(selectedClienteItem?.correo || ""); // Usa optional chaining
       setAtencion(selectedClienteItem?.atencion || ""); // Usa optional chaining
       setCelular(selectedClienteItem?.celuVenta || ""); // Usa optional chaining
+      setCorreoContacto(selectedClienteItem?.correoContacto || ""); // Usa optional chaining
       
     }
     setIsEditingCliente(true); // Cambia a modo de edición
@@ -668,6 +671,21 @@ React.useEffect(() => {
 
   };
 
+   //COOREO CONTACTO
+   const handleCorreoContactoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCorreoContacto(value);
+
+    // Validación básica del correo
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    setIsValidCorreoContacto(emailPattern.test(value));
+  };
+
+  const handleBlurCorreoContacto = () => {
+    setIsTouchedisTouchedCorreoContacto(true); // Marca el campo como tocado al salir del campo 
+  };
+
+
   //ADMINISTRIVO
   const handleAdministrativoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase(); // Convertir el valor a mayúsculas
@@ -849,7 +867,6 @@ React.useEffect(() => {
             nombre: item.nombre,
             direccion: item.direccion, // string
             fono1: item.fono1,         // string
-            //ciudad: item.ciudad,
             region:item.region,       // string
             comuna:item.comuna,
             atencion: item.atencion,   // string
@@ -863,6 +880,7 @@ React.useEffect(() => {
             docto: item.docto,                   // number
             chAdj: item.chAdj,
             correo: item.correo ,
+            correoContacto: item.correoContacto ,
             fechaRegistro: item.fechaRegistro ,
 
           
@@ -1766,6 +1784,10 @@ const guardarClienteProveedor = () => {
   if (!comuna.trim()) {
     mensajes.push("El campo 'Comuna' está vacío.");
   }
+  if (!correoContacto.trim()) {
+    mensajes.push("El campo 'correo contacto' está vacío.");
+  }
+
 
   // Si hay mensajes, significa que hay campos vacíos
   if (mensajes.length > 0) {
@@ -1805,7 +1827,8 @@ const guardarClienteProveedor = () => {
           correo:email,
           celuVenta:celular,
           region:region,
-          comuna:comuna
+          comuna:comuna,
+          correoContacto:correoContacto
           
         
         };
@@ -2048,11 +2071,11 @@ const guardarClienteProveedor = () => {
                   Atención
                 </th>
                 <th className="min-w-[120px] py-2 px-4 font-medium text-black dark:text-white">
-                  Dias
+                  N° Días Credito
                 </th>
                 
                 
-                <th className="py-2 px-4 font-medium text-black dark:text-white">
+                <th className="py-2 px-4 font-medium text-black dark:text-white text-center ">
                   Acción
                 </th>
               </tr>
@@ -2123,8 +2146,8 @@ const guardarClienteProveedor = () => {
 
 
                
-                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark text-right">
-                      <div className="flex justify-end items-center space-x-3.5">
+                <td className="border-b border-[#eee] py-2 px-4 dark:border-strokedark text-center ">
+                      <div className="flex justify-center items-center space-x-3.5">
                         <button
                           className="hover:text-primary"
                           onClick={() => openModalCliente(proveedorDataItem)}
@@ -2391,7 +2414,7 @@ const guardarClienteProveedor = () => {
     
 <div className="bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[1000px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
 
-      <h2 className="text-3xl font-bold mb-4 text-start">Costos operacionales</h2> 
+      <h2 className="text-3xl font-bold mb-4 text-start">Costos operacionales (%)</h2> 
       <button
               type="button"
               className="absolute top-0 right-2 text-3xl text-gray-600 dark:text-white hover:text-black hover:bg-gray-200 dark:hover:bg-gray-700 w-8 h-8 flex items-center justify-center  ease-in-out duration-200 sm:absolute sm:top-0 sm:right-2 lg:top-[5px] lg:right-[5px] rounded-lg"
@@ -2408,50 +2431,117 @@ const guardarClienteProveedor = () => {
 
   
  
-   {/* Contenedor para los campos */}
-   <div className=" ">
-          
-          {/* Tipo de solicitud */}
-          <div className="mb-4  flex justify-between">
+ 
+        
 
-
-          <div className="flex justify-start items-center">
-          <p className='text-1xl font-bold '>Proveedor: </p>
+          <div className="flex justify-between ">
+            <div className='flex justify-start items-center'>
+            <p className='text-1xl font-bold '>Proveedor: </p>
               <p className='px-2 text-1xl font-bold '>{selectedCostosItem.nombre}</p>
               
             </div>
-
             {selectedCostosItem.flete ? (
-            <div className="flex justify-end items-center ">
+            <div className="flex justify-end items-end ">
 
             {!isEditingCosto ? (
-          <button
-            className="flex items-center  "
-            onClick={handleEditClickCosto} // Activa el modo de edición
-          >
-            <MdEdit className="text-sm" />
-            <span className='pl-2'>Modificar</span>
-          </button>
-        ) : (
-          <button
-            className="flex items-center py-2 px-4 "
-            onClick={handleCancelClickCosto} // Cancela la edición
-          >
-            <MdEdit className="text-sm" />
-            <span className='pl-2'>Cancelar</span>
-          </button>
-        )}
 
-        </div>
-          ) : (
+          <button
+             className="flex flex-col items-center gap-2 "
+          onClick={handleEditClickCosto} // Activa el modo de edición
+        >
+         <div className="p-2 border border-stroke bg-white dark:border-strokedark dark:bg-boxdark rounded-full flex items-center justify-center">
+
+          <svg
+                          className="fill-current text-blue-700"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.8" clipPath="url(#clip0_88_10224)">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M1.56524 3.23223C2.03408 2.76339 2.66997 2.5 3.33301 2.5H9.16634C9.62658 2.5 9.99967 2.8731 9.99967 3.33333C9.99967 3.79357 9.62658 4.16667 9.16634 4.16667H3.33301C3.11199 4.16667 2.90003 4.25446 2.74375 4.41074C2.58747 4.56702 2.49967 4.77899 2.49967 5V16.6667C2.49967 16.8877 2.58747 17.0996 2.74375 17.2559C2.90003 17.4122 3.11199 17.5 3.33301 17.5H14.9997C15.2207 17.5 15.4326 17.4122 15.5889 17.2559C15.7452 17.0996 15.833 16.8877 15.833 16.6667V10.8333C15.833 10.3731 16.2061 10 16.6663 10C17.1266 10 17.4997 10.3731 17.4997 10.8333V16.6667C17.4997 17.3297 17.2363 17.9656 16.7674 18.4344C16.2986 18.9033 15.6627 19.1667 14.9997 19.1667H3.33301C2.66997 19.1667 2.03408 18.9033 1.56524 18.4344C1.0964 17.9656 0.833008 17.3297 0.833008 16.6667V5C0.833008 4.33696 1.0964 3.70107 1.56524 3.23223Z"
+                              fill=""
+                            />
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M16.6664 2.39884C16.4185 2.39884 16.1809 2.49729 16.0056 2.67253L8.25216 10.426L7.81167 12.188L9.57365 11.7475L17.3271 3.99402C17.5023 3.81878 17.6008 3.5811 17.6008 3.33328C17.6008 3.08545 17.5023 2.84777 17.3271 2.67253C17.1519 2.49729 16.9142 2.39884 16.6664 2.39884ZM14.8271 1.49402C15.3149 1.00622 15.9765 0.732178 16.6664 0.732178C17.3562 0.732178 18.0178 1.00622 18.5056 1.49402C18.9934 1.98182 19.2675 2.64342 19.2675 3.33328C19.2675 4.02313 18.9934 4.68473 18.5056 5.17253L10.5889 13.0892C10.4821 13.196 10.3483 13.2718 10.2018 13.3084L6.86847 14.1417C6.58449 14.2127 6.28409 14.1295 6.0771 13.9225C5.87012 13.7156 5.78691 13.4151 5.85791 13.1312L6.69124 9.79783C6.72787 9.65131 6.80364 9.51749 6.91044 9.41069L14.8271 1.49402Z"
+                              fill=""
+                            />
+                          </g>
+                          <defs>
+                            <clipPath id="clip0_88_10224">
+                              <rect width="20" height="20" fill="white" />
+                            </clipPath>
+                          </defs>
+                        </svg>
+                        </div>
+                        <span>Modificar</span>
+        </button>
+        
+            ) : (
+
+              
+
+              <button
+          className="flex flex-col items-center gap-2"
+          onClick={handleCancelClickCosto} // Cancela la edición
+        >
+       
+       <div className="p-2 border border-stroke bg-white dark:border-strokedark dark:bg-boxdark rounded-full flex items-center justify-center">
+
+          <svg
+                          className="fill-current text-blue-700"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.8" clipPath="url(#clip0_88_10224)">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M1.56524 3.23223C2.03408 2.76339 2.66997 2.5 3.33301 2.5H9.16634C9.62658 2.5 9.99967 2.8731 9.99967 3.33333C9.99967 3.79357 9.62658 4.16667 9.16634 4.16667H3.33301C3.11199 4.16667 2.90003 4.25446 2.74375 4.41074C2.58747 4.56702 2.49967 4.77899 2.49967 5V16.6667C2.49967 16.8877 2.58747 17.0996 2.74375 17.2559C2.90003 17.4122 3.11199 17.5 3.33301 17.5H14.9997C15.2207 17.5 15.4326 17.4122 15.5889 17.2559C15.7452 17.0996 15.833 16.8877 15.833 16.6667V10.8333C15.833 10.3731 16.2061 10 16.6663 10C17.1266 10 17.4997 10.3731 17.4997 10.8333V16.6667C17.4997 17.3297 17.2363 17.9656 16.7674 18.4344C16.2986 18.9033 15.6627 19.1667 14.9997 19.1667H3.33301C2.66997 19.1667 2.03408 18.9033 1.56524 18.4344C1.0964 17.9656 0.833008 17.3297 0.833008 16.6667V5C0.833008 4.33696 1.0964 3.70107 1.56524 3.23223Z"
+                              fill=""
+                            />
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M16.6664 2.39884C16.4185 2.39884 16.1809 2.49729 16.0056 2.67253L8.25216 10.426L7.81167 12.188L9.57365 11.7475L17.3271 3.99402C17.5023 3.81878 17.6008 3.5811 17.6008 3.33328C17.6008 3.08545 17.5023 2.84777 17.3271 2.67253C17.1519 2.49729 16.9142 2.39884 16.6664 2.39884ZM14.8271 1.49402C15.3149 1.00622 15.9765 0.732178 16.6664 0.732178C17.3562 0.732178 18.0178 1.00622 18.5056 1.49402C18.9934 1.98182 19.2675 2.64342 19.2675 3.33328C19.2675 4.02313 18.9934 4.68473 18.5056 5.17253L10.5889 13.0892C10.4821 13.196 10.3483 13.2718 10.2018 13.3084L6.86847 14.1417C6.58449 14.2127 6.28409 14.1295 6.0771 13.9225C5.87012 13.7156 5.78691 13.4151 5.85791 13.1312L6.69124 9.79783C6.72787 9.65131 6.80364 9.51749 6.91044 9.41069L14.8271 1.49402Z"
+                              fill=""
+                            />
+                          </g>
+                          <defs>
+                            <clipPath id="clip0_88_10224">
+                              <rect width="20" height="20" fill="white" />
+                            </clipPath>
+                          </defs>
+                        </svg>
+                        </div>
+                        <span className='pl-2'>No modificar</span>
+        </button>
+           
+            )}
+
+            </div>
+            
+            ) : (
             <div></div>
 
-          )}
-          </div>
+            )}
+
+        
+            </div>
 
          
+         
 
-        </div>
+        
 
   
      
@@ -2837,9 +2927,9 @@ const guardarClienteProveedor = () => {
 
 {showModalCliente &&  selectedClienteItem &&  (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-999">
-<div className="bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[1000px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
+<div className="bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[900px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
 
-      <h2 className="text-3xl font-bold mb-4 text-start">Subproceso proveedor</h2> 
+      <h2 className="text-3xl font-bold mb-4 text-center">Subproceso proveedor</h2> 
     {/* Botón de cierre */}
     <button
   type="button"
@@ -2861,51 +2951,7 @@ const guardarClienteProveedor = () => {
 <hr className="border-t dark:border-gray-600 border-gray-300 my-4 mx-auto"/>
 
   
-      {/* Contenedor para los campos */}
-      <div className=" ">
-          
-          {/* Tipo de solicitud */}
-          <div className="mb-4  flex justify-between">
-
-
-          <div className="flex justify-start items-center">
-          <p className='text-1xl font-bold '>Proveedor: </p>
-              <p className='px-2 text-1xl font-bold '>{selectedClienteItem.nombre}</p>
-              
-            </div>
-
-            {selectedClienteItem.direccion ? (
-            <div className="flex justify-end items-center ">
-
-            {!isEditingCliente ? (
-          <button
-            className="flex items-center  "
-            onClick={handleEditClickCliente} // Activa el modo de edición
-          >
-            <MdEdit className="text-sm" />
-            <span className='pl-2'>Modificar</span>
-          </button>
-        ) : (
-          <button
-            className="flex items-center py-2 px-4 "
-            onClick={handleCancelClickCliente} // Cancela la edición
-          >
-            <MdEdit className="text-sm" />
-            <span className='pl-2'>No modificar</span>
-          </button>
-        )}
-
-        </div>
-          ) : (
-            <div></div>
-
-          )}
-          </div>
-
-         
-
-        </div>
-
+    
 
          {/* DATOS CLIENTE NUEVO */}
          
@@ -2923,8 +2969,7 @@ const guardarClienteProveedor = () => {
       ref={codigoInputRef} // Vincula la referencia
       type="text"
       placeholder="CARRERA 1807 (DOUGLAS NAVARRO)"
-      className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-        ${
+      className={`w-full rounded border border-stroke bg-gray py-2 pl-3 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary        ${
           isTouchedDireccion && (!direccion )
             ? "border-red-500 focus:ring-red-500"
             : isTouchedDireccion && direccion 
@@ -2949,11 +2994,33 @@ const guardarClienteProveedor = () => {
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       Fono
     </label>
+
+    <div className="relative">
+    <span className="absolute left-4.5 top-3 text-gray-400 dark:text-gray-450">
+  <svg
+    className="stroke-current"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.6 2.2C7.5 2.1 8.3 2.6 8.7 3.4L10.4 7.3C10.8 8.2 10.5 9.2 9.7 9.8L8.2 11C9.7 14.1 11.9 16.3 15 17.8L16.2 16.3C16.8 15.5 17.8 15.2 18.7 15.6L22.6 17.3C23.4 17.7 23.9 18.5 23.8 19.4C23.6 21.4 22.1 23 20 23C15.4 23 11.2 21 7.8 17.6C4.4 14.2 2.4 10 2.4 5.4C2.4 3.3 4 1.8 6 1.6C6.2 1.6 6.4 1.6 6.6 2.2Z"
+    />
+  </svg>
+</span>
+
+
     <input
     type="text"
-    placeholder="385200"
-    className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-      ${
+    placeholder="066 385200"
+    className={`w-full rounded border border-stroke bg-gray py-2 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary   
+         ${
         isTouchedFono && (!fonoProveedor )
           ? "border-red-500 focus:ring-red-500"
           : isTouchedFono && fonoProveedor 
@@ -2966,6 +3033,7 @@ const guardarClienteProveedor = () => {
     onBlur={handleBlurFono}
       required
   />
+  </div>
   {/* Mostrar el mensaje de error si el campo está vacío o el correo no es válido */}
   {isTouchedFono &&  !fonoProveedor && (
         <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
@@ -2979,14 +3047,39 @@ const guardarClienteProveedor = () => {
    {/* CORREO */}
   <div className="flex flex-col w-full sm:w-1/3 relative">
   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-    Correo
+    Correo proveedor
   </label>
   
-  
+  <div className="relative">
+  <span className="absolute left-4.5 top-3">
+                        <svg
+                          className="fill-current"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.8">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M3.33301 4.16667C2.87658 4.16667 2.49967 4.54357 2.49967 5V15C2.49967 15.4564 2.87658 15.8333 3.33301 15.8333H16.6663C17.1228 15.8333 17.4997 15.4564 17.4997 15V5C17.4997 4.54357 17.1228 4.16667 16.6663 4.16667H3.33301ZM0.833008 5C0.833008 3.6231 1.9561 2.5 3.33301 2.5H16.6663C18.0432 2.5 19.1663 3.6231 19.1663 5V15C19.1663 16.3769 18.0432 17.5 16.6663 17.5H3.33301C1.9561 17.5 0.833008 16.3769 0.833008 15V5Z"
+                              fill=""
+                            />
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M0.983719 4.52215C1.24765 4.1451 1.76726 4.05341 2.1443 4.31734L9.99975 9.81615L17.8552 4.31734C18.2322 4.05341 18.7518 4.1451 19.0158 4.52215C19.2797 4.89919 19.188 5.4188 18.811 5.68272L10.4776 11.5161C10.1907 11.7169 9.80879 11.7169 9.52186 11.5161L1.18853 5.68272C0.811486 5.4188 0.719791 4.89919 0.983719 4.52215Z"
+                              fill=""
+                            />
+                          </g>
+                        </svg>
+                      </span>
   <input
     type="email"
     placeholder="example@gmail.com"
-    className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
+    className={`w-full rounded border border-stroke bg-gray py-2 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
       ${
         isTouchedEmail && (!email || !isValidCorreo)
           ? "border-red-500 focus:ring-red-500"
@@ -2999,7 +3092,7 @@ const guardarClienteProveedor = () => {
     onBlur={handleBlur}
     required
   />
-
+</div>
   {/* Mensajes dinámicos */}
   {isTouchedEmail && !email && (
     <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
@@ -3042,7 +3135,8 @@ const guardarClienteProveedor = () => {
       <input
         type="text"
         placeholder="Escribe para filtrar"
-        className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border ${
+        className={`w-full rounded border border-stroke bg-gray py-2 pl-3 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
+           ${
          
           isTouchedRegion && !region?
            "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"
@@ -3097,7 +3191,9 @@ const guardarClienteProveedor = () => {
   <input
     type="text"
     placeholder="Escribe para filtrar"
-    className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border ${
+    className={`w-full rounded border border-stroke bg-gray py-2 pl-3 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
+      
+      ${
       isTouchedComuna && !comuna
         ? "border-red-500 focus:ring-red-500"
         : "border-gray-300 dark:border-gray-600"
@@ -3157,129 +3253,307 @@ const guardarClienteProveedor = () => {
    
   ) : (
     
-<div className="mb-4 flex flex-col  w-full">
-   <div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
-  {/* CLIENTE MODIFICAR */}
-  <div className="flex flex-col w-full sm:w-1/3 relative">
-   {/* Botón dinámico */}
-  
+<div className="  flex flex-col  w-full">
 
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-       Direccion
-    </label>
-   
-    {isEditingCliente ? (
-    <input
-      type="text"
-      placeholder="CARRERA 1807 (DOUGLAS NAVARRO)"
-      className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-        ${
-          isTouchedDireccion && (!direccion )
-            ? "border-red-500 focus:ring-red-500"
-            : isTouchedDireccion && direccion
-            ?"border-gray-300 dark:border-gray-600"
-            : "border-gray-300 dark:border-gray-600"
-        }`}
-    value={direccion}
-    onChange={handleDireccionChange}
-
-      onBlur={handleBlurDireccion}
-      required
-   />
-      ) : (
-    <p className='w-full py-2'>
-          {selectedClienteItem.direccion}
-        </p>
-    )}
-   {isTouchedDireccion &&  !direccion && (
-        <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
-         *LA direccion es obligatorio.
-        </span>
-      )}
-  </div>
-
-  {/* Fono */}
-  <div className="flex flex-col w-full sm:w-1/3 relative">
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-      Fono
-    </label>
-    {isEditingCliente ? (
-    <input
-    type="text"
-    placeholder="385200"
-    className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-      ${
-        isTouchedFono && (!fonoProveedor )
-          ? "border-red-500 focus:ring-red-500"
-          : isTouchedFono && fonoProveedor 
-          ?"border-gray-300 dark:border-gray-600"
-          : "border-gray-300 dark:border-gray-600"
-      }`}
-    
-    value={fonoProveedor}
-    onChange={handleFonoProveedorChange}
-    onBlur={handleBlurFono}
-      required
-  />
-) : (
-  <p className='w-full py-2'>
-        {selectedClienteItem.fono1}
-      </p>
-  )}
-  {/* Mostrar el mensaje de error si el campo está vacío o el correo no es válido */}
-  {isTouchedFono &&  !fonoProveedor && (
-        <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
-         *El fono es obligatorio.
-        </span>
-      )}
-      
-  </div>
-
-
-
-
-
-   {/* CORREO */}
-  <div className="flex flex-col w-full sm:w-1/3 relative">
-  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-    Correo
+  <div className=" flex flex-col space-y-1 w-full">
+ 
+{/* DIRECCIÓN */}
+<div className="flex w-full items-center relative">
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-1/5">
+    DIRECCIÓN
   </label>
   {isEditingCliente ? (
-  
-  <input
-    type="email"
-    placeholder="example@gmail.com"
-    className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-      ${
-        isTouchedEmail && (!email || !isValidCorreo)
-          ? "border-red-500 focus:ring-red-500"
-          : isTouchedEmail && email && isValidCorreo
-          ?"border-gray-300 dark:border-gray-600"
-          : "border-gray-300 dark:border-gray-600"
-      }`}
-    value={email}
-    onChange={handleEmailChange}
-    onBlur={handleBlur}
-    required
-  />
-) : (
-  <p className='w-full py-2'>
-        {selectedClienteItem.correo}
-      </p>
+    <>
+    <span className="absolute left-45 ">
+  <svg
+    className="fill-current"
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g opacity="0.8">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M10 1.66667C6.77855 1.66667 4.16667 4.27855 4.16667 7.5C4.16667 9.99583 6.6075 13.5867 8.35667 16.025C9.05583 17.025 10.9442 17.025 11.6433 16.025C13.3925 13.5867 15.8333 9.99583 15.8333 7.5C15.8333 4.27855 13.2215 1.66667 10 1.66667ZM10 9.16667C8.80955 9.16667 7.83333 8.19045 7.83333 7C7.83333 5.80955 8.80955 4.83333 10 4.83333C11.1904 4.83333 12.1667 5.80955 12.1667 7C12.1667 8.19045 11.1904 9.16667 10 9.16667Z"
+        fill=""
+      />
+    </g>
+  </svg>
+</span>
+<input
+      type="text"
+      placeholder="CARRERA 1807 (DOUGLAS NAVARRO)"
+      className={`w-3/5 rounded border  border-stroke bg-gray py-2 pl-10 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
+        ${
+          isTouchedDireccion && !direccion
+            ? "border-red-500 focus:ring-red-500"
+            : "border-gray-300 dark:border-gray-600"
+        }`}
+      value={direccion}
+      onChange={handleDireccionChange}
+      onBlur={handleBlurDireccion}
+      required
+    />
+
+    </>
+   
+  ) : (
+    <>
+    
+    
+    <p className="w-3/5 py-1 text-gray-800 dark:text-gray-200">
+      {selectedClienteItem.direccion}
+    </p>
+    </>
   )}
 
-  {/* Mensajes dinámicos */}
+ <div className="relative  w-1/5">
+
+                {/* Tipo de solicitud */}
+                <div className="absolute top-0 right-0 z-10 p-4 border border-dashed border-primary rounded-md">
+
+
+            {selectedClienteItem.direccion ? (
+            <div className="flex justify-end items-end ">
+
+            {!isEditingCliente ? (
+
+          <button
+             className="flex flex-col items-center gap-2 "
+          onClick={handleEditClickCliente} // Activa el modo de edición
+        >
+         <div className="p-2 border border-stroke bg-white dark:border-strokedark dark:bg-boxdark rounded-full flex items-center justify-center">
+
+          <svg
+                          className="fill-current text-blue-700"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.8" clipPath="url(#clip0_88_10224)">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M1.56524 3.23223C2.03408 2.76339 2.66997 2.5 3.33301 2.5H9.16634C9.62658 2.5 9.99967 2.8731 9.99967 3.33333C9.99967 3.79357 9.62658 4.16667 9.16634 4.16667H3.33301C3.11199 4.16667 2.90003 4.25446 2.74375 4.41074C2.58747 4.56702 2.49967 4.77899 2.49967 5V16.6667C2.49967 16.8877 2.58747 17.0996 2.74375 17.2559C2.90003 17.4122 3.11199 17.5 3.33301 17.5H14.9997C15.2207 17.5 15.4326 17.4122 15.5889 17.2559C15.7452 17.0996 15.833 16.8877 15.833 16.6667V10.8333C15.833 10.3731 16.2061 10 16.6663 10C17.1266 10 17.4997 10.3731 17.4997 10.8333V16.6667C17.4997 17.3297 17.2363 17.9656 16.7674 18.4344C16.2986 18.9033 15.6627 19.1667 14.9997 19.1667H3.33301C2.66997 19.1667 2.03408 18.9033 1.56524 18.4344C1.0964 17.9656 0.833008 17.3297 0.833008 16.6667V5C0.833008 4.33696 1.0964 3.70107 1.56524 3.23223Z"
+                              fill=""
+                            />
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M16.6664 2.39884C16.4185 2.39884 16.1809 2.49729 16.0056 2.67253L8.25216 10.426L7.81167 12.188L9.57365 11.7475L17.3271 3.99402C17.5023 3.81878 17.6008 3.5811 17.6008 3.33328C17.6008 3.08545 17.5023 2.84777 17.3271 2.67253C17.1519 2.49729 16.9142 2.39884 16.6664 2.39884ZM14.8271 1.49402C15.3149 1.00622 15.9765 0.732178 16.6664 0.732178C17.3562 0.732178 18.0178 1.00622 18.5056 1.49402C18.9934 1.98182 19.2675 2.64342 19.2675 3.33328C19.2675 4.02313 18.9934 4.68473 18.5056 5.17253L10.5889 13.0892C10.4821 13.196 10.3483 13.2718 10.2018 13.3084L6.86847 14.1417C6.58449 14.2127 6.28409 14.1295 6.0771 13.9225C5.87012 13.7156 5.78691 13.4151 5.85791 13.1312L6.69124 9.79783C6.72787 9.65131 6.80364 9.51749 6.91044 9.41069L14.8271 1.49402Z"
+                              fill=""
+                            />
+                          </g>
+                          <defs>
+                            <clipPath id="clip0_88_10224">
+                              <rect width="20" height="20" fill="white" />
+                            </clipPath>
+                          </defs>
+                        </svg>
+                        </div>
+                        <span>Modificar</span>
+        </button>
+        
+            ) : (
+
+              
+
+              <button
+          className="flex flex-col items-center gap-2"
+          onClick={handleCancelClickCliente} // Cancela la edición
+        >
+       
+       <div className="p-2 border border-stroke bg-white dark:border-strokedark dark:bg-boxdark rounded-full flex items-center justify-center">
+
+          <svg
+                          className="fill-current text-blue-700"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.8" clipPath="url(#clip0_88_10224)">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M1.56524 3.23223C2.03408 2.76339 2.66997 2.5 3.33301 2.5H9.16634C9.62658 2.5 9.99967 2.8731 9.99967 3.33333C9.99967 3.79357 9.62658 4.16667 9.16634 4.16667H3.33301C3.11199 4.16667 2.90003 4.25446 2.74375 4.41074C2.58747 4.56702 2.49967 4.77899 2.49967 5V16.6667C2.49967 16.8877 2.58747 17.0996 2.74375 17.2559C2.90003 17.4122 3.11199 17.5 3.33301 17.5H14.9997C15.2207 17.5 15.4326 17.4122 15.5889 17.2559C15.7452 17.0996 15.833 16.8877 15.833 16.6667V10.8333C15.833 10.3731 16.2061 10 16.6663 10C17.1266 10 17.4997 10.3731 17.4997 10.8333V16.6667C17.4997 17.3297 17.2363 17.9656 16.7674 18.4344C16.2986 18.9033 15.6627 19.1667 14.9997 19.1667H3.33301C2.66997 19.1667 2.03408 18.9033 1.56524 18.4344C1.0964 17.9656 0.833008 17.3297 0.833008 16.6667V5C0.833008 4.33696 1.0964 3.70107 1.56524 3.23223Z"
+                              fill=""
+                            />
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M16.6664 2.39884C16.4185 2.39884 16.1809 2.49729 16.0056 2.67253L8.25216 10.426L7.81167 12.188L9.57365 11.7475L17.3271 3.99402C17.5023 3.81878 17.6008 3.5811 17.6008 3.33328C17.6008 3.08545 17.5023 2.84777 17.3271 2.67253C17.1519 2.49729 16.9142 2.39884 16.6664 2.39884ZM14.8271 1.49402C15.3149 1.00622 15.9765 0.732178 16.6664 0.732178C17.3562 0.732178 18.0178 1.00622 18.5056 1.49402C18.9934 1.98182 19.2675 2.64342 19.2675 3.33328C19.2675 4.02313 18.9934 4.68473 18.5056 5.17253L10.5889 13.0892C10.4821 13.196 10.3483 13.2718 10.2018 13.3084L6.86847 14.1417C6.58449 14.2127 6.28409 14.1295 6.0771 13.9225C5.87012 13.7156 5.78691 13.4151 5.85791 13.1312L6.69124 9.79783C6.72787 9.65131 6.80364 9.51749 6.91044 9.41069L14.8271 1.49402Z"
+                              fill=""
+                            />
+                          </g>
+                          <defs>
+                            <clipPath id="clip0_88_10224">
+                              <rect width="20" height="20" fill="white" />
+                            </clipPath>
+                          </defs>
+                        </svg>
+                        </div>
+                        <span className='pl-2'>No modificar</span>
+        </button>
+           
+            )}
+
+            </div>
+
+            ) : (
+            <div></div>
+
+            )}
+            </div>
+
+                      
+                      </div>
+ 
+  
+
+  {/* Mensaje de error */}
+  {isTouchedDireccion && !direccion && (
+    <span className="text-sm text-red-600 absolute top-full left-0">
+      * La dirección es obligatoria.
+    </span>
+  )}
+</div>
+
+
+{/* Fono */}
+<div className="flex w-full items-center  relative">
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-1/5">
+    FONO
+  </label>
+  {isEditingCliente ? (
+  <>
+  <span className="absolute left-45 top-3 text-gray-400 dark:text-gray-450">
+  <svg
+    className="stroke-current"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.6 2.2C7.5 2.1 8.3 2.6 8.7 3.4L10.4 7.3C10.8 8.2 10.5 9.2 9.7 9.8L8.2 11C9.7 14.1 11.9 16.3 15 17.8L16.2 16.3C16.8 15.5 17.8 15.2 18.7 15.6L22.6 17.3C23.4 17.7 23.9 18.5 23.8 19.4C23.6 21.4 22.1 23 20 23C15.4 23 11.2 21 7.8 17.6C4.4 14.2 2.4 10 2.4 5.4C2.4 3.3 4 1.8 6 1.6C6.2 1.6 6.4 1.6 6.6 2.2Z"
+    />
+  </svg>
+</span>
+<input
+      type="text"
+      placeholder="385200"
+      className={`w-3/5 rounded border  border-stroke bg-gray py-2 pl-10 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
+        ${
+          isTouchedFono && !fonoProveedor
+            ? "border-red-500 focus:ring-red-500"
+            : "border-gray-300 dark:border-gray-600"
+        }`}
+      value={fonoProveedor}
+      onChange={handleFonoProveedorChange}
+      onBlur={handleBlurFono}
+      required
+    />
+  
+  </>  
+   
+  ) : (
+    <p className="w-4/5 py-1 text-gray-800 dark:text-gray-200">
+      {selectedClienteItem.fono1}
+    </p>
+  )}
+  {/* Mostrar mensaje de error */}
+  {isTouchedFono && !fonoProveedor && (
+    <span className="text-sm text-red-600 absolute top-full left-0">
+      *El fono es obligatorio.
+    </span>
+  )}
+</div>
+
+
+
+
+
+
+  {/* CORREO */}
+  <div className="flex w-full items-center  relative">
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-1/5">
+    CORREO PROVEEDOR
+  </label>
+  {isEditingCliente ? (
+   <>
+   <span className="absolute left-45 top-3">
+                        <svg
+                          className="fill-current"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.8">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M3.33301 4.16667C2.87658 4.16667 2.49967 4.54357 2.49967 5V15C2.49967 15.4564 2.87658 15.8333 3.33301 15.8333H16.6663C17.1228 15.8333 17.4997 15.4564 17.4997 15V5C17.4997 4.54357 17.1228 4.16667 16.6663 4.16667H3.33301ZM0.833008 5C0.833008 3.6231 1.9561 2.5 3.33301 2.5H16.6663C18.0432 2.5 19.1663 3.6231 19.1663 5V15C19.1663 16.3769 18.0432 17.5 16.6663 17.5H3.33301C1.9561 17.5 0.833008 16.3769 0.833008 15V5Z"
+                              fill=""
+                            />
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M0.983719 4.52215C1.24765 4.1451 1.76726 4.05341 2.1443 4.31734L9.99975 9.81615L17.8552 4.31734C18.2322 4.05341 18.7518 4.1451 19.0158 4.52215C19.2797 4.89919 19.188 5.4188 18.811 5.68272L10.4776 11.5161C10.1907 11.7169 9.80879 11.7169 9.52186 11.5161L1.18853 5.68272C0.811486 5.4188 0.719791 4.89919 0.983719 4.52215Z"
+                              fill=""
+                            />
+                          </g>
+                        </svg>
+                      </span>
+                      <input
+      type="email"
+      placeholder="example@gmail.com"
+      className={`w-3/5 rounded border  border-stroke bg-gray py-2 pl-10 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
+        ${
+          isTouchedEmail && (!email || !isValidCorreo)
+            ? "border-red-500 focus:ring-red-500"
+            : "border-gray-300 dark:border-gray-600"
+        }`}
+      value={email}
+      onChange={handleEmailChange}
+      onBlur={handleBlur}
+      required
+    />
+   
+   </>
+  
+  ) : (
+    <p className="w-4/5 py-1  text-gray-800 dark:text-gray-200">
+      {selectedClienteItem.correo}
+    </p>
+  )}
+
+  {/* Mensajes de error */}
   {isTouchedEmail && !email && (
-    <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
+    <span className="text-sm text-red-600 absolute top-full left-0">
       * El correo es obligatorio.
     </span>
   )}
   {isTouchedEmail && email && !isValidCorreo && (
-    <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
+    <span className="text-sm text-red-600 absolute top-full left-0">
       * Por favor, ingrese un correo válido.
     </span>
   )}
 </div>
+
 
 
 </div>
@@ -3297,79 +3571,154 @@ const guardarClienteProveedor = () => {
     </p>
   </div>
 </div>
-<div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
 
 
-  {/* REGION */}
-  <div className="flex flex-col w-full sm:w-1/2 relative">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        Region
-      </label>
-      {isEditingCliente ? (
-      <input
-        type="text"
-        placeholder="Escribe para filtrar"
-        className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border ${
-         
-          isTouchedRegion && !region?
-           "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"
-        }`}
-        value={region}
-        onChange={handleRegionChange}
-        //onFocus={handleFocusRegion}
-        onFocus={() =>
-          setFilteredOptionsR(
-            RegionesYcomunas.regiones.map((r) => r.NombreRegion)
-          )
-        }
-       // onBlur={() => setTimeout(() => setFilteredOptionsR([]), 150)}
-        onBlur={handleBlurRegion}
-        onKeyDown={handleKeyDownRegion}
-        required
-      />
-    ) : (
-      <p className='w-full py-2'>
-            {selectedClienteItem.region}
-          </p>
-      )}
-       {isTouchedRegion && !region && (
+<div className="mb-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full">
+
+
+{/* Region */}
+<div className="flex w-full sm:w-1/2 items-center  relative">
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-1/6">
+    REGIÓN
+  </label>
+  {isEditingCliente ? (
+    <>
+    
+    <span className="absolute top-1/2 left-20 z-30 -translate-y-1/2">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g opacity="0.8">
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M10.0007 2.50065C5.85852 2.50065 2.50065 5.85852 2.50065 10.0007C2.50065 14.1428 5.85852 17.5007 10.0007 17.5007C14.1428 17.5007 17.5007 14.1428 17.5007 10.0007C17.5007 5.85852 14.1428 2.50065 10.0007 2.50065ZM0.833984 10.0007C0.833984 4.93804 4.93804 0.833984 10.0007 0.833984C15.0633 0.833984 19.1673 4.93804 19.1673 10.0007C19.1673 15.0633 15.0633 19.1673 10.0007 19.1673C4.93804 19.1673 0.833984 15.0633 0.833984 10.0007Z"
+                fill="#637381"
+              ></path>
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M0.833984 9.99935C0.833984 9.53911 1.20708 9.16602 1.66732 9.16602H18.334C18.7942 9.16602 19.1673 9.53911 19.1673 9.99935C19.1673 10.4596 18.7942 10.8327 18.334 10.8327H1.66732C1.20708 10.8327 0.833984 10.4596 0.833984 9.99935Z"
+                fill="#637381"
+              ></path>
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M7.50084 10.0008C7.55796 12.5632 8.4392 15.0301 10.0006 17.0418C11.5621 15.0301 12.4433 12.5632 12.5005 10.0008C12.4433 7.43845 11.5621 4.97153 10.0007 2.95982C8.4392 4.97153 7.55796 7.43845 7.50084 10.0008ZM10.0007 1.66749L9.38536 1.10547C7.16473 3.53658 5.90275 6.69153 5.83417 9.98346C5.83392 9.99503 5.83392 10.0066 5.83417 10.0182C5.90275 13.3101 7.16473 16.4651 9.38536 18.8962C9.54325 19.069 9.76655 19.1675 10.0007 19.1675C10.2348 19.1675 10.4581 19.069 10.6159 18.8962C12.8366 16.4651 14.0986 13.3101 14.1671 10.0182C14.1674 10.0066 14.1674 9.99503 14.1671 9.98346C14.0986 6.69153 12.8366 3.53658 10.6159 1.10547L10.0007 1.66749Z"
+                fill="#637381"
+              ></path>
+            </g>
+          </svg>
+        </span>
+        <input
+      type="text"
+      placeholder="Escribe para filtrar"
+      className={`w-5/6 rounded border  border-stroke bg-gray py-2 pl-8 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
+        ${
+        isTouchedRegion && !region
+          ? "border-red-500 focus:ring-red-500"
+          : "border-gray-300 dark:border-gray-600"
+      } relative`} // Se mantiene "relative" para que el ul se posicione bien debajo del input
+      value={region}
+      onChange={handleRegionChange}
+      onFocus={() =>
+        setFilteredOptionsR(RegionesYcomunas.regiones.map((r) => r.NombreRegion))
+      }
+      onBlur={handleBlurRegion}
+      onKeyDown={handleKeyDownRegion}
+      required
+    />
+
+    </>
+    
+  ) : (
+    <p className="w-5/6 py-2 text-gray-800 dark:text-gray-200">
+      {selectedClienteItem.region}
+    </p>
+  )}
+
+  {/* Mensaje de error */}
+  {isTouchedRegion && !region && (
     <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
-      *Seleciona una region
+      *Selecciona una región
     </span>
   )}
 
-      {filteredOptionsR.length > 0 && (
-        <ul
-          ref={listRef} // Referencia al contenedor de la lista
-          className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]"
+  {/* Lista de opciones filtradas */}
+  {filteredOptionsR.length > 0 && (
+    <ul
+      ref={listRef}
+      className="absolute top-full ml-20 mt-1 w-5/6 bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]"
+      style={{ left: '0' }} // Se asegura que el UL comience en la misma posición horizontal que el input
+    >
+      {filteredOptionsR.map((option, index) => (
+        <li
+          ref={(el) => (optionRefs.current[index] = el!)}
+          key={index}
+          className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 ${
+            selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
+          }`}
+          onMouseDown={() => handleOptionClick(option)}
         >
-          {filteredOptionsR.map((option, index) => (
-            <li
-              ref={(el) => (optionRefs.current[index] = el!)} // Asigna la referencia a cada elemento
-              key={index}
-              className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 ${
-                selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
-              }`}
-              onMouseDown={() => handleOptionClick(option)} // Evitar conflicto con onBlur
-            >
-              <span>{option}</span>
-              {selectedIndex === index && <MdCheck className="text-green-500" />}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+          <span>{option}</span>
+          {selectedIndex === index && <MdCheck className="text-green-500" />}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+
+
 
   {/* COMUNAS  */}
-  <div className="flex flex-col w-full sm:w-1/2 relative">
-  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-    Comuna
+  <div className="flex w-full sm:w-1/2 items-center  relative">
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-1/6">
+    COMUNA
   </label>
   {isEditingCliente ? (
-  <input
+    <>
+    
+    <span className="absolute top-1/2 left-22 z-30 -translate-y-1/2">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g opacity="0.8">
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M10.0007 2.50065C5.85852 2.50065 2.50065 5.85852 2.50065 10.0007C2.50065 14.1428 5.85852 17.5007 10.0007 17.5007C14.1428 17.5007 17.5007 14.1428 17.5007 10.0007C17.5007 5.85852 14.1428 2.50065 10.0007 2.50065ZM0.833984 10.0007C0.833984 4.93804 4.93804 0.833984 10.0007 0.833984C15.0633 0.833984 19.1673 4.93804 19.1673 10.0007C19.1673 15.0633 15.0633 19.1673 10.0007 19.1673C4.93804 19.1673 0.833984 15.0633 0.833984 10.0007Z"
+                fill="#637381"
+              ></path>
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M0.833984 9.99935C0.833984 9.53911 1.20708 9.16602 1.66732 9.16602H18.334C18.7942 9.16602 19.1673 9.53911 19.1673 9.99935C19.1673 10.4596 18.7942 10.8327 18.334 10.8327H1.66732C1.20708 10.8327 0.833984 10.4596 0.833984 9.99935Z"
+                fill="#637381"
+              ></path>
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M7.50084 10.0008C7.55796 12.5632 8.4392 15.0301 10.0006 17.0418C11.5621 15.0301 12.4433 12.5632 12.5005 10.0008C12.4433 7.43845 11.5621 4.97153 10.0007 2.95982C8.4392 4.97153 7.55796 7.43845 7.50084 10.0008ZM10.0007 1.66749L9.38536 1.10547C7.16473 3.53658 5.90275 6.69153 5.83417 9.98346C5.83392 9.99503 5.83392 10.0066 5.83417 10.0182C5.90275 13.3101 7.16473 16.4651 9.38536 18.8962C9.54325 19.069 9.76655 19.1675 10.0007 19.1675C10.2348 19.1675 10.4581 19.069 10.6159 18.8962C12.8366 16.4651 14.0986 13.3101 14.1671 10.0182C14.1674 10.0066 14.1674 9.99503 14.1671 9.98346C14.0986 6.69153 12.8366 3.53658 10.6159 1.10547L10.0007 1.66749Z"
+                fill="#637381"
+              ></path>
+            </g>
+          </svg>
+        </span>
+
+        <input
     type="text"
     placeholder="Escribe para filtrar"
-    className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border ${
+    className={`w-5/6 ml-3 rounded border  border-stroke bg-gray py-2 pl-8 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
+       ${
       isTouchedComuna && !comuna
         ? "border-red-500 focus:ring-red-500"
         : "border-gray-300 dark:border-gray-600"
@@ -3381,8 +3730,11 @@ const guardarClienteProveedor = () => {
     onKeyDown={handleKeyDownComuna}
     required
   />
+    
+    </>
+ 
 ) : (
-  <p className='w-full py-2'>
+  <p className='w-full ml-3 py-2'>
         {selectedClienteItem.comuna}
       </p>
   )}
@@ -3396,7 +3748,7 @@ const guardarClienteProveedor = () => {
   {filteredOptionsC.length > 0 && (
     <ul
     ref={listRefC} // Referencia al contenedor de la lista
-      className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]"
+      className="absolute top-full mt-1 w-5/6 ml-20 bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-800 z-50 overflow-y-auto max-h-[200px]"
     >
       {filteredOptionsC.map((option, index) => (
         <li
@@ -3425,7 +3777,12 @@ const guardarClienteProveedor = () => {
 
 
 </div>
+
+
+
 </div>
+
+
 )}
  
 
@@ -3435,6 +3792,7 @@ const guardarClienteProveedor = () => {
 
            {/* Separador */}
 <div className="mb-4 flex flex-row space-x-4 w-full"
+
 >
   <div className="relative w-full flex justify-center items-center">
     {/* Línea con texto en el centro */}
@@ -3456,16 +3814,40 @@ const guardarClienteProveedor = () => {
 
   <div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
   {/* Código */}
-  <div className="flex flex-col w-full sm:w-1/2 relative">
+  <div className="flex flex-col w-full sm:w-1/3 relative">
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       Atencion
     </label>
-   
+    <div className="relative">
+    <span className="absolute left-4.5 top-3">
+    <svg
+                            className="fill-current"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <g opacity="0.8">
+                              <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M3.72039 12.887C4.50179 12.1056 5.5616 11.6666 6.66667 11.6666H13.3333C14.4384 11.6666 15.4982 12.1056 16.2796 12.887C17.061 13.6684 17.5 14.7282 17.5 15.8333V17.5C17.5 17.9602 17.1269 18.3333 16.6667 18.3333C16.2064 18.3333 15.8333 17.9602 15.8333 17.5V15.8333C15.8333 15.1703 15.5699 14.5344 15.1011 14.0655C14.6323 13.5967 13.9964 13.3333 13.3333 13.3333H6.66667C6.00363 13.3333 5.36774 13.5967 4.8989 14.0655C4.43006 14.5344 4.16667 15.1703 4.16667 15.8333V17.5C4.16667 17.9602 3.79357 18.3333 3.33333 18.3333C2.8731 18.3333 2.5 17.9602 2.5 17.5V15.8333C2.5 14.7282 2.93899 13.6684 3.72039 12.887Z"
+                                fill=""
+                              />
+                              <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M9.99967 3.33329C8.61896 3.33329 7.49967 4.45258 7.49967 5.83329C7.49967 7.214 8.61896 8.33329 9.99967 8.33329C11.3804 8.33329 12.4997 7.214 12.4997 5.83329C12.4997 4.45258 11.3804 3.33329 9.99967 3.33329ZM5.83301 5.83329C5.83301 3.53211 7.69849 1.66663 9.99967 1.66663C12.3009 1.66663 14.1663 3.53211 14.1663 5.83329C14.1663 8.13448 12.3009 9.99996 9.99967 9.99996C7.69849 9.99996 5.83301 8.13448 5.83301 5.83329Z"
+                                fill=""
+                              />
+                            </g>
+                          </svg>
+                      </span>
     <input
       type="text"
       placeholder="PEDRO GONZALEZ"
-     className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-        ${
+     className={`w-full rounded border border-stroke bg-gray py-2 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary        ${
           isTouchedAtencion && (!atencion )
             ? "border-red-500 focus:ring-red-500"
             : isTouchedAtencion && atencion 
@@ -3477,6 +3859,7 @@ const guardarClienteProveedor = () => {
       onBlur={handleBlurAtencion}
       required
    />
+   </div>
  
     {/* Mostrar el mensaje de error si el campo está vacío o el correo no es válido */}
     {isTouchedAtencion && !atencion &&  (
@@ -3487,18 +3870,36 @@ const guardarClienteProveedor = () => {
   </div>
 
   
-  {/* Nombre */}
+ 
  {/* Celular */}
- <div className="flex flex-col w-full sm:w-1/2 relative">
+ <div className="flex flex-col w-full sm:w-1/3 relative">
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       Celular
     </label>
    
+    <div className="relative">
+    <span className="absolute left-4.5 top-3 text-gray-400 dark:text-gray-450">
+  <svg
+    className="stroke-current"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.6 2.2C7.5 2.1 8.3 2.6 8.7 3.4L10.4 7.3C10.8 8.2 10.5 9.2 9.7 9.8L8.2 11C9.7 14.1 11.9 16.3 15 17.8L16.2 16.3C16.8 15.5 17.8 15.2 18.7 15.6L22.6 17.3C23.4 17.7 23.9 18.5 23.8 19.4C23.6 21.4 22.1 23 20 23C15.4 23 11.2 21 7.8 17.6C4.4 14.2 2.4 10 2.4 5.4C2.4 3.3 4 1.8 6 1.6C6.2 1.6 6.4 1.6 6.6 2.2Z"
+    />
+  </svg>
+</span>
     <input
       type="text"
       placeholder="098719634"
-      className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
-        ${
+      className={`w-full rounded border border-stroke bg-gray py-2 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary         ${
           isTouchedCelular && (!celular )
             ? "border-red-500 focus:ring-red-500"
             : isTouchedCelular && celular 
@@ -3510,6 +3911,7 @@ const guardarClienteProveedor = () => {
       onBlur={handleBlurCelular}
       required
     />
+    </div>
   
      {isTouchedCelular && !celular &&  (
         <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
@@ -3517,20 +3919,114 @@ const guardarClienteProveedor = () => {
         </span>
       )}
   </div>
+
+ {/* Correo de contacto */}
+   {/* CORREO */}
+   <div className="flex flex-col w-full sm:w-1/3 relative">
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    Correo contacto
+  </label>
+  
+  <div className="relative">
+  <span className="absolute left-4.5 top-3">
+                        <svg
+                          className="fill-current"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.8">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M3.33301 4.16667C2.87658 4.16667 2.49967 4.54357 2.49967 5V15C2.49967 15.4564 2.87658 15.8333 3.33301 15.8333H16.6663C17.1228 15.8333 17.4997 15.4564 17.4997 15V5C17.4997 4.54357 17.1228 4.16667 16.6663 4.16667H3.33301ZM0.833008 5C0.833008 3.6231 1.9561 2.5 3.33301 2.5H16.6663C18.0432 2.5 19.1663 3.6231 19.1663 5V15C19.1663 16.3769 18.0432 17.5 16.6663 17.5H3.33301C1.9561 17.5 0.833008 16.3769 0.833008 15V5Z"
+                              fill=""
+                            />
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M0.983719 4.52215C1.24765 4.1451 1.76726 4.05341 2.1443 4.31734L9.99975 9.81615L17.8552 4.31734C18.2322 4.05341 18.7518 4.1451 19.0158 4.52215C19.2797 4.89919 19.188 5.4188 18.811 5.68272L10.4776 11.5161C10.1907 11.7169 9.80879 11.7169 9.52186 11.5161L1.18853 5.68272C0.811486 5.4188 0.719791 4.89919 0.983719 4.52215Z"
+                              fill=""
+                            />
+                          </g>
+                        </svg>
+                      </span>
+  
+  <input
+    type="correoContacto"
+    placeholder="example2@gmail.com"
+    className={`w-full rounded border border-stroke bg-gray py-2 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary       ${
+        isTouchedCorreoContacto && (!correoContacto || !isValidCorreoContacto)
+          ? "border-red-500 focus:ring-red-500"
+          : isTouchedCorreoContacto && correoContacto && isValidCorreoContacto
+          ?"border-gray-300 dark:border-gray-600"
+          : "border-gray-300 dark:border-gray-600"
+      }`}
+    value={correoContacto}
+    onChange={handleCorreoContactoChange}
+    onBlur={handleBlurCorreoContacto}
+    required
+  />
+  </div>
+
+  {/* Mensajes dinámicos */}
+  {isTouchedCorreoContacto && !correoContacto && (
+    <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
+      * El correo es obligatorio.
+    </span>
+  )}
+  {isTouchedCorreoContacto && correoContacto && !isValidCorreoContacto && (
+    <span className="text-sm text-red-600 mt-0 absolute top-full left-0">
+      * Por favor, ingrese un correo válido.
+    </span>
+  )}
+</div>
+
+
 </div>
 
 ) : (
-<div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
-  {/* Código */}
-  <div className="flex flex-col w-full sm:w-1/2 relative">
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-      Atencion
+<div className="mb-4 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-1 w-full">
+  {/* ATENCION CONTACTO */}
+  
+  <div className="flex w-full sm:flex-1 items-center  relative">
+
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/6">
+      ATENCIÓN
     </label>
     {isEditingCliente ? (
+      <>
+      <span className="absolute left-20 top-3">
+       <svg
+                            className="fill-current"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <g opacity="0.8">
+                              <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M3.72039 12.887C4.50179 12.1056 5.5616 11.6666 6.66667 11.6666H13.3333C14.4384 11.6666 15.4982 12.1056 16.2796 12.887C17.061 13.6684 17.5 14.7282 17.5 15.8333V17.5C17.5 17.9602 17.1269 18.3333 16.6667 18.3333C16.2064 18.3333 15.8333 17.9602 15.8333 17.5V15.8333C15.8333 15.1703 15.5699 14.5344 15.1011 14.0655C14.6323 13.5967 13.9964 13.3333 13.3333 13.3333H6.66667C6.00363 13.3333 5.36774 13.5967 4.8989 14.0655C4.43006 14.5344 4.16667 15.1703 4.16667 15.8333V17.5C4.16667 17.9602 3.79357 18.3333 3.33333 18.3333C2.8731 18.3333 2.5 17.9602 2.5 17.5V15.8333C2.5 14.7282 2.93899 13.6684 3.72039 12.887Z"
+                                fill=""
+                              />
+                              <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M9.99967 3.33329C8.61896 3.33329 7.49967 4.45258 7.49967 5.83329C7.49967 7.214 8.61896 8.33329 9.99967 8.33329C11.3804 8.33329 12.4997 7.214 12.4997 5.83329C12.4997 4.45258 11.3804 3.33329 9.99967 3.33329ZM5.83301 5.83329C5.83301 3.53211 7.69849 1.66663 9.99967 1.66663C12.3009 1.66663 14.1663 3.53211 14.1663 5.83329C14.1663 8.13448 12.3009 9.99996 9.99967 9.99996C7.69849 9.99996 5.83301 8.13448 5.83301 5.83329Z"
+                                fill=""
+                              />
+                            </g>
+                          </svg>
+                      </span>
     <input
       type="text"
       placeholder="PEDRO GONZALEZ"
-     className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
+     className={`w-5/6 ml-6 rounded border  border-stroke bg-gray py-2 pl-8 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
         ${
           isTouchedAtencion && (!atencion )
             ? "border-red-500 focus:ring-red-500"
@@ -3543,10 +4039,16 @@ const guardarClienteProveedor = () => {
       onBlur={handleBlurAtencion}
       required
    />
-  ) : (
-    <p className='w-full py-2'>
+   
+   </>
+   
+  ) 
+  
+  : (
+    <p className='w-5/6 py-2 ml-6'>
           {selectedClienteItem.atencion}
         </p>
+        
     )}
     {/* Mostrar el mensaje de error si el campo está vacío o el correo no es válido */}
     {isTouchedAtencion && !atencion &&  (
@@ -3555,19 +4057,21 @@ const guardarClienteProveedor = () => {
         </span>
       )}
   </div>
-
+ 
+  
   
   {/* Nombre */}
+
  {/* Celular */}
- <div className="flex flex-col w-full sm:w-1/2 relative">
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-      Celular
+ <div className="flex w-full sm:w-1/4 items-center  relative">
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300  w-2/6">
+      CELULAR
     </label>
     {isEditingCliente ? (
     <input
       type="text"
       placeholder="098719634"
-      className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:outline-none border
+      className={`w-4/6 rounded border  border-stroke bg-gray py-2 pl-3 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
         ${
           isTouchedCelular && (!celular )
             ? "border-red-500 focus:ring-red-500"
@@ -3581,7 +4085,7 @@ const guardarClienteProveedor = () => {
       required
     />
   ) : (
-    <p className='w-full py-2'>
+    <p className='w-4/6 py-2'>
           {selectedClienteItem.celuVenta}
         </p>
     )}
@@ -3591,6 +4095,77 @@ const guardarClienteProveedor = () => {
         </span>
       )}
   </div>
+
+  
+  <div className="flex w-full sm:flex-1 items-center space-x-4 relative">
+  {/* Label */}
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 w-1/6">
+    CORREO
+  </label>
+
+  {/* Input o texto */}
+  {isEditingCliente ? (
+    <>
+     <span className="absolute left-15 top-3">
+                        <svg
+                          className="fill-current"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.8">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M3.33301 4.16667C2.87658 4.16667 2.49967 4.54357 2.49967 5V15C2.49967 15.4564 2.87658 15.8333 3.33301 15.8333H16.6663C17.1228 15.8333 17.4997 15.4564 17.4997 15V5C17.4997 4.54357 17.1228 4.16667 16.6663 4.16667H3.33301ZM0.833008 5C0.833008 3.6231 1.9561 2.5 3.33301 2.5H16.6663C18.0432 2.5 19.1663 3.6231 19.1663 5V15C19.1663 16.3769 18.0432 17.5 16.6663 17.5H3.33301C1.9561 17.5 0.833008 16.3769 0.833008 15V5Z"
+                              fill=""
+                            />
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M0.983719 4.52215C1.24765 4.1451 1.76726 4.05341 2.1443 4.31734L9.99975 9.81615L17.8552 4.31734C18.2322 4.05341 18.7518 4.1451 19.0158 4.52215C19.2797 4.89919 19.188 5.4188 18.811 5.68272L10.4776 11.5161C10.1907 11.7169 9.80879 11.7169 9.52186 11.5161L1.18853 5.68272C0.811486 5.4188 0.719791 4.89919 0.983719 4.52215Z"
+                              fill=""
+                            />
+                          </g>
+                        </svg>
+                      </span>
+  
+    
+   
+    <input
+      type="email"
+      placeholder="example@gmail.com"
+      className={`w-5/6 rounded border  border-stroke bg-gray py-2 pl-8 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary
+      ${
+        isTouchedCorreoContacto && (!correoContacto || !isValidCorreoContacto)
+          ? "border-red-500 focus:ring-red-500"
+          : "border-gray-300 dark:border-gray-600"
+      }`}
+      value={correoContacto}
+      onChange={handleCorreoContactoChange}
+      onBlur={handleBlurCorreoContacto}
+      required
+    />
+     </>
+  ) : (
+    <p className="w-5/6 py-2">{selectedClienteItem.correoContacto}</p>
+  )}
+
+  {/* Mensajes dinámicos */}
+  <div className="absolute top-full left-0 mt-1">
+    {isTouchedCorreoContacto && !correoContacto && (
+      <span className="text-sm text-red-600">* El correo es obligatorio.</span>
+    )}
+    {isTouchedCorreoContacto && correoContacto && !isValidCorreoContacto && (
+      <span className="text-sm text-red-600">* Por favor, ingrese un correo válido.</span>
+    )}
+  </div>
+</div>
+
+
+
 </div>
  
 
@@ -3606,79 +4181,63 @@ const guardarClienteProveedor = () => {
 {/* Botones */}
 <div className="flex flex-col sm:flex-row justify-between gap-2 w-full">
   {/* Primer div: F5 = Modificar, F4 = Guardar, F3 = Anterior */}
-  <div className="flex justify-center gap-2  w-full">
-
-  {selectedClienteItem.direccion ? (
-  <>
-    <p className="flex px-0 py-2 w-full sm:w-80 text-start text-md sm:text-md font-bold">
-      F5 = Modificar
-    </p>
-    <p className="px-0 py-2 w-full sm:w-80  text-start text-md sm:text-md font-bold">
-      F4 = Guardar
-    </p>
-    <p className="px-0 py-2 w-full text-start text-md sm:text-md font-bold">
-      F3 = Anterior
-    </p>
-    
-  </>
-) : (
-  <>
-    <p className="px-0 py-2 w-full sm:w-80  text-start text-md sm:text-md font-bold">
-      F4 = Guardar
-    </p>
-    <p className="px-0 py-2 w-full   text-start text-md sm:text-md font-bold">
-      F3 = Anterior
-    </p>
-  </>
-)}
-
-
-  
-    
+  <div className="flex justify-center gap-2 w-full">
+    {selectedClienteItem.direccion ? (
+      <>
+        <p className="px-2 py-1 w-full sm:w-70 text-start text-md sm:text-md font-bold">
+          F5 = Modificar
+        </p>
+        <p className="px-2 py-1 w-full sm:w-70 text-start text-md sm:text-md font-bold">
+          F4 = Guardar
+        </p>
+        <p className="px-2 py-1 w-full text-start text-md sm:text-md font-bold">
+          F3 = Anterior
+        </p>
+      </>
+    ) : (
+      <>
+        <p className="px-2 py-1 w-full sm:w-80 text-start text-md sm:text-md font-bold">
+          F4 = Guardar
+        </p>
+        <p className="px-2 py-1 w-full text-start text-md sm:text-md font-bold">
+          F3 = Anterior
+        </p>
+      </>
+    )}
   </div>
 
   {/* Segundo div: Botones Guardar y Anterior */}
   <div className="flex flex-col sm:flex-row justify-end gap-2 w-full">
-    
-  {selectedClienteItem.direccion ? (
-    
+    {selectedClienteItem.direccion ? (
+      <button
+        className="px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
+        onClick={(e) => {
+          e.preventDefault(); // Evitar el comportamiento predeterminado
+          e.stopPropagation(); // Detener propagación del evento
+          guardarClienteProveedor();
+        }}
+      >
+        Actualizar
+      </button>
+    ) : (
+      <button
+        className="px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
+        onClick={(e) => {
+          e.preventDefault(); // Evitar el comportamiento predeterminado
+          e.stopPropagation(); // Detener propagación del evento
+          guardarClienteProveedor();
+        }}
+      >
+        Guardar
+      </button>
+    )}
+
     <button
-      className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
-     
-   
-      onClick={(e) => {
-        e.preventDefault(); // Evitar el comportamiento predeterminado
-         e.stopPropagation(); // Detener propagación del evento
-        guardarClienteProveedor();
-      }}
-   >
-      Actualizar
-    </button>
-
-  ):(
-
-<button
-      className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto sm:px-4 sm:py-2 duration-300"
-      onClick={(e) => {
-        e.preventDefault(); // Evitar el comportamiento predeterminado
-         e.stopPropagation(); // Detener propagación del evento
-        guardarClienteProveedor();
-      }}
-      
+      onClick={closeModalCliente}
+      className="px-3 py-2 text-sm bg-transparent text-gray-600 dark:text-white border border-gray-500 dark:border-gray-300 rounded-lg hover:bg-gray-700 hover:text-white dark:hover:bg-gray-600 dark:hover:text-white w-full sm:w-auto sm:px-4 sm:py-2 transition-all duration-300 ease-in-out"
     >
-      Guardar
+      Anterior
     </button>
-  )}
-
-    <button
-  onClick={closeModalCliente}
-  className="px-3 py-1 text-sm bg-transparent text-gray-600 dark:text-white border border-gray-500 dark:border-gray-300 rounded-lg hover:bg-gray-700 hover:text-white dark:hover:bg-gray-600 dark:hover:text-white w-full sm:w-auto sm:px-4 sm:py-2 transition-all duration-300 ease-in-out"
->
-  Anterior
-</button>
-
-
-
   </div>
 </div>
 

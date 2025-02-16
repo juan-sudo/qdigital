@@ -17,10 +17,10 @@ public class ProveedorDTO {
     private Long idProveedores;  // ID del proveedor
     private String codigoProveedor; // Código del proveedor
     private String correo;
+    private String correoContacto;
     private String nombre;          // Nombre del proveedor
     private String direccion;       // Dirección
     private String fono1;           // Teléfono (ajustado a String)
-    //private String ciudad;          // Ciudad
     private String region;
     private String comuna;
     private String atencion;        // Atención

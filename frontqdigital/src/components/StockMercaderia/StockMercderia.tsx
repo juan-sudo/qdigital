@@ -309,8 +309,7 @@ const handleKeyPress = async (e, cotizacionId) => {
 
 const [activeRow, setActiveRow] = useState<number>(0); // Fila activa inicial
 
-const [activeRowOrden, setActiveRowOrden] = useState<number>(0); // Fila activa inicial
-
+const [cantidadInput, setCantidadInput] = useState("");
   
 const listRef = useRef<HTMLUListElement>(null);
 const optionRefs = useRef<HTMLLIElement[]>([]);
@@ -1140,10 +1139,7 @@ interface MercaderiaProducto {
   codigo: string;
   producto: string;
   cantidad:number;
-  nSolicitud: string;
-  tSolicitud: string;
-  tOperacion: string;
-  estado: string;
+ 
 
 
 }
@@ -1167,16 +1163,15 @@ const agregarProductos = (productos: {id: number; codigo: string; producto: stri
         // Si el producto ya existe, sumar la cantidad
         updatedStock[index] = {
           ...updatedStock[index],
-          cantidad: updatedStock[index].cantidad + nuevoProducto.cantidad,
+          cantidad: nuevoProducto.cantidad,
+          //cantidad: mercaderiaStock. 
+        //  cantidad: updatedStock[index].cantidad + nuevoProducto.cantidad,
         };
       } else {
         // Si el producto no existe, agregarlo al estado
         updatedStock.push({
-          ...nuevoProducto,
-          nSolicitud: "defaultSolicitud",
-          tSolicitud: "defaultTSolicitud",
-          tOperacion: "defaultTOperacion",
-          estado: "defaultEstado",
+          ...nuevoProducto
+       
         });
       }
     });
@@ -1184,6 +1179,16 @@ const agregarProductos = (productos: {id: number; codigo: string; producto: stri
     return updatedStock;
   });
 };
+
+
+useEffect(() => {
+  const productoActivo = mercaderiaStock.find((item) => item.codigo === filteredProductos[activeRow]?.codigo);
+  
+  if (productoActivo) {
+    setCantidadInput(String(productoActivo.cantidad));
+  }
+}, [activeRow, mercaderiaStock]);
+
 
 
 
@@ -1212,9 +1217,26 @@ const agregarProductos = (productos: {id: number; codigo: string; producto: stri
       setActiveRow((prevIndex) => {
         const newIndex = prevIndex < filteredProductos.length - 1 ? prevIndex + 1 : 0;
         actualizarTotales(filteredProductos[newIndex]); // Recalcular totales
-
-
         actualizarTotalesVentas(filteredProductos[newIndex]); // Recalcular totales
+
+        // 🔥 Hacer que la fila activa se mantenga visible
+      // 🔥 Asegurar que la fila activa sea visible dentro del contenedor
+      setTimeout(() => {
+        const rowElement = document.getElementById(`producto-row-${newIndex}`);
+        const container = document.getElementById("productos-container");
+
+        if (rowElement && container) {
+          const rowRect = rowElement.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+
+          if (rowRect.bottom > containerRect.bottom) {
+            container.scrollTop += rowRect.bottom - containerRect.bottom; // Desplazar hacia abajo
+          } else if (rowRect.top < containerRect.top) {
+            container.scrollTop -= containerRect.top - rowRect.top; // Desplazar hacia arriba
+          }
+        }
+      }, 0);
+
 
 
         
@@ -1226,8 +1248,26 @@ const agregarProductos = (productos: {id: number; codigo: string; producto: stri
       setActiveRow((prevIndex) => {
         const newIndex = prevIndex > 0 ? prevIndex - 1 : filteredProductos.length - 1;
         actualizarTotales(filteredProductos[newIndex]); // Recalcular totales
-
         actualizarTotalesVentas(filteredProductos[newIndex]); // Recalcular totales
+        // 🔥 Hacer que la fila activa se mantenga visible
+     // 🔥 Asegurar que la fila activa sea visible dentro del contenedor
+     setTimeout(() => {
+      const rowElement = document.getElementById(`producto-row-${newIndex}`);
+      const container = document.getElementById("productos-container");
+
+      if (rowElement && container) {
+        const rowRect = rowElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        if (rowRect.bottom > containerRect.bottom) {
+          container.scrollTop += rowRect.bottom - containerRect.bottom; // Desplazar hacia abajo
+        } else if (rowRect.top < containerRect.top) {
+          container.scrollTop -= containerRect.top - rowRect.top; // Desplazar hacia arriba
+        }
+      }
+    }, 0);
+
+
         
         return newIndex;
       });
@@ -1237,6 +1277,8 @@ const agregarProductos = (productos: {id: number; codigo: string; producto: stri
       handleOptionClick(filteredProductos[activeRow]);
       event.preventDefault(); // Evitar acciones por defecto
     }
+
+    
 
   };
 
@@ -1862,7 +1904,7 @@ const registrarCotizacion = async () => {
 
   <div className="max-w-full overflow-x-auto">
 
-  <div className="max-h-[200px] overflow-y-auto">
+  <div id="productos-container" className="max-h-[200px] overflow-y-auto">
   <table className="w-full table-auto ">
     <thead className="bg-gray-2 text-left dark:bg-meta-4 sticky top-0 z-10">
       <tr className="bg-gray-2 text-left dark:bg-meta-4">
@@ -1883,7 +1925,9 @@ const registrarCotizacion = async () => {
 
     {filteredProductos && filteredProductos.length > 0 ? (
             filteredProductos.map((producto: any, index: number) => (
-              <tr key={index}
+              <tr 
+              key={index}
+              id={`producto-row-${index}`} // 🔥 Agregamos un ID único a cada fila
               className={`${
                 activeRow === index
                   ? "bg-blue-200 dark:bg-blue-600" // Fila activa
@@ -2092,17 +2136,25 @@ const registrarCotizacion = async () => {
            </td>
            <td className="border-b border-[#eee] dark:border-strokedark   font-medium text-black dark:text-white xl:pl-11">
               CP
-           </td>
-           <td className="border-[#eee] pl-2 pr-2">
+             
+            
+            </td>
+
+
+           <td className="border-[#eee] pl-2 ">
+
+ 
   <input
     id="cantidad-input"
     type="text"
+    autoComplete="off"  // 🔥 Desactiva el autocompletado del navegador
     placeholder="0"
     className="w-13 bg-transparent text-black focus:outline-none dark:bg-gray-700 dark:border-strokedark border-2"
     onKeyDown={(e) => {
       if (e.key === "Enter") {
         // Obtener el valor del input
         const cantidad = e.currentTarget.value.trim();
+        
 
         // Si la cantidad está vacía o no es un número válido, no hacer nada
         if (cantidad === "" || isNaN(Number(cantidad))) {
@@ -2115,6 +2167,7 @@ const registrarCotizacion = async () => {
         const producto = productoSeleccionado.producto; // Nombre del producto
         const id = productoSeleccionado.id; // Obtener el id del producto
         const codigo = productoSeleccionado.nombre; // Código del producto
+
         const cantidadNumerica = parseInt(cantidad); // Convertir la cantidad a número
 
         if (producto.trim() !== "") {
@@ -2124,6 +2177,19 @@ const registrarCotizacion = async () => {
       }
     }}
   />
+{activeRow >= 0 && filteredProductos.length > 0 && (() => {
+  const productoSeleccionado = filteredProductos[activeRow];
+  const cantidad = mercaderiaStock.find((item) => item.codigo === productoSeleccionado?.nombre)?.cantidad || 0;
+
+  return cantidad > 0 ? (
+    <span className=' px-1 ml-2  text-center font-semibold text-black dark:text-white bg-gray-300 dark:bg-gray-600 border border-gray-400 dark:border-gray-500 rounded-sm  '>{cantidad}</span>
+  ) : null;
+})()}
+
+
+  
+
+  
 </td>
 
 
@@ -2401,7 +2467,7 @@ const registrarCotizacion = async () => {
       <tr>
         <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Código</th>
         <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Producto</th>
-        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Cantidad</th>
+        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Cantidad solicitada</th>
       </tr>
       {/* Fila con inputs que se muestra al hacer clic en el botón */}
       {showInputRow && (

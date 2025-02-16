@@ -36,9 +36,6 @@ public class ProveedorEntity {
 
     private String comuna;
 
-    //@Column(name = "ciudad")
-    //private String ciudad;
-
     @Column(name = "atencion")
         private String atencion;
 
@@ -70,6 +67,9 @@ public class ProveedorEntity {
     private String chAdj;
 
     private String correo;
+
+    @Column(name = "correo_contacto")
+    private String correoContacto;
 
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;  // Fecha de publicación del producto
@@ -259,5 +259,13 @@ public class ProveedorEntity {
 
     public void setFechaRegistro(LocalDateTime fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
+    }
+
+    public String getCorreoContacto() {
+        return correoContacto;
+    }
+
+    public void setCorreoContacto(String correoContacto) {
+        this.correoContacto = correoContacto;
     }
 }

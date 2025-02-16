@@ -5,7 +5,6 @@ export interface Proveedor {
   nombre: string;
   direccion: string;
   fono1: string;
-  //ciudad: string;
   region:string;
   comuna:string;
   atencion: string;
@@ -19,5 +18,6 @@ export interface Proveedor {
   docto: number;
   chAdj: string;
   correo:string;
+  correoContacto:string;
   fechaRegistro:string;
 }

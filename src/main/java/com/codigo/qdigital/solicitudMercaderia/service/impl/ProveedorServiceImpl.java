@@ -56,7 +56,7 @@ public class ProveedorServiceImpl implements ProveedorService {
         return ResponseBase.builder()
                 .code(404)
                 .message("Proveedor no encontrado.")
-                .data(null)
+                .data(null)     
                 .build();
     }
 
@@ -105,14 +105,13 @@ public class ProveedorServiceImpl implements ProveedorService {
             ProveedorEntity updatedEntity = proveedorEntity.get();
             updatedEntity.setDireccion(proveedorRequest.getDireccion());
             updatedEntity.setFono1(proveedorRequest.getFono1());
-           // updatedEntity.setCiudad(proveedorRequest.getCiudad());
             updatedEntity.setRegion(proveedorRequest.getRegion());
             updatedEntity.setComuna(proveedorRequest.getComuna());
             updatedEntity.setAtencion(proveedorRequest.getAtencion());
             updatedEntity.setCeluVenta(proveedorRequest.getCeluVenta());
             updatedEntity.setCiudadVen(proveedorRequest.getCiudadVen());
             updatedEntity.setCorreo(proveedorRequest.getCorreo());
-
+            updatedEntity.setCorreoContacto(proveedorRequest.getCorreoContacto());
             updatedEntity.setCondPago(proveedorRequest.getCondPago());
             updatedEntity.setDocto(proveedorRequest.getDocto());
             updatedEntity.setChAdj(proveedorRequest.getChAdj());
@@ -358,6 +357,7 @@ public class ProveedorServiceImpl implements ProveedorService {
                 .docto(proveedorEntity.getDocto())
                 .chAdj(proveedorEntity.getChAdj())
                 .correo(proveedorEntity.getCorreo())
+                .correoContacto(proveedorEntity.getCorreoContacto())
                 .fechaRegistro(proveedorEntity.getFechaRegistro())
 
 
