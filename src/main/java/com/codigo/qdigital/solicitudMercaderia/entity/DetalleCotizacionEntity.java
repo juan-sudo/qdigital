@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name="detalle_cotizaciones")
 
@@ -19,6 +21,9 @@ public class DetalleCotizacionEntity {
     private Long id;  // Nuevo campo como clave primaria
 
     private Long cantidad;
+
+
+    private BigDecimal total;
 
     @JsonIgnore  // Evitar la serialización de la relación con ProveedorEntity
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,5 +65,13 @@ public class DetalleCotizacionEntity {
 
     public void setCotizacion(CotizacionEntity cotizacion) {
         this.cotizacion = cotizacion;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
     }
 }

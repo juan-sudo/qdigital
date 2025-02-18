@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,6 +61,7 @@ public class CotizacionServiceImpl implements CotizacionService {
                                 .producto(detalleRequest.getProducto())
                                 .nombre(detalleRequest.getNombre())
                                 .proveedor(cotizacion.getProveedor())
+                                .cNeto(detalleRequest.getCNeto())
                                 .build();
 
                         ProductoEntity savedProducto = productoRepository.save(nuevoProducto);
@@ -73,8 +76,12 @@ public class CotizacionServiceImpl implements CotizacionService {
 
             // Si el producto no está en la cotización, agregarlo
             if (!productosExistentes.contains(producto.getId())) {
+                BigDecimal cantidad = BigDecimal.valueOf(detalleRequest.getCantidad()); // Convertir Long a BigDecimal
+                BigDecimal total = cantidad.multiply(detalleRequest.getCNeto()).setScale(2, RoundingMode.HALF_UP); // Multiplicación segura
+
                 DetalleCotizacionEntity nuevoDetalle = DetalleCotizacionEntity.builder()
                         .cantidad(detalleRequest.getCantidad())
+                        .total(total)
                         .producto(producto)
                         .cotizacion(cotizacion)
                         .build();
@@ -181,10 +188,13 @@ public class CotizacionServiceImpl implements CotizacionService {
                                 .map(detalle -> DetalleCotizacionDTO.builder()
                                         .id(detalle.getId())
                                         .cantidad(detalle.getCantidad())
+                                        .total(detalle.getTotal())
                                         .producto(ProductoDTO.builder()
                                                 .id(detalle.getProducto().getId())
                                                 .nombre(detalle.getProducto().getNombre())
                                                 .producto(detalle.getProducto().getProducto())
+                                                .cNeto(detalle.getProducto().getcNeto())
+
                                                 .build())
                                         .build())
                                 .collect(Collectors.toList())

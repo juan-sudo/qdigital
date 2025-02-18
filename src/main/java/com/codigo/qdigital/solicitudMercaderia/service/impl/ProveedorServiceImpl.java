@@ -56,7 +56,7 @@ public class ProveedorServiceImpl implements ProveedorService {
         return ResponseBase.builder()
                 .code(404)
                 .message("Proveedor no encontrado.")
-                .data(null)     
+                .data(null)
                 .build();
     }
 

@@ -67,11 +67,11 @@ interface ProveedorOptionNombre {
 const StockMercaderia = () => {
 
   //DATOS DE INPUT
-
   const [inputData, setInputData] = useState({
     producto: "",
     nombre: "",
     cantidad: "",
+    cNeto:"",
     proveedorId: "",
   });
 
@@ -80,14 +80,21 @@ const StockMercaderia = () => {
   };
 
   const exportToExcel = async () => {
+     // Calcular la suma de los totales
+  const totalNeto = selectedItem?.detalleCotizacionDTO?.reduce(
+    (sum, mercaderia) => sum + (mercaderia?.total || 0), 
+    0
+  ).toFixed(2);
     // Datos adicionales que quieres agregar antes de la tabla
     const additionalData = [
-      ["", "", ""], // Espacio vacío para la fila de encabezado fusionada
+      ["", "", "",], // Espacio vacío para la fila de encabezado fusionada
       ["C.S.C LIBRERIA", ""], // Título de la solicitud
-      [" ", " ", "N°" + selectedItem?.numero],
-      [" ", " ", selectedItem?.fechaCotizacion],
+      [" ", " ", "","", "N°" + selectedItem?.numero],
+      [" ", " ",  "","", selectedItem?.fechaCotizacion],
       ["Proveedor", selectedItem?.proveedor?.nombre],
       ["Responsable", selectedItem?.responsable],
+      ["Total neto", totalNeto],
+      ["Flete", "transpostes dobletes"],
       ["", ""], // Separador
     ];
   
@@ -101,7 +108,7 @@ const StockMercaderia = () => {
     });
   
    // Definir los encabezados de la tabla
-const headerRown = worksheet.addRow(["CÓDIGO", "PRODUCTO", "CANTIDAD"]);
+const headerRown = worksheet.addRow(["CÓDIGO", "PRODUCTO", "CANTIDAD UNITARIA", "COSTO UNITARIA","TOTAL"]);
 
 // Aplicar estilo de fondo amarillo a los encabezados
 headerRown.eachCell((cell) => {
@@ -142,6 +149,8 @@ selectedItem?.detalleCotizacionDTO?.forEach((mercaderia) => {
     mercaderia?.producto?.producto,
     mercaderia?.producto?.nombre,
     mercaderia?.cantidad,
+    mercaderia?.producto.cneto,
+    mercaderia?.total,
   ]);
 
   // Aplicar bordes a las celdas de la fila
@@ -157,7 +166,7 @@ selectedItem?.detalleCotizacionDTO?.forEach((mercaderia) => {
 
   
     // Fusionar las celdas en la fila 1 (A1, B1, C1)
-    worksheet.mergeCells("A1:C1");
+    worksheet.mergeCells("A1:E1");
   
     // Establecer el título en la celda A1
     const titleCell = worksheet.getCell("A1");
@@ -183,6 +192,8 @@ selectedItem?.detalleCotizacionDTO?.forEach((mercaderia) => {
       { width: 15 }, // Ancho de la columna A
       { width: 30 }, // Ancho de la columna B
       { width: 20 }, // Ancho de la columna C
+      { width: 15 }, // Ancho de la columna D
+      { width: 15 }, // Ancho de la columna E
     ];
 
     
@@ -220,6 +231,11 @@ const handleKeyPress = async (e, cotizacionId) => {
       });
       return;
     }
+   
+    console.log(
+      "Input antes de guardar " +
+        JSON.stringify(inputData, null, 2)
+    );
 
     try {
       const response = await axios.put(
@@ -804,6 +820,8 @@ useEffect(() => {
     try {
       const response = await axios.get("http://localhost:8080/api/cotizacion");
       setCotizacionData(response.data.data);
+      console.log("Resultado de la lista completa:", JSON.stringify(response.data.data, null, 2));
+
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -2341,7 +2359,7 @@ const registrarCotizacion = async () => {
 
               {showModalVer &&  selectedItem &&  (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-99999">
-<div className="bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[750px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
+<div className="bg-white dark:bg-gray-800 p-6 shadow-2xl border border-gray-300 dark:border-gray-600 rounded-lg w-[90%] sm:w-[900px] max-h-[95vh] overflow-y-auto lg:overflow-y-visible relative">
 
       <h2 className="text-3xl font-bold mb-4 text-center">Detalle de Solicitud de Cotización</h2> 
       <button
@@ -2371,8 +2389,8 @@ const registrarCotizacion = async () => {
                 
           {/* TABLA PRODUCTOS */}
          {/* TABLA PRODUCTOS */}
-        <div className=" space-y-2 flex justify-end"> 
-        <div className="flex justify-center items-center p-2 w-50 rounded-md border-2 border-gray-300 dark:border-gray-600 ">
+        <div className=" space-y-1 flex justify-end"> 
+        <div className="flex justify-center items-center p-1 w-50 rounded-md border-2 border-gray-300 dark:border-gray-600 ">
           <p className="text-md font-bold text-gray-800 dark:text-gray-200">N°</p>
           <p className="px-2 text-xl font-bold text-gray-900 dark:text-white">{selectedItem?.numero}</p>
         </div>
@@ -2403,7 +2421,7 @@ const registrarCotizacion = async () => {
         
 
 
-          <div className=" space-y-2 flex justify-end"> 
+          <div className=" space-y-1 flex justify-end"> 
           <div className="flex justify-start items-center p-2 w-50">
           <p className="px-2 text-sm font-medium text-gray-400 ">
             {new Date(selectedItem?.fechaCotizacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
@@ -2419,7 +2437,7 @@ const registrarCotizacion = async () => {
 
 
 
-<div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+<div className=" flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
   <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
     <div className="flex justify-start items-start">
       <p className="text-md font-bold text-left">Proveedor: </p>
@@ -2433,31 +2451,58 @@ const registrarCotizacion = async () => {
   </div>
 </div>
 
-
-
-
-
-
-<div className="mb-2 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+<div className=" flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
   <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
     <div className="flex justify-start items-start">
-      <p className="text-md font-bold text-left">Responsable: </p>
+      <p className="text-md font-bold text-left">Vendedor: </p>
       <p className="px-2 text-left">{selectedItem.responsable}</p>
     </div>
     
   </div>
 
-  <div className="flex flex-row w-full sm:w-1/2 relative items-end justify-end space-x-2 rounded-md">
-  <button
-          onClick={() => setShowInputRow(!showInputRow)} // Alternar estado
-          className="px-4 py-2 text-gray-600 dark:text-white text-sm font-medium rounded-md border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 hover:border-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-        >
-          {showInputRow ? "Cancelar" : "Nuevo producto"} {/* Cambiar texto dinámicamente */}
-        </button>
+  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
+   
+  </div>
+</div>
+<div className=" flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full">
+  <div className="flex flex-row w-full sm:w-1/2 relative items-start justify-start space-x-2">
+    <div className="flex justify-start items-start">
+      <p className="text-md font-bold text-left">Total neto: </p>
+      <p className="px-2 text-left">
+        {selectedItem?.detalleCotizacionDTO
+          ?.reduce((sum, mercaderia) => sum + (mercaderia?.total || 0), 0)
+          .toFixed(2)}
+      </p>
+    </div>
+    
+  </div>
+
+  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-center space-x-2 rounded-md">
+   
+  </div>
 </div>
 
 
+
+
+<div className="mb-1 flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1 w-full">
+  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-start space-x-2">
+    <div className="flex justify-start items-center">
+      <p className="text-md font-bold text-left">Flete:</p>
+      <p className="px-2 text-left">transpostes dobletes</p>
+    </div>
+  </div>
+
+  <div className="flex flex-row w-full sm:w-1/2 relative items-center justify-end space-x-1 rounded-md">
+    <button
+      onClick={() => setShowInputRow(!showInputRow)} // Alternar estado
+      className="px-2  text-gray-600 dark:text-white text-sm font-medium rounded-md border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-800 hover:border-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+    >
+      {showInputRow ? "Cancelar" : "Nuevo producto"} {/* Cambiar texto dinámicamente */}
+    </button>
+  </div>
 </div>
+
 
 
 
@@ -2467,7 +2512,9 @@ const registrarCotizacion = async () => {
       <tr>
         <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Código</th>
         <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Producto</th>
-        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Cantidad solicitada</th>
+        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Cantidad unitaria</th>
+        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Costo unitario</th>
+        <th className="px-4 py-1 text-left text-sm font-medium text-gray-700 dark:text-white">Total</th>
       </tr>
       {/* Fila con inputs que se muestra al hacer clic en el botón */}
       {showInputRow && (
@@ -2496,6 +2543,16 @@ const registrarCotizacion = async () => {
                 name="cantidad"
                 value={inputData.cantidad}
                 onChange={handleChange}
+               // onKeyDown={(e) => handleKeyPress(e, selectedItem.id)}  // Pasando cotizacion.id 
+                className="w-full px-2 py-1 text-sm border rounded-md dark:bg-gray-900 dark:text-white"
+              />
+            </td>
+            <td className="px-4 py-1">
+              <input
+                type="number"
+                name="cNeto"
+                value={inputData.cNeto}
+                onChange={handleChange}
                 onKeyDown={(e) => handleKeyPress(e, selectedItem.id)}  // Pasando cotizacion.id 
                 className="w-full px-2 py-1 text-sm border rounded-md dark:bg-gray-900 dark:text-white"
               />
@@ -2514,6 +2571,17 @@ const registrarCotizacion = async () => {
           </td>
           <td className="px-4  text-left text-sm font-medium text-gray-700 dark:text-white">
             {mercaderia?.cantidad}
+          </td>
+          <td className="px-4 text-left text-sm font-medium text-gray-700 dark:text-white">
+            {mercaderia?.producto?.cneto 
+              ? mercaderia.producto.cneto.toFixed(2) 
+              : "0.00"}
+          </td>
+
+          <td className="px-4 text-left text-sm font-medium text-gray-700 dark:text-white">
+            {mercaderia?.total
+              ? mercaderia.total.toFixed(2) 
+              : "0.00"}
           </td>
         </tr>
       ))}

@@ -5,6 +5,7 @@ export interface Producto {
   producto: string;
   nombre: string;
   codProv: string;
+  cneto:number;
   stockLib: number;
   cantidad: number;
   stDic2023: number;

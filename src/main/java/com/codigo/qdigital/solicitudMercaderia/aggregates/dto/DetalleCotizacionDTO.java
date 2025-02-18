@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -21,12 +22,8 @@ import java.util.Set;
 public class DetalleCotizacionDTO {
     private Long id;
     private Long cantidad;
+    private BigDecimal total;
     private ProductoDTO producto;
     private CotizacionDTO cotizacion;
-
-
-
-
-
 
 }
